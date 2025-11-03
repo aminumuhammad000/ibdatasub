@@ -36,12 +36,22 @@ const LoginScreen = () => {
     }
     
     setIsLoading(true);
-    // Simulate API call
+    // Simulate API call with mock validation
     setTimeout(() => {
-      console.log('Login with:', { email, password, rememberMe });
-      setIsLoading(false);
-      // Navigate to home or next screen on successful login
-      // navigation.navigate('Home');
+      // Mock credentials: any email/phone and any password will work
+      // For demo: email: "demo@connecta.com" or phone: "08012345678", password: "password123"
+      const isValidEmail = email.includes('@') || email.length >= 10;
+      const isValidPassword = password.length >= 6;
+      
+      if (isValidEmail && isValidPassword) {
+        console.log('Login successful with:', { email, password, rememberMe });
+        setIsLoading(false);
+        // Navigate to dashboard (tabs)
+        router.replace('/(tabs)');
+      } else {
+        setIsLoading(false);
+        Alert.alert('Login Failed', 'Invalid credentials. Please try:\nEmail: demo@connecta.com\nPassword: password123');
+      }
     }, 1500);
   };
 
@@ -166,7 +176,7 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F6F8',
+    backgroundColor: '#111418',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -186,13 +196,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111921',
+    color: '#F8FAFC',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#94A3B8',
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -205,27 +215,23 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111921',
+    color: '#E2E8F0',
     marginBottom: 8,
   },
   inputWrapper: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1E293B',
     borderRadius: 12,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: '#334155',
     height: 56,
     justifyContent: 'center',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   input: {
     fontSize: 16,
-    color: '#111921',
+    color: '#F8FAFC',
     padding: 0,
     margin: 0,
     height: '100%',

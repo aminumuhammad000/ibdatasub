@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 const SignupScreen = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +23,7 @@ const SignupScreen = () => {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const handleSignup = () => {
     if (!email || !password || !confirmPassword || !fullName || !phoneNumber) {
@@ -44,10 +44,10 @@ const SignupScreen = () => {
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      console.log('Signup with:', { email, password, fullName });
+      console.log('Signup successful with:', { email, password, fullName, phoneNumber });
       setIsLoading(false);
-      // Navigate to verification or home screen on successful signup
-      // navigation.navigate('Verification');
+      // Navigate to dashboard after successful signup
+      router.replace('/(tabs)');
     }, 1500);
   };
 
@@ -174,7 +174,7 @@ const SignupScreen = () => {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#FFFFFF' }]}>
+            {/* <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#FFFFFF' }]}>
               <Image 
                 source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-LBgmwH2QdH0SMXnLSqgIzuC4R-0W0RvWdTNEr_NpllN6NV6rCHU_urzGTET9ukQggSllwcntrBKYQVjrGy6faoX8uS7vMBRmj0MiDrwzQTD-97DXh-l4_fFuLdxeafoJtGGTZjvDSFe-Tugarxj95ecQrLItSiak6VEG-9Pqy0iohz03Fe4YsS2boiowmrtRdqaEmWb_nGbE4XQ7PMnEtyIWbNQZVKOkerrQijPeUgoC9hU4LIZhja9XBx2__jIaqbHK7v8GfLs' }} 
                 style={styles.socialIcon} 
@@ -188,12 +188,12 @@ const SignupScreen = () => {
                 style={styles.socialIcon} 
               />
               <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>Continue with Apple</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity onPress={() => router.push('/login')}>
               <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
           </View>
@@ -212,7 +212,7 @@ const SignupScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F6F8',
+    backgroundColor: '#111418',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -232,13 +232,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111921',
+    color: '#F8FAFC',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#94A3B8',
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -251,32 +251,28 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111921',
+    color: '#E2E8F0',
     marginBottom: 8,
   },
   inputWrapper: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1E293B',
     borderRadius: 12,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: '#334155',
     height: 56,
     justifyContent: 'flex-start',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   countryCode: {
     fontSize: 16,
-    color: '#111921',
+    color: '#F8FAFC',
     fontWeight: '500',
   },
   input: {
     fontSize: 16,
-    color: '#111921',
+    color: '#F8FAFC',
     padding: 0,
     margin: 0,
     height: '100%',
