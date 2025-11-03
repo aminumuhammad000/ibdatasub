@@ -10,9 +10,9 @@ import {
   useColorScheme,
   StatusBar,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [selectedTab, setSelectedTab] = useState<'airtime' | 'data'>('airtime');
@@ -41,6 +41,7 @@ export default function HomeScreen() {
       phone: '08012345678',
       amount: '-₦500.00',
       status: 'Successful',
+      logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg',
       bgColor: '#FFCB05',
     },
     {
@@ -49,6 +50,7 @@ export default function HomeScreen() {
       phone: '09087654321',
       amount: '-₦1,500.00',
       status: 'Successful',
+      logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg',
       bgColor: '#EF4444',
     },
     {
@@ -57,11 +59,19 @@ export default function HomeScreen() {
       phone: '1234567890',
       amount: '-₦4,500.00',
       status: 'Failed',
+      logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg',
       bgColor: '#2563EB',
     },
   ];
 
-  const operators = ['MTN', 'Airtel', 'Glo', '9mobile', 'DSTV', 'GoTV'];
+  const operators = [
+    { name: 'MTN', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+    { name: 'Airtel', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+    { name: 'Glo', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+    { name: '9mobile', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+    { name: 'DSTV', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+    { name: 'GoTV', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
@@ -235,7 +245,7 @@ export default function HomeScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.operatorsList}>
             {operators.map((operator, index) => (
               <View key={index} style={[styles.operatorItem, { backgroundColor: cardBg }]}>
-                <Text style={[styles.operatorText, { color: textColor }]}>{operator}</Text>
+                <View style={styles.operatorLogoPlaceholder} />
               </View>
             ))}
           </ScrollView>
@@ -244,6 +254,29 @@ export default function HomeScreen() {
         {/* Bottom Spacing */}
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={[styles.bottomNav, { 
+        backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+        borderTopColor: isDark ? '#374151' : '#E5E7EB'
+      }]}>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="home" size={24} color={isDark ? theme.accent : theme.primary} />
+          <Text style={[styles.navText, { color: isDark ? theme.accent : theme.primary }]}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="time-outline" size={24} color={textBodyColor} />
+          <Text style={[styles.navText, { color: textBodyColor }]}>Transactions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="person-outline" size={24} color={textBodyColor} />
+          <Text style={[styles.navText, { color: textBodyColor }]}>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="headset-outline" size={24} color={textBodyColor} />
+          <Text style={[styles.navText, { color: textBodyColor }]}>Support</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -511,8 +544,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 16,
   },
-  operatorText: {
+  operatorLogoPlaceholder: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 4,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  navText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '500',
+    marginTop: 4,
   },
 });
