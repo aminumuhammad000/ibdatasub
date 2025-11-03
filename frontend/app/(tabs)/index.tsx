@@ -125,7 +125,10 @@ export default function HomeScreen() {
             <Text style={styles.balanceAmount}>
               {isBalanceHidden ? '₦••••••' : '₦50,000.00'}
             </Text>
-            <TouchableOpacity style={[styles.addMoneyBtn, { backgroundColor: theme.accent }]}>
+            <TouchableOpacity 
+              style={[styles.addMoneyBtn, { backgroundColor: theme.accent }]}
+              onPress={() => router.push('/add-money')}
+            >
               <Ionicons name="add" size={20} color="#FFFFFF" />
               <Text style={styles.addMoneyText}>Add Money</Text>
             </TouchableOpacity>

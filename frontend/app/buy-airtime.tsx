@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   useColorScheme,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +34,7 @@ export default function BuyAirtimeScreen() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const networks = [
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -48,8 +50,11 @@ export default function BuyAirtimeScreen() {
       alert('Please fill all required fields');
       return;
     }
-    // Handle airtime purchase logic here
-    alert('Airtime purchase successful!');
+    setShowSuccessModal(true);
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      router.back();
+    }, 3000);
   };
 
   return (
@@ -262,6 +267,61 @@ export default function BuyAirtimeScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.successModalBackdrop}>
+          <View style={[styles.successModalCard, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
+            <View style={styles.successIconContainer}>
+              <Ionicons name="checkmark-circle" size={80} color={theme.success} />
+            </View>
+            
+            <Text style={[styles.successTitle, { color: isDark ? '#FFFFFF' : theme.primary }]}>
+              Airtime Purchase Successful!
+            </Text>
+            
+            <View style={styles.successDetails}>
+              <View style={styles.successDetailRow}>
+                <Text style={[styles.successLabel, { color: textBodyColor }]}>
+                  Network:
+                </Text>
+                <Text style={[styles.successValue, { color: isDark ? '#FFFFFF' : theme.primary }]}>
+                  {networks.find(n => n.id === selectedNetwork)?.name || ''}
+                </Text>
+              </View>
+              
+              <View style={styles.successDetailRow}>
+                <Text style={[styles.successLabel, { color: textBodyColor }]}>
+                  Phone Number:
+                </Text>
+                <Text style={[styles.successValue, { color: isDark ? '#FFFFFF' : theme.primary }]}>
+                  {phoneNumber}
+                </Text>
+              </View>
+              
+              <View style={styles.successDetailRow}>
+                <Text style={[styles.successLabel, { color: textBodyColor }]}>
+                  Amount:
+                </Text>
+                <Text style={[styles.successValue, { color: theme.success }]}>
+                  ₦{(selectedAmount || parseInt(customAmount) || 0).toLocaleString()}
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.successCheckmark, { backgroundColor: theme.success + '20' }]}>
+              <Ionicons name="checkmark" size={20} color={theme.success} />
+              <Text style={[styles.successMessage, { color: theme.success }]}>
+                Airtime delivered instantly
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -440,5 +500,63 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
+  },
+  successModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successModalCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  successIconContainer: {
+    marginBottom: 20,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  successDetails: {
+    width: '100%',
+    gap: 16,
+    marginBottom: 24,
+  },
+  successDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  successLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  successValue: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  successCheckmark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  successMessage: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

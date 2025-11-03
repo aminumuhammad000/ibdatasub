@@ -68,6 +68,13 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen 
+          name="add-money" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
           name="modal" 
           options={{
             presentation: 'modal',
