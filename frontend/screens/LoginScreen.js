@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -26,6 +27,7 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigation = useNavigation();
+  const router = useRouter();
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -139,20 +141,12 @@ const LoginScreen = () => {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#FFFFFF' }]}>
-              <Image 
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-LBgmwH2QdH0SMXnLSqgIzuC4R-0W0RvWdTNEr_NpllN6NV6rCHU_urzGTET9ukQggSllwcntrBKYQVjrGy6faoX8uS7vMBRmj0MiDrwzQTD-97DXh-l4_fFuLdxeafoJtGGTZjvDSFe-Tugarxj95ecQrLItSiak6VEG-9Pqy0iohz03Fe4YsS2boiowmrtRdqaEmWb_nGbE4XQ7PMnEtyIWbNQZVKOkerrQijPeUgoC9hU4LIZhja9XBx2__jIaqbHK7v8GfLs' }} 
-                style={styles.socialIcon} 
-              />
-              <Text style={[styles.socialButtonText, { color: '#111921' }]}>Continue with Google</Text>
-            </TouchableOpacity>
+          </View>
 
-            <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#000000' }]}>
-              <Image 
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBmzEF8JMM9NDAf9oj1zKEI0KwqP4hZG4VTwaApPexK9L1_rwmqnvXuKJlhgkreSD-iNyFk17kJdRAjl9EwrnTSIuTVXTrtxlhA-95OTv2fdWMxTqm9-3J-zE_EcVsQn7Kq8vKwYnZ0-GynAsisF9cihvbvPu5mbfPLqFHZiZt7tRvc4bF9KrB3a04CcTB2cEDRy3D3jJTU80LXIqGIBmJYoIyFsABv8BaX35UJXMnOYzvI88HfG6SxUMEbkf5NE9P93VUnCr6Dn8c' }} 
-                style={styles.socialIcon} 
-              />
-              <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>Continue with Apple</Text>
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => router.push('/signup')}>
+              <Text style={styles.signupLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
@@ -305,6 +299,21 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     fontSize: 16,
+    fontWeight: '500',
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  signupLink: {
+    fontSize: 14,
+    color: '#3B82F6',
     fontWeight: '500',
   },
   termsText: {
