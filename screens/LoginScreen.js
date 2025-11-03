@@ -217,13 +217,17 @@ const styles = StyleSheet.create({
   inputWrapper: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderWidth: 0,
     height: 56,
     justifyContent: 'center',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   input: {
     fontSize: 16,
@@ -313,10 +317,6 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
     textDecorationLine: 'underline',
   },
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
   otpContent: {
     flex: 1,
     justifyContent: 'center',
@@ -364,5 +364,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
-export default LoginScreen;
