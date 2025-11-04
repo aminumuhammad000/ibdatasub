@@ -1,12 +1,12 @@
 // controllers/admin.controller.ts
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { AdminUser, User, AuditLog } from '../models';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { AdminUser, User, AuditLog, Transaction } from '../models';
 import { AdminService } from '../services/admin.service';
 import { ApiResponse } from '../utils/response';
 import { AuthRequest } from '../types';
-import { config } from '../config/env';
+import { config } from '../config/env.js';
 
 export class AdminController {
   static async login(req: Request, res: Response) {
@@ -32,8 +32,8 @@ export class AdminController {
 
       const token = jwt.sign(
         { id: admin._id, role: 'admin' },
-        config.jwtSecret,
-        { expiresIn: config.jwtExpiry }
+        config.jwtSecret as string,
+        { expiresIn: config.jwtExpiry } as SignOptions
       );
 
       return ApiResponse.success(res, { admin, token }, 'Login successful');

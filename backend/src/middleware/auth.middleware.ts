@@ -1,7 +1,7 @@
 // middleware/auth.middleware.ts
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../config/env';
+import { config } from '../config/env.js';
 import { ApiResponse } from '../utils/response';
 import { AuthRequest } from '../types';
 

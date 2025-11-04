@@ -1,3 +1,6 @@
+- Base URL: http://localhost:5000
+- Test (GET): /, /api/auth, /api/users, /api/transactions, /api/admin, /api/notifications, /api/promotions, /api/support, /api/wallet
+
 {
   _id: ObjectId,
   email: String,
@@ -280,3 +283,5 @@
   created_at: Date,
   updated_at: Date
 }
+
+

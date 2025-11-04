@@ -1,6 +1,6 @@
 // config/logger.ts
 import winston from 'winston';
-import { config } from './env';
+import { config } from './env.js';
 
 export const logger = winston.createLogger({
   level: config.logLevel,

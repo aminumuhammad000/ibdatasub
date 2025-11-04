@@ -2,12 +2,12 @@
 // controllers/auth.controller.ts
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { User } from '../models';
 import { WalletService } from '../services/wallet.service';
 import { OTPService } from '../services/otp.service';
 import { ApiResponse } from '../utils/response';
-import { config } from '../config/env';
+import { config } from '../config/env.js';
 import { userValidation } from '../utils/validators';
 
 export class AuthController {
@@ -50,7 +50,7 @@ export class AuthController {
       await WalletService.createWallet(user._id);
       await OTPService.createOTP(phone_number, email, user._id.toString());
 
-      const token = jwt.sign({ id: user._id }, config.jwtSecret, { expiresIn: config.jwtExpiry });
+      const token = jwt.sign({ id: user._id }, config.jwtSecret as string, { expiresIn: config.jwtExpiry } as SignOptions);
 
       return ApiResponse.success(res, { user, token }, 'Registration successful', 201);
     } catch (error: any) {
@@ -81,7 +81,7 @@ export class AuthController {
         return ApiResponse.error(res, 'Account is inactive', 403);
       }
 
-      const token = jwt.sign({ id: user._id }, config.jwtSecret, { expiresIn: config.jwtExpiry });
+      const token = jwt.sign({ id: user._id }, config.jwtSecret as string, { expiresIn: config.jwtExpiry } as SignOptions);
 
       return ApiResponse.success(res, { user, token }, 'Login successful');
     } catch (error: any) {

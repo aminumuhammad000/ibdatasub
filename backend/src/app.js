@@ -6,6 +6,10 @@ import authRoutes from "./routes/auth.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import notificationsRoutes from "./routes/notifications.routes.js";
+import promotionsRoutes from "./routes/promotions.routes.js";
+import supportRoutes from "./routes/support.routes.js";
+import walletRoutes from "./routes/wallet.routes.js";
 
 dotenv.config();
 
@@ -19,6 +23,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationsRoutes);
+app.use("/api/promotions", promotionsRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/wallet", walletRoutes);
 
 // Root route
 app.get("/", (req, res) => {

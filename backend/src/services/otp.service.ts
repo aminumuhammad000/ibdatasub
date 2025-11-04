@@ -1,6 +1,6 @@
 // services/otp.service.ts
 import { OTP } from '../models';
-import { config } from '../config/env';
+import { config } from '../config/env.js';
 
 export class OTPService {
   static async generateOTP(): Promise<string> {

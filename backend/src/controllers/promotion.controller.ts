@@ -1,4 +1,4 @@
-/ controllers/promotion.controller.ts
+// controllers/promotion.controller.ts
 import { Response } from 'express';
 import { Promotion } from '../models';
 import { ApiResponse } from '../utils/response';
