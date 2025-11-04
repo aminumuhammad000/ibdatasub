@@ -2,8 +2,8 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
-import { ApiResponse } from '../utils/response';
-import { AuthRequest } from '../types';
+import { ApiResponse } from '../utils/response.js';
+import { AuthRequest } from '../types/index.js';
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

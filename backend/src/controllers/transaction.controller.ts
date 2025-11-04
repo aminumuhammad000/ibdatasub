@@ -1,11 +1,11 @@
 // controllers/transaction.controller.ts
 import { Response } from 'express';
-import { Transaction, Wallet, Operator, Plan } from '../models';
-import { WalletService } from '../services/wallet.service';
-import { NotificationService } from '../services/notification.service';
-import { ApiResponse } from '../utils/response';
-import { AuthRequest } from '../types';
-import { transactionValidation } from '../utils/validators';
+import { Transaction, Wallet, Operator, Plan } from '../models/index.js';
+import { WalletService } from '../services/wallet.service.js';
+import { NotificationService } from '../services/notification.service.js';
+import { ApiResponse } from '../utils/response.js';
+import { AuthRequest } from '../types/index.js';
+import { transactionValidation } from '../utils/validators.js';
 
 export class TransactionController {
   static async createTransaction(req: AuthRequest, res: Response) {
@@ -130,6 +130,35 @@ export class TransactionController {
         total,
         pages: Math.ceil(total / limit)
       }, 'Transactions retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async updateTransactionStatus(req: AuthRequest, res: Response) {
+    try {
+      const { status, remarks } = req.body;
+      const allowedStatuses = ['pending', 'completed', 'failed', 'cancelled'];
+
+      if (!allowedStatuses.includes(status)) {
+        return ApiResponse.error(res, 'Invalid status', 400);
+      }
+
+      const transaction = await Transaction.findByIdAndUpdate(
+        req.params.id,
+        { 
+          status, 
+          remarks: remarks || '',
+          updated_at: new Date() 
+        },
+        { new: true }
+      );
+
+      if (!transaction) {
+        return ApiResponse.error(res, 'Transaction not found', 404);
+      }
+
+      return ApiResponse.success(res, transaction, 'Transaction status updated successfully');
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

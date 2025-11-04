@@ -1,7 +1,7 @@
 // middleware/role.middleware.ts
 import { Response, NextFunction } from 'express';
-import { ApiResponse } from '../utils/response';
-import { AuthRequest } from '../types';
+import { ApiResponse } from '../utils/response.js';
+import { AuthRequest } from '../types/index.js';
 import { AdminUser, RolePermission } from '../models';
 
 export const checkPermission = (permission: string) => {

@@ -3,12 +3,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { User } from '../models';
-import { WalletService } from '../services/wallet.service';
-import { OTPService } from '../services/otp.service';
-import { ApiResponse } from '../utils/response';
+import { User } from '../models/index.js';
+import { WalletService } from '../services/wallet.service.js';
+import { OTPService } from '../services/otp.service.js';
+import { ApiResponse } from '../utils/response.js';
 import { config } from '../config/env.js';
-import { userValidation } from '../utils/validators';
+import { userValidation } from '../utils/validators.js';
 
 export class AuthController {
   static async register(req: Request, res: Response) {

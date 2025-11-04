@@ -1,9 +1,9 @@
 // controllers/notification.controller.ts
 import { Response } from 'express';
-import { Notification } from '../models';
-import { NotificationService } from '../services/notification.service';
-import { ApiResponse } from '../utils/response';
-import { AuthRequest } from '../types';
+import { Notification } from '../models/index.js';
+import { NotificationService } from '../services/notification.service.js';
+import { ApiResponse } from '../utils/response.js';
+import { AuthRequest } from '../types/index.js';
 
 export class NotificationController {
   static async getNotifications(req: AuthRequest, res: Response) {
@@ -55,6 +55,49 @@ export class NotificationController {
       );
 
       return ApiResponse.success(res, null, 'All notifications marked as read');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async getNotificationById(req: AuthRequest, res: Response) {
+    try {
+      const notification = await Notification.findOne({
+        _id: req.params.id,
+        user_id: req.user?.id
+      });
+
+      if (!notification) {
+        return ApiResponse.error(res, 'Notification not found', 404);
+      }
+
+      return ApiResponse.success(res, notification, 'Notification retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async deleteNotification(req: AuthRequest, res: Response) {
+    try {
+      const notification = await Notification.findOneAndDelete({
+        _id: req.params.id,
+        user_id: req.user?.id
+      });
+
+      if (!notification) {
+        return ApiResponse.error(res, 'Notification not found', 404);
+      }
+
+      return ApiResponse.success(res, null, 'Notification deleted successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async deleteAllNotifications(req: AuthRequest, res: Response) {
+    try {
+      await Notification.deleteMany({ user_id: req.user?.id });
+      return ApiResponse.success(res, null, 'All notifications deleted successfully');
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

@@ -12,7 +12,7 @@ connectDB()
       console.log(`✅ Server running on http://localhost:${PORT}`);
     });
   })
-  .catch((err) => {
+  .catch((err: Error) => {
     console.error("❌ MongoDB connection failed:", err.message);
     process.exit(1);
   });

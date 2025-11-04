@@ -2,10 +2,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { AdminUser, User, AuditLog, Transaction } from '../models';
-import { AdminService } from '../services/admin.service';
-import { ApiResponse } from '../utils/response';
-import { AuthRequest } from '../types';
+import { AdminUser, User, AuditLog, Transaction } from '../models/index.js';
+import { AdminService } from '../services/admin.service.js';
+import { ApiResponse } from '../utils/response.js';
+import { AuthRequest } from '../types/index.js';
 import { config } from '../config/env.js';
 
 export class AdminController {
@@ -114,6 +114,96 @@ export class AdminController {
         total,
         pages: Math.ceil(total / limit)
       }, 'Audit logs retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async getAllUsers(req: AuthRequest, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      const users = await User.find()
+        .select('-password_hash')
+        .skip(skip)
+        .limit(limit)
+        .sort({ created_at: -1 });
+
+      const total = await User.countDocuments();
+
+      return ApiResponse.paginated(res, users, {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }, 'Users retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async getUserById(req: AuthRequest, res: Response) {
+    try {
+      const user = await User.findById(req.params.id).select('-password_hash');
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      return ApiResponse.success(res, user, 'User retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async updateUser(req: AuthRequest, res: Response) {
+    try {
+      const allowedUpdates = ['first_name', 'last_name', 'email', 'phone_number', 'status', 'kyc_status'];
+      const updates = Object.keys(req.body)
+        .filter(key => allowedUpdates.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = req.body[key];
+          return obj;
+        }, {});
+
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { ...updates, updated_at: new Date() },
+        { new: true }
+      ).select('-password_hash');
+
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      return ApiResponse.success(res, user, 'User updated successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async deleteUser(req: AuthRequest, res: Response) {
+    try {
+      const user = await User.findByIdAndDelete(req.params.id);
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      return ApiResponse.success(res, null, 'User deleted successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async deleteAuditLog(req: AuthRequest, res: Response) {
+    try {
+      const log = await AuditLog.findByIdAndDelete(req.params.id);
+      if (!log) {
+        return ApiResponse.error(res, 'Audit log not found', 404);
+      }
+
+      return ApiResponse.success(res, null, 'Audit log deleted successfully');
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

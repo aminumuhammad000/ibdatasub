@@ -1,5 +1,5 @@
 // services/notification.service.ts
-import { Notification } from '../models';
+import { Notification } from '../models/index.js';
 import { Types } from 'mongoose';
 
 export class NotificationService {

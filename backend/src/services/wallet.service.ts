@@ -1,5 +1,5 @@
 // services wallet.service.ts
-import { Wallet, Transaction } from '../models';
+import { Wallet, Transaction } from '../models/index.js';
 import { Types } from 'mongoose';
 
 export class WalletService {
@@ -35,5 +35,18 @@ export class WalletService {
     wallet.last_transaction_at = new Date();
     await wallet.save();
     return true;
+  }
+
+  // Alias methods for compatibility
+  static async getWalletByUserId(user_id: Types.ObjectId | string) {
+    return await Wallet.findOne({ user_id });
+  }
+
+  static async debit(user_id: Types.ObjectId | string, amount: number, description?: string) {
+    return await this.debitWallet(user_id as Types.ObjectId, amount);
+  }
+
+  static async credit(user_id: Types.ObjectId | string, amount: number, description?: string) {
+    return await this.creditWallet(user_id as Types.ObjectId, amount);
   }
 }

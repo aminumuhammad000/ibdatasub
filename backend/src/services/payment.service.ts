@@ -1,5 +1,5 @@
 // services/payment.service.ts
-import { Transaction } from '../models';
+import { Transaction } from '../models/index.js';
 import { Types } from 'mongoose';
 
 export class PaymentService {

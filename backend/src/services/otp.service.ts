@@ -1,5 +1,5 @@
 // services/otp.service.ts
-import { OTP } from '../models';
+import { OTP } from '../models/index.js';
 import { config } from '../config/env.js';
 
 export class OTPService {

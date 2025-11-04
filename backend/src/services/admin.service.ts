@@ -1,5 +1,5 @@
 // services/admin.service.ts
-import { AuditLog } from '../models';
+import { AuditLog } from '../models/index.js';
 import { Types } from 'mongoose';
 
 export class AdminService {

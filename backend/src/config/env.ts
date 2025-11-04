@@ -12,3 +12,34 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   logLevel: process.env.LOG_LEVEL || 'info',
 };
+
+// config/env.ts - Add these to your existing environment configuration
+
+export default {
+  // ... your existing env variables
+  
+  // TopupMate API Configuration
+  TOPUPMATE_API_KEY: process.env.TOPUPMATE_API_KEY || '',
+  TOPUPMATE_BASE_URL: process.env.TOPUPMATE_BASE_URL || 'https://connect.topupmate.com/api',
+  
+  // Service charge configuration (optional - for markup)
+  AIRTIME_SERVICE_CHARGE: parseFloat(process.env.AIRTIME_SERVICE_CHARGE || '0'),
+  DATA_SERVICE_CHARGE: parseFloat(process.env.DATA_SERVICE_CHARGE || '0'),
+  CABLE_SERVICE_CHARGE: parseFloat(process.env.CABLE_SERVICE_CHARGE || '0'),
+  ELECTRICITY_SERVICE_CHARGE: parseFloat(process.env.ELECTRICITY_SERVICE_CHARGE || '0'),
+  EXAMPIN_SERVICE_CHARGE: parseFloat(process.env.EXAMPIN_SERVICE_CHARGE || '0'),
+};
+
+// .env file additions
+/*
+# TopupMate API Configuration
+TOPUPMATE_API_KEY=your_api_key_here
+TOPUPMATE_BASE_URL=https://connect.topupmate.com/api
+
+# Service charges (percentage or flat amount)
+AIRTIME_SERVICE_CHARGE=0
+DATA_SERVICE_CHARGE=0
+CABLE_SERVICE_CHARGE=0
+ELECTRICITY_SERVICE_CHARGE=0
+EXAMPIN_SERVICE_CHARGE=0
+*/
