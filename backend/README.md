@@ -40,8 +40,10 @@ Register a new user account.
 {
   "email": "user@example.com",
   "password": "securePassword123",
-  "phone": "+234XXXXXXXXXX",
-  "fullName": "John Doe"
+  "phone_number": "+234XXXXXXXXXX",
+  "first_name": "John",
+  "last_name": "Doe",
+  "referral_code": "ABC123" // optional
 }
 ```
 
@@ -49,7 +51,24 @@ Register a new user account.
 ```json
 {
   "success": true,
-  "message": "Registration successful. OTP sent to your email/phone"
+  "message": "Registration successful",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "email": "user@example.com",
+      "phone_number": "+234XXXXXXXXXX",
+      "first_name": "John",
+      "last_name": "Doe",
+      "referral_code": "XYZ789",
+      "country": "Nigeria",
+      "kyc_status": "pending",
+      "status": "active",
+      "biometric_enabled": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "token": "jwt_token_here"
+  }
 }
 ```
 
@@ -70,11 +89,23 @@ Login to existing account.
 ```json
 {
   "success": true,
-  "token": "jwt_token_here",
-  "user": {
-    "id": "user_id",
-    "email": "user@example.com",
-    "fullName": "John Doe"
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "email": "user@example.com",
+      "phone_number": "+234XXXXXXXXXX",
+      "first_name": "John",
+      "last_name": "Doe",
+      "referral_code": "XYZ789",
+      "country": "Nigeria",
+      "kyc_status": "pending",
+      "status": "active",
+      "biometric_enabled": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "token": "jwt_token_here"
   }
 }
 ```
@@ -87,8 +118,8 @@ Verify OTP sent during registration or other verification processes.
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
-  "otp": "123456"
+  "phone_number": "+234XXXXXXXXXX",
+  "otp_code": "123456"
 }
 ```
 
@@ -108,7 +139,7 @@ Resend OTP to user.
 **Request Body:**
 ```json
 {
-  "email": "user@example.com"
+  "phone_number": "+234XXXXXXXXXX"
 }
 ```
 
@@ -136,12 +167,27 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "success": true,
-  "user": {
-    "id": "user_id",
-    "email": "user@example.com",
-    "fullName": "John Doe",
-    "phone": "+234XXXXXXXXXX",
-    "kycStatus": "pending"
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "email": "user@example.com",
+      "phone_number": "+234XXXXXXXXXX",
+      "first_name": "John",
+      "last_name": "Doe",
+      "date_of_birth": "1990-01-01",
+      "address": "123 Main St",
+      "city": "Lagos",
+      "state": "Lagos",
+      "country": "Nigeria",
+      "kyc_status": "pending",
+      "kyc_document_id_front_url": null,
+      "kyc_document_id_back_url": null,
+      "referral_code": "XYZ789",
+      "biometric_enabled": false,
+      "status": "active",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
   }
 }
 ```
@@ -159,8 +205,14 @@ Authorization: Bearer <jwt_token>
 **Request Body:**
 ```json
 {
-  "fullName": "Jane Doe",
-  "phone": "+234XXXXXXXXXX"
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "phone_number": "+234XXXXXXXXXX",
+  "date_of_birth": "1990-01-01",
+  "address": "123 Main St",
+  "city": "Lagos",
+  "state": "Lagos",
+  "country": "Nigeria"
 }
 ```
 
@@ -168,7 +220,16 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "success": true,
-  "message": "Profile updated successfully"
+  "message": "Profile updated successfully",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "email": "user@example.com",
+      "phone_number": "+234XXXXXXXXXX"
+    }
+  }
 }
 ```
 
