@@ -1,330 +1,352 @@
-- Base URL: http://localhost:5000
-- Test (GET): /, /api/auth, /api/users, /api/transactions, /api/admin, /api/notifications, /api/promotions, /api/support, /api/wallet
+# VTU App Backend API Documentation
 
-{
-  _id: ObjectId,
-  email: String,
-  phone_number: String,
-  password_hash: String,
-  first_name: String,
-  last_name: String,
-  date_of_birth: Date,
-  address: String,
-  city: String,
-  state: String,
-  country: String,
-  kyc_status: { type: String, enum: ['pending', 'verified', 'rejected'] },
-  kyc_document_id_front_url: String,
-  kyc_document_id_back_url: String,
-  referral_code: String,
-  referred_by: ObjectId, // reference to another User
-  biometric_enabled: Boolean,
-  status: { type: String, enum: ['active', 'inactive', 'suspended'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  user_id: ObjectId, // ref: Users
-  balance: Number,
-  currency: String,
-  last_transaction_at: Date,
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  user_id: ObjectId,
-  wallet_id: ObjectId,
-  type: { type: String, enum: ['airtime_topup', 'data_purchase', 'bill_payment', 'wallet_topup', 'e-pin_purchase'] },
-  amount: Number,
-  fee: Number,
-  total_charged: Number,
-  status: { type: String, enum: ['pending', 'successful', 'failed', 'refunded'] },
-  reference_number: String,
-  description: String,
-  payment_method: String,
-  destination_account: String,
-  operator_id: ObjectId, // ref: Operators
-  plan_id: ObjectId, // ref: Plans
-  receipt_url: String,
-  error_message: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  name: String,
-  code: String,
-  logo_url: String,
-  status: { type: String, enum: ['active', 'inactive'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  operator_id: ObjectId, // ref: Operators
-  name: String,
-  price: Number,
-  validity: String,
-  data_amount: String,
-  type: { type: String, enum: ['data', 'airtime'] },
-  status: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  name: String,
-  category: String,
-  logo_url: String,
-  api_endpoint: String,
-  status: { type: String, enum: ['active', 'inactive'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  name: String,
-  value: Number,
-  status: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  e_pin_product_id: ObjectId,
-  transaction_id: ObjectId,
-  pin_code: String,
-  serial_number: String,
-  status: { type: String, enum: ['available', 'used', 'expired'] },
-  purchased_at: Date,
-  used_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  email: String,
-  password_hash: String,
-  first_name: String,
-  last_name: String,
-  role_id: ObjectId,
-  last_login_at: Date,
-  status: { type: String, enum: ['active', 'inactive'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  name: String, // Super Admin, Support Agent, etc.
-  description: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  name: String,
-  description: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-{
-  _id: ObjectId,
-  role_id: ObjectId,
-  permission_id: ObjectId
-}
-
-
-{
-  _id: ObjectId,
-  user_id: ObjectId,
-  phone_number: String,
-  email: String,
-  otp_code: String,
-  expires_at: Date,
-  is_used: Boolean,
-  created_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  user_id: ObjectId, // nullable
-  type: String,
-  title: String,
-  message: String,
-  read_status: Boolean,
-  created_at: Date,
-  action_link: String
-}
-
-
-{
-  _id: ObjectId,
-  name: String,
-  description: String,
-  type: { type: String, enum: ['discount', 'cashback', 'referral_bonus'] },
-  start_date: Date,
-  end_date: Date,
-  code: String,
-  status: String,
-  target_users: String,
-  banner_image_url: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  referrer_bonus_amount: Number,
-  referee_bonus_amount: Number,
-  min_transaction_for_bonus: Number,
-  terms_and_conditions_url: String,
-  is_active: Boolean,
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  user_id: ObjectId,
-  admin_id: ObjectId,
-  subject: String,
-  description: String,
-  status: { type: String, enum: ['new', 'open', 'pending_user', 'resolved', 'closed'] },
-  priority: { type: String, enum: ['low', 'medium', 'high'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  admin_id: ObjectId,
-  user_id: ObjectId,
-  action: String,
-  entity_type: String,
-  entity_id: ObjectId,
-  old_value: Object,
-  new_value: Object,
-  ip_address: String,
-  timestamp: Date
-}
-
-
-{
-  _id: ObjectId,
-  email: String,
-  phone_number: String,
-  password_hash: String,
-  first_name: String,
-  last_name: String,
-  date_of_birth: Date,
-  address: String,
-  city: String,
-  state: String,
-  country: String,
-  kyc_status: { type: String, enum: ['pending', 'verified', 'rejected'] },
-  kyc_document_id_front_url: String,
-  kyc_document_id_back_url: String,
-  referral_code: String,
-  referred_by: ObjectId,
-  biometric_enabled: Boolean,
-  status: { type: String, enum: ['active', 'inactive', 'suspended'] },
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  user_id: ObjectId,
-  balance: Number,
-  currency: String,
-  last_transaction_at: Date,
-  created_at: Date,
-  updated_at: Date
-}
-
-
-{
-  _id: ObjectId,
-  user_id: ObjectId,
-  wallet_id: ObjectId,
-  type: { type: String, enum: ['airtime_topup', 'data_purchase', 'bill_payment', 'wallet_topup', 'e-pin_purchase'] },
-  amount: Number,
-  fee: Number,
-  total_charged: Number,
-  status: { type: String, enum: ['pending', 'successful', 'failed', 'refunded'] },
-  reference_number: String,
-  description: String,
-  payment_method: String,
-  destination_account: String,
-  operator_id: ObjectId,
-  plan_id: ObjectId,
-  receipt_url: String,
-  error_message: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-
-# Bill Payment API Documentation
-
-## Overview
-This API integrates with TopupMate to provide bill payment services including airtime, data bundles, cable TV, electricity, and exam pins.
+A comprehensive backend API for VTU (Virtual Top-Up) services including airtime, data, cable TV, electricity, and exam pin purchases.
 
 ## Base URL
 ```
-/api/v1/billpayment
+http://localhost:PORT
 ```
+
+## Technologies Used
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js v5.1.0
+- **Database**: MongoDB with Mongoose v8.19.2
+- **Authentication**: JWT (jsonwebtoken v9.0.2)
+- **Security**: Helmet, CORS, Express Rate Limit
+- **Logging**: Winston, Morgan
+
+---
+
+## Table of Contents
+1. [Authentication](#authentication)
+2. [User Management](#user-management)
+3. [Wallet Management](#wallet-management)
+4. [Bill Payment Services](#bill-payment-services)
+5. [Transactions](#transactions)
+6. [Notifications](#notifications)
+7. [Support Tickets](#support-tickets)
+8. [Promotions](#promotions)
+9. [Admin Dashboard](#admin-dashboard)
+
+---
 
 ## Authentication
-All endpoints require Bearer token authentication:
+
+### POST `/api/auth/register`
+Register a new user account.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "phone": "+234XXXXXXXXXX",
+  "fullName": "John Doe"
+}
 ```
-Authorization: Bearer {your_jwt_token}
-```
-
----
-
-## Endpoints
-
-### 1. Get Networks
-Retrieve available network providers.
-
-**Endpoint:** `GET /networks`
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "message": "Networks retrieved successfully",
-  "data": [
+  "success": true,
+  "message": "Registration successful. OTP sent to your email/phone"
+}
+```
+
+---
+
+### POST `/api/auth/login`
+Login to existing account.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "jwt_token_here",
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "fullName": "John Doe"
+  }
+}
+```
+
+---
+
+### POST `/api/auth/verify-otp`
+Verify OTP sent during registration or other verification processes.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Account verified successfully"
+}
+```
+
+---
+
+### POST `/api/auth/resend-otp`
+Resend OTP to user.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "OTP resent successfully"
+}
+```
+
+---
+
+## User Management
+
+### GET `/api/users/profile`
+Get current user profile (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "fullName": "John Doe",
+    "phone": "+234XXXXXXXXXX",
+    "kycStatus": "pending"
+  }
+}
+```
+
+---
+
+### PUT `/api/users/profile`
+Update user profile (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "fullName": "Jane Doe",
+  "phone": "+234XXXXXXXXXX"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully"
+}
+```
+
+---
+
+### DELETE `/api/users/profile`
+Delete user account (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully"
+}
+```
+
+---
+
+### POST `/api/users/kyc`
+Upload KYC documents (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+```
+document: file
+documentType: string (e.g., "passport", "drivers_license", "national_id")
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "KYC document uploaded successfully"
+}
+```
+
+---
+
+### GET `/api/users`
+Get all users - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "users": [...]
+}
+```
+
+---
+
+### GET `/api/users/:id`
+Get user by ID - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user": {...}
+}
+```
+
+---
+
+### PUT `/api/users/:id`
+Update user by ID - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### DELETE `/api/users/:id`
+Delete user by ID - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## Wallet Management
+
+### GET `/api/wallet`
+Get user wallet details (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "wallet": {
+    "balance": 5000.00,
+    "currency": "NGN",
+    "userId": "user_id"
+  }
+}
+```
+
+---
+
+### POST `/api/wallet/fund`
+Fund wallet (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "amount": 1000.00,
+  "paymentMethod": "card",
+  "reference": "payment_reference"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Wallet funded successfully",
+  "balance": 6000.00
+}
+```
+
+---
+
+### GET `/api/wallet/transactions`
+Get wallet transaction history (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+
+**Response:**
+```json
+{
+  "success": true,
+  "transactions": [
     {
-      "id": "1",
-      "network": "MTN",
-      "status": "On"
-    },
-    {
-      "id": "2",
-      "network": "AIRTEL",
-      "status": "On"
+      "id": "txn_id",
+      "type": "credit",
+      "amount": 1000.00,
+      "date": "2024-01-01T00:00:00Z"
     }
   ]
 }
@@ -332,23 +354,358 @@ Retrieve available network providers.
 
 ---
 
-### 2. Get Data Plans
-Retrieve available data plans.
+### PUT `/api/wallet/adjust`
+Adjust wallet balance - Admin only (Protected).
 
-**Endpoint:** `GET /data-plans`
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "userId": "user_id",
+  "amount": 500.00,
+  "type": "credit",
+  "reason": "Refund"
+}
+```
+
+---
+
+### POST `/api/wallet/transfer`
+Transfer funds to another user (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "recipientId": "recipient_user_id",
+  "amount": 1000.00,
+  "note": "Payment for services"
+}
+```
+
+---
+
+## Bill Payment Services
+
+**Note:** Bill payment routes are currently commented out in `app.ts`. Uncomment to activate.
+
+All bill payment endpoints require authentication.
+
+**Base Path:** `/api/billpayment`
+
+### GET `/api/billpayment/networks`
+Get available mobile networks.
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "message": "Data plans retrieved successfully",
-  "data": [
+  "success": true,
+  "networks": [
+    {"id": "mtn", "name": "MTN"},
+    {"id": "glo", "name": "GLO"},
+    {"id": "airtel", "name": "Airtel"},
+    {"id": "9mobile", "name": "9Mobile"}
+  ]
+}
+```
+
+---
+
+### GET `/api/billpayment/data-plans`
+Get available data plans.
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+- `network`: Network ID (required)
+
+**Response:**
+```json
+{
+  "success": true,
+  "plans": [...]
+}
+```
+
+---
+
+### GET `/api/billpayment/cable-providers`
+Get cable TV providers.
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "providers": [
+    {"id": "dstv", "name": "DSTV"},
+    {"id": "gotv", "name": "GOTV"},
+    {"id": "startimes", "name": "StarTimes"}
+  ]
+}
+```
+
+---
+
+### GET `/api/billpayment/electricity-providers`
+Get electricity distribution companies.
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "providers": [...]
+}
+```
+
+---
+
+### GET `/api/billpayment/exampin-providers`
+Get exam pin providers.
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "providers": [
+    {"id": "waec", "name": "WAEC"},
+    {"id": "neco", "name": "NECO"}
+  ]
+}
+```
+
+---
+
+### POST `/api/billpayment/airtime`
+Purchase airtime (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "network": "mtn",
+  "phone": "+234XXXXXXXXXX",
+  "amount": 100
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Airtime purchased successfully",
+  "transaction": {
+    "reference": "txn_ref",
+    "status": "success"
+  }
+}
+```
+
+---
+
+### POST `/api/billpayment/data`
+Purchase data bundle (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "network": "mtn",
+  "phone": "+234XXXXXXXXXX",
+  "planId": "plan_id",
+  "amount": 1000
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Data bundle purchased successfully",
+  "transaction": {...}
+}
+```
+
+---
+
+### POST `/api/billpayment/cable/verify`
+Verify cable TV account (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "provider": "dstv",
+  "smartCardNumber": "1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "accountName": "John Doe",
+  "accountNumber": "1234567890"
+}
+```
+
+---
+
+### POST `/api/billpayment/cable/purchase`
+Purchase cable TV subscription (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "provider": "dstv",
+  "smartCardNumber": "1234567890",
+  "package": "package_id",
+  "amount": 5000
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Cable TV subscription successful",
+  "transaction": {...}
+}
+```
+
+---
+
+### POST `/api/billpayment/electricity/verify`
+Verify electricity meter number (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "provider": "ekedc",
+  "meterNumber": "12345678901",
+  "meterType": "prepaid"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "accountName": "John Doe",
+  "address": "123 Main St"
+}
+```
+
+---
+
+### POST `/api/billpayment/electricity/purchase`
+Purchase electricity token (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "provider": "ekedc",
+  "meterNumber": "12345678901",
+  "meterType": "prepaid",
+  "amount": 5000
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Electricity token purchased successfully",
+  "token": "1234-5678-9012-3456",
+  "transaction": {...}
+}
+```
+
+---
+
+### POST `/api/billpayment/exampin`
+Purchase exam pin (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "provider": "waec",
+  "quantity": 1,
+  "examType": "waec_gce"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Exam pin purchased successfully",
+  "pins": [
     {
-      "id": "1",
-      "network": "MTN",
-      "plan": "1GB SME",
-      "price": "250",
-      "validity": "30 days"
+      "serial": "ABC123456789",
+      "pin": "123456789012"
     }
   ]
 }
@@ -356,338 +713,605 @@ Retrieve available data plans.
 
 ---
 
-### 3. Get Cable Providers
-Retrieve available cable TV providers.
+### GET `/api/billpayment/transaction/:reference`
+Get bill payment transaction status (Protected).
 
-**Endpoint:** `GET /cable-providers`
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Cable providers retrieved successfully",
-  "data": [
-    {
-      "id": "1",
-      "provider": "DSTV",
-      "status": "On"
-    },
-    {
-      "id": "2",
-      "provider": "GOTV",
-      "status": "On"
-    }
-  ]
-}
+**Headers:**
 ```
-
----
-
-### 4. Get Electricity Providers
-Retrieve available electricity providers.
-
-**Endpoint:** `GET /electricity-providers`
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Electricity providers retrieved successfully",
-  "data": [
-    {
-      "id": "1",
-      "provider": "EKEDC",
-      "status": "On"
-    }
-  ]
-}
-```
-
----
-
-### 5. Purchase Airtime
-Purchase airtime for a phone number.
-
-**Endpoint:** `POST /airtime`
-
-**Request Body:**
-```json
-{
-  "network": "1",
-  "phone": "08012345678",
-  "amount": "100",
-  "airtime_type": "VTU",
-  "ported_number": true
-}
-```
-
-**Validation Rules:**
-- `network`: Required, string
-- `phone`: Required, 10-11 digits
-- `amount`: Required, number (min: 50, max: 50000)
-- `airtime_type`: Optional, "VTU" or "SHARE_AND_SELL" (default: "VTU")
-- `ported_number`: Optional, boolean (default: true)
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Airtime purchase successful",
-  "data": {
-    "transaction": {
-      "id": "123",
-      "reference": "AIRTIME_1234567890",
-      "amount": 100,
-      "status": "completed"
-    },
-    "provider_response": {
-      "status": "success",
-      "Status": "successful"
-    }
-  }
-}
-```
-
----
-
-### 6. Purchase Data
-Purchase data bundle for a phone number.
-
-**Endpoint:** `POST /data`
-
-**Request Body:**
-```json
-{
-  "network": "1",
-  "phone": "08012345678",
-  "plan": "1",
-  "ported_number": true
-}
-```
-
-**Validation Rules:**
-- `network`: Required, string
-- `phone`: Required, 10-11 digits
-- `plan`: Required, string (plan ID)
-- `ported_number`: Optional, boolean (default: true)
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Data purchase successful",
-  "data": {
-    "transaction": {
-      "id": "124",
-      "reference": "DATA_1234567890",
-      "amount": 250,
-      "status": "completed"
-    },
-    "provider_response": {
-      "status": "success",
-      "Status": "successful",
-      "true_response": "MTN SME 1GB for 08012345678..."
-    }
-  }
-}
-```
-
----
-
-### 7. Verify Cable Account
-Verify a cable TV IUC number.
-
-**Endpoint:** `POST /cable/verify`
-
-**Request Body:**
-```json
-{
-  "provider": "1",
-  "iucnumber": "1234567890"
-}
+Authorization: Bearer <jwt_token>
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "message": "Account verification successful",
-  "data": {
-    "customer_name": "John Doe",
-    "iucnumber": "1234567890"
-  }
-}
-```
-
----
-
-### 8. Purchase Cable TV Subscription
-Purchase or renew cable TV subscription.
-
-**Endpoint:** `POST /cable/purchase`
-
-**Request Body:**
-```json
-{
-  "provider": "1",
-  "iucnumber": "1234567890",
-  "plan": "3",
-  "subtype": "renew",
-  "phone": "08012345678"
-}
-```
-
-**Validation Rules:**
-- `provider`: Required, string
-- `iucnumber`: Required, string
-- `plan`: Required, string (plan ID)
-- `subtype`: Optional, "renew" or "change" (default: "renew")
-- `phone`: Required, 10-11 digits
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Cable TV purchase successful",
-  "data": {
-    "transaction": {
-      "id": "125",
-      "reference": "CABLE_1234567890",
-      "amount": 5000,
-      "status": "completed"
-    }
-  }
-}
-```
-
----
-
-### 9. Verify Electricity Meter
-Verify an electricity meter number.
-
-**Endpoint:** `POST /electricity/verify`
-
-**Request Body:**
-```json
-{
-  "provider": "1",
-  "meternumber": "12345678901",
-  "metertype": "prepaid"
-}
-```
-
-**Validation Rules:**
-- `metertype`: Must be "prepaid" or "postpaid"
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Meter verification successful",
-  "data": {
-    "customer_name": "Jane Smith",
-    "meternumber": "12345678901"
-  }
-}
-```
-
----
-
-### 10. Purchase Electricity
-Purchase electricity units.
-
-**Endpoint:** `POST /electricity/purchase`
-
-**Request Body:**
-```json
-{
-  "provider": "1",
-  "meternumber": "12345678901",
-  "amount": "1000",
-  "metertype": "prepaid",
-  "phone": "08012345678"
-}
-```
-
-**Validation Rules:**
-- `amount`: Required, number (min: 500, max: 100000)
-- `metertype`: Required, "prepaid" or "postpaid"
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Electricity purchase successful",
-  "data": {
-    "transaction": {
-      "id": "126",
-      "reference": "ELECTRIC_1234567890",
-      "amount": 1000,
-      "status": "completed"
-    },
-    "token": "1234-5678-9012-3456"
-  }
-}
-```
-
----
-
-### 11. Purchase Exam Pin
-Purchase examination PIN(s).
-
-**Endpoint:** `POST /exampin`
-
-**Request Body:**
-```json
-{
-  "provider": "1",
-  "quantity": "2"
-}
-```
-
-**Validation Rules:**
-- `quantity`: Required, integer (min: 1, max: 10)
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Exam pin purchase successful",
-  "data": {
-    "transaction": {
-      "id": "127",
-      "reference": "EXAMPIN_1234567890",
-      "amount": 1000,
-      "status": "completed"
-    },
-    "pins": "123456,789012"
-  }
-}
-```
-
----
-
-### 12. Get Transaction Status
-Check the status of a transaction.
-
-**Endpoint:** `GET /transaction/:reference`
-
-**Parameters:**
-- `reference`: Transaction reference (e.g., "DATA_1234567890")
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Transaction status retrieved",
-  "data": {
-    "transref": "DATA_1234567890",
-    "amount": "250",
+  "success": true,
+  "transaction": {
+    "reference": "txn_ref",
     "status": "success",
-    "date": "2024-09-21 21:55:40",
-    "service": "Data",
-    "description": "MTN SME 1GB for 08012345678..."
+    "type": "airtime",
+    "amount": 100
   }
+}
+```
+
+---
+
+## Transactions
+
+### POST `/api/transactions`
+Create a new transaction (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "type": "airtime",
+  "amount": 100,
+  "details": {...}
+}
+```
+
+---
+
+### GET `/api/transactions`
+Get user transactions (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+- `status` (optional): Filter by status
+- `type` (optional): Filter by type
+
+**Response:**
+```json
+{
+  "success": true,
+  "transactions": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 100
+  }
+}
+```
+
+---
+
+### GET `/api/transactions/all`
+Get all transactions - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### GET `/api/transactions/:id`
+Get transaction by ID (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "transaction": {...}
+}
+```
+
+---
+
+### PUT `/api/transactions/:id/status`
+Update transaction status - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "status": "completed"
+}
+```
+
+---
+
+## Notifications
+
+### GET `/api/notifications`
+Get user notifications (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "notifications": [
+    {
+      "id": "notif_id",
+      "title": "Transaction Successful",
+      "message": "Your airtime purchase was successful",
+      "read": false,
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### GET `/api/notifications/:id`
+Get notification by ID (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### PUT `/api/notifications/:id/read`
+Mark notification as read (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Notification marked as read"
+}
+```
+
+---
+
+### PUT `/api/notifications/read-all`
+Mark all notifications as read (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "All notifications marked as read"
+}
+```
+
+---
+
+### DELETE `/api/notifications/:id`
+Delete notification (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### DELETE `/api/notifications`
+Delete all notifications (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## Support Tickets
+
+### POST `/api/support`
+Create support ticket (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "subject": "Issue with transaction",
+  "message": "My transaction failed but I was debited",
+  "category": "transaction",
+  "priority": "high"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "ticket": {
+    "id": "ticket_id",
+    "ticketNumber": "TICK-001",
+    "status": "open"
+  }
+}
+```
+
+---
+
+### GET `/api/support`
+Get user support tickets (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "tickets": [...]
+}
+```
+
+---
+
+### GET `/api/support/all`
+Get all support tickets - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### GET `/api/support/:id`
+Get ticket by ID (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### PUT `/api/support/:id/status`
+Update ticket status - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "status": "resolved"
+}
+```
+
+---
+
+### PUT `/api/support/:id`
+Update ticket (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "message": "Additional information..."
+}
+```
+
+---
+
+### DELETE `/api/support/:id`
+Delete ticket (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## Promotions
+
+### GET `/api/promotions`
+Get active promotions (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "promotions": [
+    {
+      "id": "promo_id",
+      "title": "New Year Bonus",
+      "description": "Get 10% extra on all recharges",
+      "code": "NEWYEAR2024",
+      "discount": 10,
+      "validFrom": "2024-01-01",
+      "validTo": "2024-01-31"
+    }
+  ]
+}
+```
+
+---
+
+### POST `/api/promotions`
+Create promotion - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "title": "New Year Bonus",
+  "description": "Get 10% extra on all recharges",
+  "code": "NEWYEAR2024",
+  "discount": 10,
+  "validFrom": "2024-01-01",
+  "validTo": "2024-01-31"
+}
+```
+
+---
+
+### GET `/api/promotions/:id`
+Get promotion by ID (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### PUT `/api/promotions/:id`
+Update promotion - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### DELETE `/api/promotions/:id`
+Delete promotion - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## Admin Dashboard
+
+### POST `/api/admin/login`
+Admin login.
+
+**Request Body:**
+```json
+{
+  "email": "admin@example.com",
+  "password": "adminPassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "jwt_token",
+  "admin": {
+    "id": "admin_id",
+    "email": "admin@example.com",
+    "role": "admin"
+  }
+}
+```
+
+---
+
+### GET `/api/admin/dashboard`
+Get dashboard statistics - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "stats": {
+    "totalUsers": 1000,
+    "totalTransactions": 5000,
+    "totalRevenue": 1000000,
+    "activeUsers": 500,
+    "pendingTickets": 10
+  }
+}
+```
+
+---
+
+### GET `/api/admin/users`
+Get all users - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+- `search` (optional): Search term
+
+---
+
+### GET `/api/admin/users/:id`
+Get user by ID - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### PUT `/api/admin/users/:id/status`
+Update user status - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Request Body:**
+```json
+{
+  "status": "active"
+}
+```
+
+---
+
+### PUT `/api/admin/users/:id`
+Update user - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### DELETE `/api/admin/users/:id`
+Delete user - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+### GET `/api/admin/audit-logs`
+Get audit logs - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+- `action` (optional): Filter by action type
+
+**Response:**
+```json
+{
+  "success": true,
+  "logs": [
+    {
+      "id": "log_id",
+      "userId": "user_id",
+      "action": "user_login",
+      "timestamp": "2024-01-01T00:00:00Z",
+      "ipAddress": "192.168.1.1"
+    }
+  ]
+}
+```
+
+---
+
+### DELETE `/api/admin/audit-logs/:id`
+Delete audit log - Admin only (Protected).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## System Endpoints
+
+### GET `/`
+Root endpoint - Health check.
+
+**Response:**
+```
+✅ Connecta Backend (MongoDB) is running...
+```
+
+---
+
+### GET `/health`
+Health check endpoint.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "message": "Server is running"
+}
+```
+
+---
+
+### GET `/api/test-topupmate`
+Test TopUpMate service integration.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "TopUpMate service is working!",
+  "data": [...]
 }
 ```
 
@@ -695,134 +1319,120 @@ Check the status of a transaction.
 
 ## Error Responses
 
-### Validation Error (422)
+All endpoints may return the following error responses:
+
+### 400 Bad Request
 ```json
 {
-  "status": "error",
+  "success": false,
   "message": "Validation error",
-  "errors": [
-    {
-      "field": "phone",
-      "message": "Phone number must be 10 or 11 digits"
-    }
-  ]
+  "errors": [...]
 }
 ```
 
-### Insufficient Balance (400)
+### 401 Unauthorized
 ```json
 {
-  "status": "error",
-  "message": "Insufficient wallet balance"
+  "success": false,
+  "message": "Unauthorized access"
 }
 ```
 
-### Transaction Failed (400)
+### 403 Forbidden
 ```json
 {
-  "status": "error",
-  "message": "Data purchase failed",
-  "data": {
-    "status": "failed",
-    "msg": "Transaction failed"
-  }
+  "success": false,
+  "message": "Access forbidden"
 }
 ```
 
-### Authentication Error (401)
+### 404 Not Found
 ```json
 {
-  "status": "error",
-  "message": "Authentication required"
+  "success": false,
+  "message": "Resource not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "error": "Error details"
 }
 ```
 
 ---
 
-## Transaction Flow
+## Rate Limiting
 
-1. **User initiates purchase** → Request sent to endpoint
-2. **Validation** → Request body is validated
-3. **Balance check** → User's wallet balance is verified
-4. **Wallet debit** → Amount is deducted from wallet
-5. **Transaction creation** → Transaction record is created with "pending" status
-6. **API call to TopupMate** → Request is sent to provider
-7. **Response handling:**
-   - **Success:** Transaction updated to "completed"
-   - **Failure:** Amount refunded to wallet, transaction marked as "failed"
-8. **Response sent** → User receives transaction details
+API endpoints are protected with rate limiting to prevent abuse. Default limits apply per IP address.
 
 ---
 
-## Testing
+## Environment Variables
 
-### Postman Collection
-Import this collection to test all endpoints:
-
-```json
-{
-  "info": {
-    "name": "Bill Payment API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Get Networks",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "url": "{{base_url}}/api/v1/billpayment/networks"
-      }
-    },
-    {
-      "name": "Purchase Airtime",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"network\": \"1\",\n  \"phone\": \"08012345678\",\n  \"amount\": \"100\"\n}"
-        },
-        "url": "{{base_url}}/api/v1/billpayment/airtime"
-      }
-    }
-  ]
-}
+Required environment variables:
+```
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+TOPUPMATE_API_KEY=your_topupmate_api_key
+TOPUPMATE_BASE_URL=https://api.topupmate.com
+NODE_ENV=development
 ```
 
 ---
 
-## Best Practices
+## Development
 
-1. **Always verify accounts** before making purchases (cable, electricity)
-2. **Check transaction status** for pending transactions
-3. **Store transaction references** for future queries
-4. **Handle errors gracefully** and inform users
-5. **Log all transactions** for audit purposes
-6. **Implement rate limiting** to prevent abuse
-7. **Monitor wallet balance** before initiating transactions
-8. **Use unique references** for each transaction
+### Setup
+```bash
+npm install
+```
+
+### Run Development Server
+```bash
+npm run dev
+```
+
+### Build
+```bash
+npm run build
+```
+
+### Start Production Server
+```bash
+npm start
+```
+
+---
+
+## Security Features
+
+- **JWT Authentication**: Secure token-based authentication
+- **Helmet**: Security headers protection
+- **CORS**: Cross-Origin Resource Sharing enabled
+- **Rate Limiting**: Protection against brute force attacks
+- **Input Validation**: Express Validator for request validation
+- **Password Hashing**: bcryptjs for secure password storage
+
+---
+
+## Logging
+
+- **Winston**: Structured logging for production
+- **Morgan**: HTTP request logging for development
+
+---
+
+## License
+
+ISC
 
 ---
 
 ## Support
 
-For issues or questions:
-- Check transaction status using the reference
-- Contact support if transaction is pending for more than 5 minutes
-- Keep transaction references for dispute resolution
-
+For issues or questions, create a support ticket through the `/api/support` endpoint or contact the development team.
