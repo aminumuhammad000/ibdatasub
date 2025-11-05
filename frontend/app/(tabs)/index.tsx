@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  useColorScheme,
-  StatusBar,
-} from 'react-native';
+import { useTheme } from '@/components/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import {
+    Image,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View,
+} from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { isDark } = useTheme();
   const [selectedTab, setSelectedTab] = useState<'airtime' | 'data'>('airtime');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);

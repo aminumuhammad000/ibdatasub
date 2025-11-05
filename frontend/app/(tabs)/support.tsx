@@ -1,19 +1,17 @@
+import { useTheme } from '@/components/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  useColorScheme,
-  StatusBar,
-  TouchableOpacity,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import BottomTabBar from '@/components/BottomTabBar';
 
 export default function SupportScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { isDark } = useTheme();
 
   const theme = {
     primary: '#0A2540',
@@ -97,8 +95,6 @@ export default function SupportScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
-
-      <BottomTabBar />
     </View>
   );
 }

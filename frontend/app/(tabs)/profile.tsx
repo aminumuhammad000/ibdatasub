@@ -1,20 +1,22 @@
+import { useProfile } from '@/components/ProfileContext';
+import { useTheme } from '@/components/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  useColorScheme,
-  StatusBar,
-  TouchableOpacity,
   Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import BottomTabBar from '@/components/BottomTabBar';
 
 export default function ProfileScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { isDark } = useTheme();
+  const router = useRouter();
+  const { profileData, getFullName } = useProfile();
 
   const theme = {
     primary: '#0A2540',
@@ -31,13 +33,18 @@ export default function ProfileScreen() {
   const cardBg = isDark ? '#1F2937' : '#F3F4F6';
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Personal Information', route: '' },
-    { icon: 'lock-closed-outline', label: 'Security', route: '' },
-    { icon: 'notifications-outline', label: 'Notifications', route: '' },
-    { icon: 'card-outline', label: 'Payment Methods', route: '' },
-    { icon: 'help-circle-outline', label: 'Help & Support', route: '' },
-    { icon: 'information-circle-outline', label: 'About', route: '' },
+    { icon: 'person-outline', label: 'Personal Information', route: '/edit-profile' },
+    { icon: 'lock-closed-outline', label: 'Security', route: '/security' },
+    { icon: 'notifications-outline', label: 'Notifications', route: '/notifications-settings' },
+    { icon: 'help-circle-outline', label: 'Help & Support', route: '/help-support' },
+    { icon: 'information-circle-outline', label: 'About', route: '/about' },
   ];
+
+  const handleMenuItemPress = (route: string) => {
+    if (route) {
+      router.push(route as any);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
@@ -46,7 +53,10 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor }]}>
         <Text style={[styles.headerTitle, { color: textColor }]}>Profile</Text>
-        <TouchableOpacity style={styles.settingsBtn}>
+        <TouchableOpacity 
+          style={styles.settingsBtn}
+          onPress={() => router.push('/settings')}
+        >
           <Ionicons name="settings-outline" size={24} color={textColor} />
         </TouchableOpacity>
       </View>
@@ -60,13 +70,16 @@ export default function ProfileScreen() {
         <View style={[styles.profileCard, { backgroundColor: cardBg }]}>
           <View style={styles.profilePic}>
             <Image
-              source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+              source={{ uri: profileData.profileImage }}
               style={styles.profileImage}
             />
           </View>
-          <Text style={[styles.profileName, { color: textColor }]}>David Johnson</Text>
-          <Text style={[styles.profileEmail, { color: textBodyColor }]}>david.johnson@email.com</Text>
-          <TouchableOpacity style={[styles.editButton, { backgroundColor: theme.primary }]}>
+          <Text style={[styles.profileName, { color: textColor }]}>{getFullName()}</Text>
+          <Text style={[styles.profileEmail, { color: textBodyColor }]}>{profileData.email}</Text>
+          <TouchableOpacity 
+            style={[styles.editButton, { backgroundColor: theme.primary }]}
+            onPress={() => router.push('/edit-profile')}
+          >
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
@@ -78,6 +91,7 @@ export default function ProfileScreen() {
               key={index}
               style={[styles.menuItem, { backgroundColor: cardBg }]}
               activeOpacity={0.7}
+              onPress={() => handleMenuItemPress(item.route)}
             >
               <View style={styles.menuItemLeft}>
                 <Ionicons name={item.icon as any} size={24} color={isDark ? '#FFFFFF' : theme.primary} />
@@ -96,8 +110,6 @@ export default function ProfileScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
-
-      <BottomTabBar />
     </View>
   );
 }

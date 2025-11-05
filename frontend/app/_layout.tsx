@@ -1,11 +1,16 @@
+import { AlertProvider } from '@/components/AlertContext';
+import { ProfileProvider } from '@/components/ProfileContext';
+import { ThemeProvider } from '@/components/ThemeContext';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
   return (
-    <>
-      <StatusBar style="light" />
-      <Stack>
+    <ThemeProvider>
+      <AlertProvider>
+        <ProfileProvider>
+          <StatusBar style="light" />
+          <Stack>
         <Stack.Screen 
           name="index" 
           options={{
@@ -75,13 +80,63 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen 
+          name="edit-profile" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="security" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="notifications-settings" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="help-support" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="about" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="payment-methods" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="settings" 
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
           name="modal" 
           options={{
             presentation: 'modal',
           }}
         />
-      </Stack>
-      <StatusBar style="auto" />
-    </>
+          </Stack>
+        </ProfileProvider>
+      </AlertProvider>
+    </ThemeProvider>
   );
 }
