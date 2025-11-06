@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth.service';
 
 export const AuthContext = createContext();
@@ -12,13 +13,24 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const userData = await authService.getCurrentUser();
-        if (userData) {
-          setUser(userData);
-          setIsAuthenticated(true);
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('No authentication token found');
         }
+        
+        const userData = await authService.getCurrentUser();
+        if (!userData) {
+          throw new Error('Invalid user data');
+        }
+        
+        setUser(userData);
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.log('Auth check failed, forcing logout:', error.message);
+        // Clear any invalid auth state
+        await authService.logout();
+        setUser(null);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
@@ -29,16 +41,35 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userData) => {
     try {
-      const response = await authService.login(userData);
-      if (response.success) {
-        setUser(response.data.user);
-        setIsAuthenticated(true);
-        return { success: true };
+      if (!userData?.email || !userData?.password) {
+        throw new Error('Email and password are required');
       }
-      return { success: false, message: response.message };
+      
+      const response = await authService.login(userData);
+      
+      if (!response?.success || !response.data?.user) {
+        throw new Error(response?.message || 'Invalid login response');
+      }
+      
+      // Verify we have a valid token after login
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication failed: No token received');
+      }
+      
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, message: error.message || 'Login failed' };
+      // Ensure we're logged out if login fails
+      await authService.logout();
+      setUser(null);
+      setIsAuthenticated(false);
+      return { 
+        success: false, 
+        message: error.message || 'Login failed. Please check your credentials.' 
+      };
     }
   };
 
