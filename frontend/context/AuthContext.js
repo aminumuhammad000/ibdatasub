@@ -47,11 +47,21 @@ export const AuthProvider = ({ children }) => {
       
       const response = await authService.login(userData);
       
-      if (!response?.success || !response.data?.user) {
-        throw new Error(response?.message || 'Invalid login response');
+      // Check for network errors first
+      if (!response) {
+        throw new Error('Unable to connect to the server. Please check your internet connection.');
       }
       
-      // Verify we have a valid token after login
+      // Check for failed login
+      if (!response.success) {
+        throw new Error(response.message || 'Invalid email or password');
+      }
+      
+      // Verify we have a valid user and token
+      if (!response.data?.user) {
+        throw new Error('Invalid user data received');
+      }
+      
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
         throw new Error('Authentication failed: No token received');
@@ -62,13 +72,22 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      // Ensure we're logged out if login fails
+      // Clear any partial auth state
       await authService.logout();
       setUser(null);
       setIsAuthenticated(false);
+      
+      // Provide more user-friendly error messages
+      let errorMessage = error.message || 'Login failed. Please try again.';
+      
+      // Handle network errors specifically
+      if (error.message.includes('Network Error') || error.message.includes('timeout')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+      }
+      
       return { 
         success: false, 
-        message: error.message || 'Login failed. Please check your credentials.' 
+        message: errorMessage
       };
     }
   };

@@ -37,12 +37,12 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     // Validation
     if (!email || !password) {
-      Alert.alert('❌ Validation Error', 'Please enter both email and password');
+      showError('Please enter both email and password');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('❌ Validation Error', 'Password must be at least 6 characters');
+      showError('Password must be at least 6 characters');
       return;
     }
     
@@ -54,20 +54,27 @@ const LoginScreen = () => {
         password,
       });
       
-      console.log('✅ Login successful:', response);
+      console.log('✅ Login response:', response);
       
       if (response.success) {
         showSuccess('Login successful! Welcome back!');
         // Navigation is handled by the useEffect above
       } else {
+        // Show the error message from the response
         showError(response.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      console.error('❌ Login failed:', error);
-      const errorMessage = error.message || 'Login failed. Please try again.';
+      console.error('❌ Login error:', error);
+      // Show a user-friendly error message
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error.message && (error.message.includes('Network Error') || error.message.includes('timeout'))) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       showError(errorMessage);
-    } finally {
-      // Loading state is managed by the AuthContext
     }
   };
 
@@ -137,12 +144,17 @@ const LoginScreen = () => {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
-              style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
+              style={[
+                styles.button, 
+                styles.primaryButton, 
+                (isLoading || !email || !password) && styles.buttonDisabled
+              ]}
               onPress={handleLogin}
-              disabled={isLoading}
+              disabled={isLoading || !email || !password}
+              activeOpacity={0.8}
             >
               {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.primaryButtonText}>Continue</Text>
               )}
@@ -285,6 +297,7 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   optionsRow: {
     flexDirection: 'row',
