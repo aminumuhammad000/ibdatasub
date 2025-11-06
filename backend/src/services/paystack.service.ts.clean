@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import config from '../config/env.js';
 
 interface PaystackTransactionResponse {
@@ -47,17 +47,6 @@ interface ResolveAccountResponse {
   data: {
     account_number: string;
     account_name: string;
-  };
-}
-
-interface PaystackVerifyResponse {
-  status: boolean;
-  message: string;
-  data: {
-    status: string;
-    reference: string;
-    amount: number;
-    metadata: any;
   };
 }
 
@@ -144,13 +133,10 @@ export class PaystackService {
   async handleWebhook(payload: any, signature: string): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       // Verify the webhook signature
-      if (!this.secretKey) {
-        throw new Error('Paystack secret key is not configured');
-      }
-      
-      const hmac = crypto.createHmac('sha512', this.secretKey);
-      hmac.update(JSON.stringify(payload));
-      const hash = hmac.digest('hex');
+      const hash = crypto
+        .createHmac('sha512', this.webhookSecret)
+        .update(JSON.stringify(payload))
+        .digest('hex');
 
       if (hash !== signature) {
         throw new Error('Invalid webhook signature');
@@ -175,93 +161,6 @@ export class PaystackService {
     } catch (error: any) {
       console.error('Paystack webhook error:', error);
       throw error;
-    }
-  }
-
-  /**
-   * Create a transfer recipient
-   * @param accountNumber Bank account number
-   * @param bankCode Paystack bank code
-   * @param accountName Account name (optional)
-   */
-  async createTransferRecipient(accountNumber: string, bankCode: string, accountName?: string) {
-    try {
-      const response = await this.api.post('/transferrecipient', {
-        type: 'nuban',
-        name: accountName || 'VTU Customer',
-        account_number: accountNumber,
-        bank_code: bankCode,
-        currency: 'NGN'
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Paystack create recipient error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to create transfer recipient');
-    }
-  }
-
-  /**
-   * Initiate a transfer
-   * @param amount Amount in kobo
-   * @param recipient Recipient code from createTransferRecipient
-   * @param reason Optional reason for transfer
-   */
-  async initiateTransfer(amount: number, recipient: string, reason?: string) {
-    try {
-      const response = await this.api.post('/transfer', {
-        source: 'balance',
-        amount: amount * 100, // Convert to kobo
-        recipient,
-        reason: reason || 'VTU Wallet Withdrawal'
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Paystack transfer error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to initiate transfer');
-    }
-  }
-
-  /**
-   * Verify a transfer
-   * @param reference Transfer reference
-   */
-  async verifyTransfer(reference: string) {
-    try {
-      const response = await this.api.get(`/transfer/verify/${reference}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Paystack transfer verification error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to verify transfer');
-    }
-  }
-
-  /**
-   * List all banks
-   */
-  async listBanks() {
-    try {
-      const response = await this.api.get('/bank?country=nigeria');
-      return response.data;
-    } catch (error: any) {
-      console.error('Paystack list banks error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to fetch banks');
-    }
-  }
-
-  /**
-   * Resolve account number
-   * @param accountNumber Bank account number
-   * @param bankCode Paystack bank code
-   */
-  async resolveAccount(accountNumber: string, bankCode: string) {
-    try {
-      const response = await this.api.get(`/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Paystack resolve account error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to resolve account details');
     }
   }
 }

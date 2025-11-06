@@ -1,5 +1,16 @@
 import dotenv from "dotenv";
-import { config } from './config/env.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configure __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+// Import config after dotenv is configured
+const { config } = await import('./config/env.js');
 
 // Add error handlers
 process.on('uncaughtException', (error) => {
@@ -11,8 +22,6 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
-
-dotenv.config();
 
 async function startServer() {
   try {

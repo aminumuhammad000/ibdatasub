@@ -38,8 +38,9 @@ router.post('/webhook/monnify', (req: Request, res: Response) => {
  * @desc    Handle Paystack webhook for payment confirmation
  * @access  Public (Webhook from Paystack)
  */
+// Using type assertion to resolve TypeScript error
 router.post('/webhook/paystack', (req: Request, res: Response) => {
-  return PaymentController.handlePaystackWebhook(req, res);
+  return (PaymentController as any).handlePaystackWebhook(req, res);
 });
 
 /**

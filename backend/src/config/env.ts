@@ -21,6 +21,14 @@ interface TopupmateConfig {
   baseUrl: string;
 }
 
+interface ServiceCharges {
+  airtime: number;
+  data: number;
+  cable: number;
+  electricity: number;
+  exampin: number;
+}
+
 export interface Config {
   port: number;
   nodeEnv: string;
@@ -34,9 +42,10 @@ export interface Config {
   paystack: PaystackConfig;
   monnify: MonnifyConfig;
   topupmate: TopupmateConfig;
+  serviceCharges: ServiceCharges;
 }
 
-const config: Config = {
+export const config: Config = {
   // Server Configuration
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -57,12 +66,12 @@ const config: Config = {
   logLevel: process.env.LOG_LEVEL || 'info',
   
   // Paystack Configuration
-  // paystack: {
-  //   secretKey: process.env.PAYSTACK_SECRET_KEY || '',
-  //   publicKey: process.env.PAYSTACK_PUBLIC_KEY || '',
-  //   baseUrl: 'https://api.paystack.co',
-  //   webhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
-  // },
+  paystack: {
+    secretKey: process.env.PAYSTACK_SECRET_KEY || '',
+    publicKey: process.env.PAYSTACK_PUBLIC_KEY || '',
+    baseUrl: 'https://api.paystack.co',
+    webhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
+  },
   
   // Monnify Configuration (if needed)
   monnify: {
@@ -76,13 +85,6 @@ const config: Config = {
   topupmate: {
     apiKey: process.env.TOPUPMATE_API_KEY || '',
     baseUrl: process.env.TOPUPMATE_BASE_URL || 'https://connect.topupmate.com/api',
-  },
-  
-  // Paystack Configuration
-  paystack: {
-    secretKey: process.env.PAYSTACK_SECRET_KEY || '',
-    publicKey: process.env.PAYSTACK_PUBLIC_KEY || '',
-    webhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
   },
   
   // Service charges (percentage or flat amount - optional)
