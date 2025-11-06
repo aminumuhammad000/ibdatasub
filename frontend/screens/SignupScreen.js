@@ -10,13 +10,14 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { authService } from '../services/auth.service';
+import { useAlert } from '../components/AlertContext';
 
 const SignupScreen = () => {
+  const { showSuccess, showError } = useAlert();
   const [email, setEmail] = useState('');
   const [phone_number, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -31,22 +32,22 @@ const SignupScreen = () => {
   const handleSignup = async () => {
     // Validation
     if (!email || !password || !confirmPassword || !first_name || !last_name || !phone_number) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      showError('Please fill in all required fields');
       return;
     }
     
     if (!/^[0-9]{10,15}$/.test(phone_number)) {
-      Alert.alert('Error', 'Please enter a valid phone number (10-15 digits)');
+      showError('Please enter a valid phone number (10-15 digits)');
       return;
     }
     
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showError('Passwords do not match');
       return;
     }
 
     if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters');
+      showError('Password must be at least 8 characters');
       return;
     }
     
@@ -63,15 +64,14 @@ const SignupScreen = () => {
       });
       
       if (response.success) {
-        Alert.alert('Success', 'Registration successful!', [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/(tabs)'),
-          },
-        ]);
+        showSuccess('Registration successful! Welcome to Connecta!');
+        // Navigate after showing success message
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 1500);
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+      showError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

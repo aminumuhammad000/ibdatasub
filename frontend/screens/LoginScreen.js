@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -16,8 +15,10 @@ import {
   View
 } from 'react-native';
 import { authService } from '../services/auth.service';
+import { useAlert } from '../components/AlertContext';
 
 const LoginScreen = () => {
+  const { showSuccess, showError } = useAlert();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,12 +29,12 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     // Validation
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      showError('Please enter both email and password');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      showError('Password must be at least 6 characters');
       return;
     }
     
@@ -46,15 +47,14 @@ const LoginScreen = () => {
       });
       
       if (response.success) {
-        Alert.alert('Success', 'Login successful!', [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/(tabs)'),
-          },
-        ]);
+        showSuccess('Login successful! Welcome back!');
+        // Navigate after showing success message
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 1500);
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Login failed. Please check your credentials.');
+      showError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

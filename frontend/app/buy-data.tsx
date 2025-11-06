@@ -9,9 +9,12 @@ import {
   useColorScheme,
   Modal,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { billPaymentService } from '@/services/billpayment.service';
+import { useAlert } from '@/components/AlertContext';
 
 const theme = {
   primary: '#0A2540',
@@ -31,10 +34,12 @@ export default function BuyDataScreen() {
   const textBodyColor = isDark ? '#D1D5DB' : '#6B7280';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
 
+  const { showSuccess, showError } = useAlert();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const networks = [
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -86,19 +91,48 @@ export default function BuyDataScreen() {
     ],
   };
 
-  const handleBuyData = () => {
+  const handleBuyData = async () => {
+    // Validation
     if (!phoneNumber || !selectedNetwork || !selectedPlan) {
-      alert('Please fill all required fields');
+      showError('Please fill all required fields');
       return;
     }
-    // Handle data purchase logic here
-    setShowSuccessModal(true);
-    
-    // Auto close modal and navigate after 3 seconds
-    setTimeout(() => {
-      setShowSuccessModal(false);
-      router.back();
-    }, 3000);
+
+    // Validate phone number format
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+      showError('Please enter a valid phone number');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await billPaymentService.purchaseData({
+        network: selectedNetwork,
+        phone: cleanPhone,
+        plan: selectedPlan.id.toString(),
+        ported_number: true,
+      });
+
+      if (response.success) {
+        showSuccess(`Data purchase successful! ${selectedPlan.data} sent to ${phoneNumber}`);
+        // Reset form
+        setPhoneNumber('');
+        setSelectedPlan(null);
+        setSelectedNetwork(null);
+        // Navigate back after short delay
+        setTimeout(() => {
+          router.back();
+        }, 2000);
+      } else {
+        showError(response.message || 'Failed to purchase data');
+      }
+    } catch (error: any) {
+      showError(error.message || 'Failed to purchase data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const currentPlans = selectedNetwork ? dataPlans[selectedNetwork as keyof typeof dataPlans] : [];
@@ -301,18 +335,22 @@ export default function BuyDataScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || !selectedNetwork || !selectedPlan)
+              backgroundColor: (!phoneNumber || !selectedNetwork || !selectedPlan || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleBuyData}
-          disabled={!phoneNumber || !selectedNetwork || !selectedPlan}
+          disabled={!phoneNumber || !selectedNetwork || !selectedPlan || isLoading}
           activeOpacity={0.8}
         >
-          <Text style={styles.buyButtonText}>
-            Buy Data
-          </Text>
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buyButtonText}>
+              Buy Data
+            </Text>
+          )}
         </TouchableOpacity>
 
         {/* Info Card */}

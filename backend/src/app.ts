@@ -10,6 +10,7 @@ import notificationsRoutes from "./routes/notifications.routes.js";
 import promotionsRoutes from "./routes/promotions.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 // import billpaymentRoutes from "./routes/billpayment.routes.js";
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use("/api/notifications", notificationsRoutes);
 app.use("/api/promotions", promotionsRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/payment", paymentRoutes);
 // app.use("/api/billpayment", billpaymentRoutes);
 
 // Root route

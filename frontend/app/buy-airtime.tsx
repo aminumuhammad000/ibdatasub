@@ -8,9 +8,12 @@ import {
   TextInput,
   useColorScheme,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { billPaymentService } from '@/services/billpayment.service';
+import { useAlert } from '@/components/AlertContext';
 
 const theme = {
   primary: '#0A2540',
@@ -30,11 +33,13 @@ export default function BuyAirtimeScreen() {
   const textBodyColor = isDark ? '#D1D5DB' : '#6B7280';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
 
+  const { showSuccess, showError, showInfo } = useAlert();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const networks = [
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -45,16 +50,61 @@ export default function BuyAirtimeScreen() {
 
   const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
-  const handleBuyAirtime = () => {
+  const handleBuyAirtime = async () => {
+    // Validation
     if (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount)) {
-      alert('Please fill all required fields');
+      showError('Please fill all required fields');
       return;
     }
-    setShowSuccessModal(true);
-    setTimeout(() => {
-      setShowSuccessModal(false);
-      router.back();
-    }, 3000);
+
+    // Validate phone number format
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+      showError('Please enter a valid phone number');
+      return;
+    }
+
+    const amount = selectedAmount || parseFloat(customAmount);
+    if (!amount || amount < 50) {
+      showError('Minimum airtime amount is ₦50');
+      return;
+    }
+
+    if (amount > 50000) {
+      showError('Maximum airtime amount is ₦50,000');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await billPaymentService.purchaseAirtime({
+        network: selectedNetwork,
+        phone: cleanPhone,
+        amount: amount,
+        airtime_type: 'VTU',
+        ported_number: true,
+      });
+
+      if (response.success) {
+        showSuccess(`Airtime purchase successful! ₦${amount} sent to ${phoneNumber}`);
+        // Reset form
+        setPhoneNumber('');
+        setSelectedAmount(null);
+        setCustomAmount('');
+        setSelectedNetwork(null);
+        // Navigate back after short delay
+        setTimeout(() => {
+          router.back();
+        }, 2000);
+      } else {
+        showError(response.message || 'Failed to purchase airtime');
+      }
+    } catch (error: any) {
+      showError(error.message || 'Failed to purchase airtime. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -241,18 +291,22 @@ export default function BuyAirtimeScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount))
+              backgroundColor: (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleBuyAirtime}
-          disabled={!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount)}
+          disabled={!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading}
           activeOpacity={0.8}
         >
-          <Text style={styles.buyButtonText}>
-            Buy Airtime
-          </Text>
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buyButtonText}>
+              Buy Airtime
+            </Text>
+          )}
         </TouchableOpacity>
 
         {/* Recent Transactions Info */}

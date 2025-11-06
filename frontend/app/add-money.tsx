@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,15 @@ import {
   TextInput,
   useColorScheme,
   Image,
+  ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { authService } from '@/services/auth.service';
+import { paymentService } from '@/services/payment.service';
+import { useAlert } from '@/components/AlertContext';
+import * as WebBrowser from 'expo-web-browser';
 
 const theme = {
   primary: '#0A2540',
@@ -30,8 +36,22 @@ export default function AddMoneyScreen() {
   const textBodyColor = isDark ? '#D1D5DB' : '#6B7280';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
 
+  const { showSuccess, showError, showInfo } = useAlert();
   const [amount, setAmount] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string | null>('payrant'); // Default to Payrant
+  const [userName, setUserName] = useState('Loading...');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadUserName = async () => {
+      const user = await authService.getCurrentUser();
+      if (user) {
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim().toUpperCase();
+        setUserName(fullName || 'USER');
+      }
+    };
+    loadUserName();
+  }, []);
 
   const quickAmounts = [1000, 2000, 5000, 10000, 20000, 50000];
 
@@ -43,15 +63,149 @@ export default function AddMoneyScreen() {
       icon: 'wallet-outline',
       color: '#06B6D4',
     },
+    {
+      id: 'payrant',
+      name: 'Payrant Checkout',
+      description: 'Quick checkout (Recommended)',
+      icon: 'flash-outline',
+      color: '#10B981',
+    },
+    {
+      id: 'monnify',
+      name: 'Card/Bank Transfer',
+      description: 'Pay with card or bank',
+      icon: 'card-outline',
+      color: '#8B5CF6',
+    },
   ];
 
-  const handleAddMoney = () => {
+  const handleAddMoney = async () => {
+    // Validation
     if (!amount || !selectedMethod) {
-      alert('Please enter amount and select payment method');
+      showError('Please enter amount and select payment method');
       return;
     }
-    // Handle add money logic here
-    alert(`Adding ₦${amount} via ${selectedMethod}`);
+
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      showError('Please enter a valid amount');
+      return;
+    }
+
+    if (amountNum < 100) {
+      showError('Minimum amount is ₦100');
+      return;
+    }
+
+    if (amountNum > 1000000) {
+      showError('Maximum amount is ₦1,000,000');
+      return;
+    }
+
+    if (selectedMethod === 'virtual') {
+      showInfo('Transfer to the virtual account above to fund your wallet');
+      return;
+    }
+
+    // Handle Payrant payment (DEFAULT)
+    if (selectedMethod === 'payrant') {
+      setIsLoading(true);
+      try {
+        showInfo('Initializing Payrant checkout...');
+        
+        const response = await paymentService.initiatePayment({
+          amount: amountNum,
+          gateway: 'payrant',
+        });
+
+        if (response.success) {
+          const checkoutUrl = response.data.payment.checkoutUrl || '';
+          const paymentReference = response.data.transaction.reference;
+
+          console.log('💳 Opening Payrant checkout:', checkoutUrl);
+
+          const result = await WebBrowser.openBrowserAsync(checkoutUrl);
+
+          if (result.type === 'cancel' || result.type === 'dismiss') {
+            showInfo('Verifying payment status...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            try {
+              const verifyResponse = await paymentService.verifyPayment(paymentReference);
+              
+              if (verifyResponse.success && verifyResponse.data.status === 'paid') {
+                showSuccess('Payment successful! Your wallet has been credited.');
+                setTimeout(() => router.push('/(tabs)'), 1500);
+              } else if (verifyResponse.data.status === 'pending') {
+                showInfo('Payment is being processed. We will credit your wallet once confirmed.');
+                setTimeout(() => router.back(), 2000);
+              } else {
+                showError('Payment was not completed. Please try again.');
+              }
+            } catch (verifyError: any) {
+              console.error('Verification error:', verifyError);
+              showInfo('We are verifying your payment. Please check your wallet in a few moments.');
+              setTimeout(() => router.back(), 2000);
+            }
+          }
+        }
+      } catch (error: any) {
+        console.error('Payment error:', error);
+        showError(error.message || 'Failed to initiate payment. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    // Handle Monnify payment
+    if (selectedMethod === 'monnify') {
+      setIsLoading(true);
+      try {
+        showInfo('Initializing Monnify checkout...');
+        
+        const response = await paymentService.initiatePayment({
+          amount: amountNum,
+          gateway: 'monnify',
+        });
+
+        if (response.success) {
+          const checkoutUrl = response.data.payment.checkoutUrl || '';
+          const paymentReference = response.data.payment.paymentReference || response.data.transaction.reference;
+
+          console.log('💳 Opening Monnify checkout:', checkoutUrl);
+
+          const result = await WebBrowser.openBrowserAsync(checkoutUrl);
+
+          if (result.type === 'cancel' || result.type === 'dismiss') {
+            showInfo('Verifying payment status...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            try {
+              const verifyResponse = await paymentService.verifyPayment(paymentReference);
+              
+              if (verifyResponse.success && verifyResponse.data.status === 'paid') {
+                showSuccess('Payment successful! Your wallet has been credited.');
+                setTimeout(() => router.push('/(tabs)'), 1500);
+              } else if (verifyResponse.data.status === 'pending') {
+                showInfo('Payment is being processed. We will credit your wallet once confirmed.');
+                setTimeout(() => router.back(), 2000);
+              } else {
+                showError('Payment was not completed. Please try again.');
+              }
+            } catch (verifyError: any) {
+              console.error('Verification error:', verifyError);
+              showInfo('We are verifying your payment. Please check your wallet in a few moments.');
+              setTimeout(() => router.back(), 2000);
+            }
+          }
+        }
+      } catch (error: any) {
+        console.error('Payment error:', error);
+        showError(error.message || 'Failed to initiate payment. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -103,7 +257,7 @@ export default function AddMoneyScreen() {
             <View style={styles.atmCardFooter}>
               <View style={styles.atmNameSection}>
                 <Text style={styles.atmLabel}>ACCOUNT NAME</Text>
-                <Text style={styles.atmAccountName}>DAVID OLAMIDE</Text>
+                <Text style={styles.atmAccountName}>{userName}</Text>
               </View>
               <View style={styles.virtualBadge}>
                 <Ionicons name="shield-checkmark" size={12} color="#00D4AA" />
@@ -275,7 +429,7 @@ export default function AddMoneyScreen() {
                 <Text style={[styles.accountInfoLabel, { color: textBodyColor }]}>Account Name:</Text>
                 <View style={styles.accountInfoValueContainer}>
                   <Text style={[styles.accountInfoValue, { color: textColor }]}>
-                    David Olamide
+                    {userName}
                   </Text>
                   <TouchableOpacity onPress={() => alert('Copied!')}>
                     <Ionicons name="copy-outline" size={18} color={theme.accent} />
@@ -332,17 +486,26 @@ export default function AddMoneyScreen() {
           style={[
             styles.addMoneyButton,
             {
-              backgroundColor: (!amount || !selectedMethod)
+              backgroundColor: (!amount || !selectedMethod || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleAddMoney}
-          disabled={!amount || !selectedMethod}
+          disabled={!amount || !selectedMethod || isLoading}
           activeOpacity={0.8}
         >
-          <Ionicons name="add-circle" size={20} color="#FFFFFF" />
-          <Text style={styles.addMoneyButtonText}>Add Money</Text>
+          {isLoading ? (
+            <>
+              <ActivityIndicator color="#FFFFFF" size="small" />
+              <Text style={[styles.addMoneyButtonText, { marginLeft: 8 }]}>Processing...</Text>
+            </>
+          ) : (
+            <>
+              <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+              <Text style={styles.addMoneyButtonText}>Add Money</Text>
+            </>
+          )}
         </TouchableOpacity>
 
         {/* Info Card */}

@@ -4,6 +4,8 @@ import { GlobalAlert } from './GlobalAlert';
 interface AlertContextType {
   showSuccess: (message: string) => void;
   showError: (message: string) => void;
+  showWarning: (message: string) => void;
+  showInfo: (message: string) => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
@@ -23,7 +25,7 @@ interface AlertProviderProps {
 export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
   const [alert, setAlert] = useState<{
     visible: boolean;
-    type: 'success' | 'error';
+    type: 'success' | 'error' | 'warning' | 'info';
     message: string;
   }>({
     visible: false,
@@ -47,12 +49,28 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
     });
   };
 
+  const showWarning = (message: string) => {
+    setAlert({
+      visible: true,
+      type: 'warning',
+      message,
+    });
+  };
+
+  const showInfo = (message: string) => {
+    setAlert({
+      visible: true,
+      type: 'info',
+      message,
+    });
+  };
+
   const hideAlert = () => {
     setAlert(prev => ({ ...prev, visible: false }));
   };
 
   return (
-    <AlertContext.Provider value={{ showSuccess, showError }}>
+    <AlertContext.Provider value={{ showSuccess, showError, showWarning, showInfo }}>
       {children}
       <GlobalAlert
         visible={alert.visible}

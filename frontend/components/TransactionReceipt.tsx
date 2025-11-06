@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 interface Transaction {
-  id: number;
+  id: string;
   name: string;
   phone: string;
   amount: string;

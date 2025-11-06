@@ -2,7 +2,7 @@ import { useTheme } from '@/components/ThemeContext';
 import TransactionFilter, { FilterOptions } from '@/components/TransactionFilter';
 import TransactionReceipt from '@/components/TransactionReceipt';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
     ScrollView,
     StatusBar,
@@ -10,10 +10,13 @@ import {
     Text,
     TouchableOpacity,
     View,
+    ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
+import { transactionService, Transaction as ApiTransaction } from '@/services/transaction.service';
 
 interface Transaction {
-  id: number;
+  id: string;
   name: string;
   phone: string;
   amount: string;
@@ -37,6 +40,13 @@ export default function TransactionsScreen() {
     dateRange: 'all',
     amountRange: 'all',
   });
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
   const theme = {
     primary: '#0A2540',
@@ -52,112 +62,85 @@ export default function TransactionsScreen() {
   const textBodyColor = isDark ? '#9CA3AF' : theme.textBody;
   const cardBg = isDark ? '#1F2937' : '#F3F4F6';
 
-  const allTransactions: Transaction[] = [
-    {
-      id: 1,
-      name: 'MTN Airtime Top-up',
-      phone: '08012345678',
-      amount: '₦500.00',
-      status: 'Successful',
-      date: 'Today, 10:30 AM',
-      bgColor: '#FFCB05',
-      type: 'Airtime',
-      transactionId: 'TXN001234567890',
-      fee: '₦10.00',
-      totalAmount: '₦510.00',
-    },
-    {
-      id: 2,
-      name: 'Airtel Data',
-      phone: '09087654321',
-      amount: '₦1,500.00',
-      status: 'Successful',
-      date: 'Yesterday, 3:45 PM',
-      bgColor: '#EF4444',
-      type: 'Data',
-      transactionId: 'TXN001234567891',
-      fee: '₦25.00',
-      totalAmount: '₦1,525.00',
-    },
-    {
-      id: 3,
-      name: 'DSTV Subscription',
-      phone: '1234567890',
-      amount: '₦4,500.00',
-      status: 'Failed',
-      date: 'Nov 1, 2025',
-      bgColor: '#2563EB',
-      type: 'TV Subscription',
-      transactionId: 'TXN001234567892',
-      fee: '₦50.00',
-      totalAmount: '₦4,550.00',
-    },
-    {
-      id: 4,
-      name: 'Glo Airtime',
-      phone: '08023456789',
-      amount: '₦200.00',
-      status: 'Successful',
-      date: 'Oct 31, 2025',
-      bgColor: '#10B981',
-      type: 'Airtime',
-      transactionId: 'TXN001234567893',
-      fee: '₦5.00',
-      totalAmount: '₦205.00',
-    },
-    {
-      id: 5,
-      name: 'GOTV Subscription',
-      phone: '9876543210',
-      amount: '₦2,800.00',
-      status: 'Pending',
-      date: 'Oct 30, 2025',
-      bgColor: '#FF9F43',
-      type: 'TV Subscription',
-      transactionId: 'TXN001234567894',
-      fee: '₦40.00',
-      totalAmount: '₦2,840.00',
-    },
-    {
-      id: 6,
-      name: '9mobile Data',
-      phone: '08056789123',
-      amount: '₦800.00',
-      status: 'Failed',
-      date: 'Oct 29, 2025',
-      bgColor: '#10B981',
-      type: 'Data',
-      transactionId: 'TXN001234567895',
-      fee: '₦15.00',
-      totalAmount: '₦815.00',
-    },
-    {
-      id: 7,
-      name: 'Electricity Bill',
-      phone: '1122334455',
-      amount: '₦6,000.00',
-      status: 'Successful',
-      date: 'Oct 28, 2025',
-      bgColor: '#F59E0B',
-      type: 'Electricity',
-      transactionId: 'TXN001234567896',
-      fee: '₦60.00',
-      totalAmount: '₦6,060.00',
-    },
-    {
-      id: 8,
-      name: 'MTN Data',
-      phone: '08098765432',
-      amount: '₦300.00',
-      status: 'Successful',
-      date: 'Oct 27, 2025',
-      bgColor: '#FFCB05',
-      type: 'Data',
-      transactionId: 'TXN001234567897',
-      fee: '₦8.00',
-      totalAmount: '₦308.00',
-    },
-  ];
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      const response = await transactionService.getTransactions(1, 50);
+      if (response.success && response.data) {
+        // Backend returns transactions directly in data array, not in data.transactions
+        const transactionsArray = Array.isArray(response.data) ? response.data : [];
+        const mappedTransactions = transactionsArray.map(mapApiTransactionToLocal);
+        setAllTransactions(mappedTransactions);
+      } else {
+        // If no transactions or invalid response, set empty array
+        setAllTransactions([]);
+      }
+    } catch (error: any) {
+      console.error('Error loading transactions:', error);
+      setAllTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadTransactions();
+    setRefreshing(false);
+  };
+
+  const mapApiTransactionToLocal = (transaction: ApiTransaction): Transaction => {
+    const date = new Date(transaction.created_at);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    let dateString = '';
+    if (date.toDateString() === today.toDateString()) {
+      dateString = `Today, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      dateString = `Yesterday, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+      dateString = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    return {
+      id: transaction._id,
+      name: formatTransactionType(transaction.type),
+      phone: transaction.destination_account || transaction.reference_number,
+      amount: `₦${transaction.amount.toFixed(2)}`,
+      status: transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1),
+      date: dateString,
+      bgColor: getTransactionColor(transaction.type),
+      type: formatTransactionType(transaction.type),
+      transactionId: transaction.reference_number,
+      fee: `₦${transaction.fee.toFixed(2)}`,
+      totalAmount: `₦${transaction.total_charged.toFixed(2)}`,
+    };
+  };
+
+  const formatTransactionType = (type: string) => {
+    return type
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'airtime_topup':
+        return '#FFCB05';
+      case 'data_purchase':
+        return '#EF4444';
+      case 'bill_payment':
+        return '#2563EB';
+      case 'wallet_topup':
+        return '#10B981';
+      default:
+        return '#6B7280';
+    }
+  };
+
 
   // Filter transactions based on current filters
   const filteredTransactions = useMemo(() => {
@@ -281,10 +264,23 @@ export default function TransactionsScreen() {
         </TouchableOpacity>
       </View>
 
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: textBodyColor }]}>Loading transactions...</Text>
+        </View>
+      ) : (
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.primary}
+          />
+        }
       >
         <View style={styles.transactionsList}>
           {filteredTransactions.length > 0 ? (
@@ -327,6 +323,7 @@ export default function TransactionsScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+      )}
 
       <TransactionReceipt
         visible={receiptVisible}
@@ -453,5 +450,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

@@ -1,5 +1,5 @@
-import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from './api';
 
 export interface RegisterData {
   email: string;
@@ -43,7 +43,9 @@ export const authService = {
    */
   register: async (data: RegisterData): Promise<AuthResponse> => {
     try {
+      console.log('📤 Sending registration request to backend:', data);
       const response = await api.post<AuthResponse>('/auth/register', data);
+      console.log('✅ Registration response:', response.data);
       
       // Save token and user data
       if (response.data.success && response.data.data.token) {
@@ -53,7 +55,9 @@ export const authService = {
       
       return response.data;
     } catch (error: any) {
-      throw error.response?.data || { success: false, message: 'Registration failed' };
+      console.error('❌ Registration error:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      throw { success: false, message: errorMessage, ...error.response?.data };
     }
   },
 

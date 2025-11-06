@@ -20,3 +20,6 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     return ApiResponse.error(res, 'Invalid token', 401);
   }
 };
+
+// Alias for compatibility
+export const authenticate = authMiddleware;

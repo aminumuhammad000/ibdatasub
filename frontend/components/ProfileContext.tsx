@@ -1,4 +1,6 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import { authService } from '@/services/auth.service';
+import { userService } from '@/services/user.service';
 
 export interface ProfileData {
   firstName: string;
@@ -33,15 +35,71 @@ interface ProfileProviderProps {
 
 export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) => {
   const [profileData, setProfileData] = useState<ProfileData>({
-    firstName: 'David',
-    lastName: 'Johnson',
-    email: 'david.johnson@email.com',
-    phoneNumber: '+234 803 123 4567',
-    address: '123 Main Street',
-    city: 'Lagos',
-    state: 'Lagos State',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    state: '',
     profileImage: 'https://i.pravatar.cc/150?img=12',
   });
+
+  // Load user data from server on mount
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        // Try to get from server first
+        const response = await userService.getProfile();
+        if (response.success && response.data) {
+          const user = response.data;
+          setProfileData({
+            firstName: user.first_name || '',
+            lastName: user.last_name || '',
+            email: user.email || '',
+            phoneNumber: user.phone_number || '',
+            address: user.address || '',
+            city: user.city || '',
+            state: user.state || '',
+            profileImage: user.avatar || 'https://i.pravatar.cc/150?img=12',
+          });
+        } else {
+          // Fallback to cached user data
+          const cachedUser = await authService.getCurrentUser();
+          if (cachedUser) {
+            setProfileData({
+              firstName: cachedUser.first_name || '',
+              lastName: cachedUser.last_name || '',
+              email: cachedUser.email || '',
+              phoneNumber: cachedUser.phone_number || '',
+              address: cachedUser.address || '',
+              city: cachedUser.city || '',
+              state: cachedUser.state || '',
+              profileImage: cachedUser.avatar || 'https://i.pravatar.cc/150?img=12',
+            });
+          }
+        }
+      } catch (error) {
+        console.log('Failed to load profile from server, using cached data');
+        // Fallback to cached user data
+        const cachedUser = await authService.getCurrentUser();
+        if (cachedUser) {
+          setProfileData({
+            firstName: cachedUser.first_name || '',
+            lastName: cachedUser.last_name || '',
+            email: cachedUser.email || '',
+            phoneNumber: cachedUser.phone_number || '',
+            address: cachedUser.address || '',
+            city: cachedUser.city || '',
+            state: cachedUser.state || '',
+            profileImage: cachedUser.avatar || 'https://i.pravatar.cc/150?img=12',
+          });
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, []);
 
   const updateProfile = (data: ProfileData) => {
     setProfileData(data);

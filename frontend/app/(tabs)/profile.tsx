@@ -12,22 +12,69 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { authService } from '@/services/auth.service';
+import { userService } from '@/services/user.service';
+import { walletService } from '@/services/wallet.service';
 
 export default function ProfileScreen() {
   const { isDark } = useTheme();
   const router = useRouter();
   const { profileData, getFullName } = useProfile();
   const [user, setUser] = useState<any>(null);
+  const [wallet, setWallet] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadUserData();
+    loadAllData();
   }, []);
 
-  const loadUserData = async () => {
-    const userData = await authService.getCurrentUser();
-    setUser(userData);
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        loadUserProfile(),
+        loadWalletData(),
+      ]);
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      const response = await userService.getProfile();
+      if (response.success) {
+        setUser(response.data);
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      // Fallback to local storage
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+    }
+  };
+
+  const loadWalletData = async () => {
+    try {
+      const response = await walletService.getWallet();
+      if (response.success) {
+        setWallet(response.data);
+      }
+    } catch (error: any) {
+      console.error('Error loading wallet:', error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAllData();
+    setRefreshing(false);
   };
 
   const handleLogout = async () => {
@@ -94,10 +141,23 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: textBodyColor }]}>Loading...</Text>
+        </View>
+      ) : (
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.primary}
+          />
+        }
       >
         {/* Profile Card */}
         <View style={[styles.profileCard, { backgroundColor: cardBg }]}>
@@ -113,6 +173,11 @@ export default function ProfileScreen() {
           <Text style={[styles.profileEmail, { color: textBodyColor }]}>
             {profileData?.email || user?.email || ''}
           </Text>
+          {user?.phone_number && (
+            <Text style={[styles.profilePhone, { color: textBodyColor }]}>
+              {user.phone_number}
+            </Text>
+          )}
           <TouchableOpacity 
             style={[styles.editButton, { backgroundColor: theme.primary }]}
             onPress={() => router.push('/edit-profile')}
@@ -148,8 +213,22 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 
+        {/* Account Stats */}
+        <View style={[styles.statsCard, { backgroundColor: cardBg }]}>
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: textColor }]}>₦{wallet?.balance?.toLocaleString() || '0'}</Text>
+            <Text style={[styles.statLabel, { color: textBodyColor }]}>Wallet Balance</Text>
+          </View>
+          <View style={[styles.statDivider, { backgroundColor: textBodyColor }]} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: textColor }]}>{user?.kyc_status || 'Not Started'}</Text>
+            <Text style={[styles.statLabel, { color: textBodyColor }]}>KYC Status</Text>
+          </View>
+        </View>
+
         <View style={{ height: 100 }} />
       </ScrollView>
+      )}
     </View>
   );
 }
@@ -204,6 +283,10 @@ const styles = StyleSheet.create({
   },
   profileEmail: {
     fontSize: 14,
+    marginBottom: 4,
+  },
+  profilePhone: {
+    fontSize: 14,
     marginBottom: 16,
   },
   editButton: {
@@ -251,5 +334,43 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  statsCard: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    padding: 20,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    opacity: 0.2,
   },
 });

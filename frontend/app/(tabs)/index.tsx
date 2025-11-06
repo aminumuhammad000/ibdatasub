@@ -1,18 +1,24 @@
 import { useTheme } from '@/components/ThemeContext';
+import { authService } from '@/services/auth.service';
+import { Transaction, transactionService } from '@/services/transaction.service';
+import { userService } from '@/services/user.service';
+import { WalletData, walletService } from '@/services/wallet.service';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { authService } from '@/services/auth.service';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -23,14 +29,85 @@ export default function HomeScreen() {
   const [selectedAirtimeIndex, setSelectedAirtimeIndex] = useState<number | null>(null);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadUserData();
+    loadAllData();
   }, []);
 
-  const loadUserData = async () => {
-    const userData = await authService.getCurrentUser();
-    setUser(userData);
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        loadUserProfile(),
+        loadWalletData(),
+        loadTransactions(),
+      ]);
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+      // Don't show intrusive alert, just log error
+      // User can still use the app with cached/default data
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      const response = await userService.getProfile();
+      if (response.success) {
+        setUser(response.data);
+        // Update local storage
+        await authService.getCurrentUser();
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      // Fallback to local storage
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+    }
+  };
+
+  const loadWalletData = async () => {
+    try {
+      const response = await walletService.getWallet();
+      if (response.success && response.data) {
+        setWallet(response.data);
+      } else {
+        // Set null if no wallet data
+        setWallet(null);
+      }
+    } catch (error: any) {
+      console.error('Error loading wallet:', error);
+      // Set null on error - will show 0 balance
+      setWallet(null);
+    }
+  };
+
+  const loadTransactions = async () => {
+    try {
+      const response = await transactionService.getTransactions(1, 5);
+      if (response.success && response.data) {
+        // Backend returns transactions directly in data array
+        const transactionsArray = Array.isArray(response.data) ? response.data : [];
+        setTransactions(transactionsArray.slice(0, 5)); // Only show first 5 on home
+      } else {
+        setTransactions([]);
+      }
+    } catch (error: any) {
+      console.error('Error loading transactions:', error);
+      // Set empty transactions on error
+      setTransactions([]);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAllData();
+    setRefreshing(false);
   };
 
   const theme = {
@@ -58,32 +135,46 @@ export default function HomeScreen() {
     { label: '20GB', price: '₦5,000', duration: '30 days' },
   ];
 
-  const recentTransactions = [
-    {
-      id: 1,
-      name: 'MTN Airtime Top-up',
-      phone: '08012345678',
-      amount: '-₦500.00',
-      status: 'Successful',
-      bgColor: '#FFCB05',
-    },
-    {
-      id: 2,
-      name: 'Airtel Data',
-      phone: '09087654321',
-      amount: '-₦1,500.00',
-      status: 'Successful',
-      bgColor: '#EF4444',
-    },
-    {
-      id: 3,
-      name: 'DSTV Subscription',
-      phone: '1234567890',
-      amount: '-₦4,500.00',
-      status: 'Failed',
-      bgColor: '#2563EB',
-    },
-  ];
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'airtime_topup':
+        return 'phone-portrait';
+      case 'data_purchase':
+        return 'wifi';
+      case 'bill_payment':
+        return 'receipt';
+      case 'wallet_topup':
+        return 'wallet';
+      default:
+        return 'card';
+    }
+  };
+
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'airtime_topup':
+        return '#FFCB05';
+      case 'data_purchase':
+        return '#EF4444';
+      case 'bill_payment':
+        return '#2563EB';
+      case 'wallet_topup':
+        return '#10B981';
+      default:
+        return '#6B7280';
+    }
+  };
+
+  const formatTransactionType = (type: string) => {
+    return type
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   const operators = ['MTN', 'Airtel', 'Glo', '9mobile', 'DSTV', 'GoTV'];
 
@@ -110,10 +201,23 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: textBodyColor }]}>Loading...</Text>
+        </View>
+      ) : (
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.primary}
+          />
+        }
       >
         {/* Wallet Balance Card */}
         <View style={styles.balanceCardContainer}>
@@ -133,7 +237,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.balanceAmount}>
-              {isBalanceHidden ? '₦••••••' : '₦50,000.00'}
+              {isBalanceHidden ? '₦••••••' : formatCurrency(wallet?.balance || 0)}
             </Text>
             <TouchableOpacity 
               style={[styles.addMoneyBtn, { backgroundColor: theme.accent }]}
@@ -331,26 +435,39 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.transactionsList}>
-            {recentTransactions.map((transaction) => (
-              <View key={transaction.id} style={[styles.transactionItem, { backgroundColor: cardBg }]}>
-                <View style={[styles.transactionLogo, { backgroundColor: transaction.bgColor }]}>
-                  <View style={styles.logoPlaceholder} />
+            {transactions.length > 0 ? (
+              transactions.map((transaction) => (
+                <View key={transaction._id} style={[styles.transactionItem, { backgroundColor: cardBg }]}>
+                  <View style={[styles.transactionLogo, { backgroundColor: getTransactionColor(transaction.type) }]}>
+                    <Ionicons name={getTransactionIcon(transaction.type)} size={20} color="#FFFFFF" />
+                  </View>
+                  <View style={styles.transactionDetails}>
+                    <Text style={[styles.transactionName, { color: textColor }]}>
+                      {formatTransactionType(transaction.type)}
+                    </Text>
+                    <Text style={[styles.transactionPhone, { color: textBodyColor }]}>
+                      {transaction.destination_account || transaction.reference_number}
+                    </Text>
+                  </View>
+                  <View style={styles.transactionRight}>
+                    <Text style={[styles.transactionAmount, { color: textColor }]}>
+                      -{formatCurrency(transaction.total_charged)}
+                    </Text>
+                    <Text style={[
+                      styles.transactionStatus,
+                      { color: transaction.status === 'successful' ? '#10B981' : transaction.status === 'failed' ? '#EF4444' : '#F59E0B' }
+                    ]}>
+                      {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.transactionDetails}>
-                  <Text style={[styles.transactionName, { color: textColor }]}>{transaction.name}</Text>
-                  <Text style={[styles.transactionPhone, { color: textBodyColor }]}>{transaction.phone}</Text>
-                </View>
-                <View style={styles.transactionRight}>
-                  <Text style={[styles.transactionAmount, { color: textColor }]}>{transaction.amount}</Text>
-                  <Text style={[
-                    styles.transactionStatus,
-                    { color: transaction.status === 'Successful' ? '#10B981' : '#EF4444' }
-                  ]}>
-                    {transaction.status}
-                  </Text>
-                </View>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="receipt-outline" size={48} color={textBodyColor} />
+                <Text style={[styles.emptyStateText, { color: textBodyColor }]}>No transactions yet</Text>
               </View>
-            ))}
+            )}
           </View>
         </View>
 
@@ -369,6 +486,7 @@ export default function HomeScreen() {
         {/* Bottom Spacing */}
         <View style={{ height: 100 }} />
       </ScrollView>
+      )}
     </View>
   );
 }
@@ -662,5 +780,26 @@ const styles = StyleSheet.create({
   operatorText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

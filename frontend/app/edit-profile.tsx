@@ -4,7 +4,9 @@ import { useTheme } from '@/components/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { userService } from '@/services/user.service';
+import { authService } from '@/services/auth.service';
 import {
     ActionSheetIOS,
     Alert,
@@ -37,6 +39,8 @@ export default function EditProfileScreen() {
   const { isDark } = useTheme();
   const { showSuccess, showError } = useAlert();
   const { profileData, updateProfile } = useProfile();
+  const [userData, setUserData] = useState<any>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const bgColor = isDark ? theme.backgroundDark : theme.backgroundLight;
   const cardBgColor = isDark ? '#1F2937' : '#FFFFFF';
@@ -45,29 +49,76 @@ export default function EditProfileScreen() {
   const borderColor = isDark ? '#374151' : '#E5E7EB';
   const inputBgColor = isDark ? '#374151' : '#F9FAFB';
 
-  // Form state - initialize from profile context
-  const [firstName, setFirstName] = useState(profileData.firstName);
-  const [lastName, setLastName] = useState(profileData.lastName);
-  const [email, setEmail] = useState(profileData.email);
-  const [phoneNumber, setPhoneNumber] = useState(profileData.phoneNumber);
-  const [address, setAddress] = useState(profileData.address);
-  const [city, setCity] = useState(profileData.city);
-  const [state, setState] = useState(profileData.state);
+  // Form state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState(profileData.profileImage);
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   // Keep track of original values for reset functionality
-  const [originalData] = useState({
-    firstName: profileData.firstName,
-    lastName: profileData.lastName,
-    email: profileData.email,
-    phoneNumber: profileData.phoneNumber,
-    address: profileData.address,
-    city: profileData.city,
-    state: profileData.state,
+  const [originalData, setOriginalData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    state: '',
     profileImage: profileData.profileImage,
   });
+
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      setIsInitialLoading(true);
+      const response = await userService.getProfile();
+      if (response.success) {
+        const user = response.data;
+        setUserData(user);
+        setFirstName(user.first_name || '');
+        setLastName(user.last_name || '');
+        setEmail(user.email || '');
+        setPhoneNumber(user.phone_number || '');
+        setAddress(user.address || '');
+        setCity(user.city || '');
+        setState(user.state || '');
+        
+        // Set original data for reset
+        setOriginalData({
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          email: user.email || '',
+          phoneNumber: user.phone_number || '',
+          address: user.address || '',
+          city: user.city || '',
+          state: user.state || '',
+          profileImage: profileData.profileImage,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      showError('Failed to load profile data');
+      // Fallback to local storage
+      const localUser = await authService.getCurrentUser();
+      if (localUser) {
+        setFirstName(localUser.first_name || '');
+        setLastName(localUser.last_name || '');
+        setEmail(localUser.email || '');
+        setPhoneNumber(localUser.phone_number || '');
+      }
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
 
   // Check if form has changes
   const hasChanges = 
@@ -240,38 +291,59 @@ export default function EditProfileScreen() {
     setIsLoading(true);
 
     try {
-      // Create updated profile data
-      const updatedProfileData = {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim(),
-        phoneNumber,
-        address,
-        city,
-        state,
-        profileImage: profileImage
+      // Create updated profile data for API
+      const updateData = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
       };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call API to update profile
+      const response = await userService.updateProfile(updateData);
       
-      // Update the global profile context
-      updateProfile(updatedProfileData);
+      if (response.success) {
+        // Update the global profile context
+        updateProfile({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phoneNumber,
+          address,
+          city,
+          state,
+          profileImage: profileImage
+        });
+        
+        // Show success message
+        showSuccess('Profile updated successfully!');
+        
+        // Navigate back after a short delay to show the success message
+        setTimeout(() => {
+          router.back();
+        }, 1000);
+      } else {
+        showError(response.message || 'Failed to update profile');
+      }
       
-      // Show success message
-      showSuccess('Profile updated successfully!');
-      
-      // Navigate back after a short delay to show the success message
-      setTimeout(() => {
-        router.back();
-      }, 1000);
-      
-    } catch (error) {
-      showError('Failed to update profile. Please try again.');
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      showError(error.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isInitialLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: bgColor, justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <Ionicons name="refresh" size={32} color={textBodyColor} />
+        <Text style={[{ color: textBodyColor, marginTop: 12, fontSize: 16 }]}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
