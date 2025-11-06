@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { authService } from '../services/auth.service';
-import { useAlert } from '../components/AlertContext';
 
 const SignupScreen = () => {
-  const { showSuccess, showError } = useAlert();
   const [email, setEmail] = useState('');
   const [phone_number, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -32,22 +31,22 @@ const SignupScreen = () => {
   const handleSignup = async () => {
     // Validation
     if (!email || !password || !confirmPassword || !first_name || !last_name || !phone_number) {
-      showError('Please fill in all required fields');
+      Alert.alert('❌ Validation Error', 'Please fill in all required fields');
       return;
     }
     
     if (!/^[0-9]{10,15}$/.test(phone_number)) {
-      showError('Please enter a valid phone number (10-15 digits)');
+      Alert.alert('❌ Validation Error', 'Please enter a valid phone number (10-15 digits)');
       return;
     }
     
     if (password !== confirmPassword) {
-      showError('Passwords do not match');
+      Alert.alert('❌ Validation Error', 'Passwords do not match');
       return;
     }
 
-    if (password.length < 8) {
-      showError('Password must be at least 8 characters');
+    if (password.length < 6) {
+      Alert.alert('❌ Validation Error', 'Password must be at least 6 characters');
       return;
     }
     
@@ -64,14 +63,24 @@ const SignupScreen = () => {
       });
       
       if (response.success) {
-        showSuccess('Registration successful! Welcome to Connecta!');
-        // Navigate after showing success message
-        setTimeout(() => {
-          router.replace('/(tabs)');
-        }, 1500);
+        Alert.alert(
+          '🎉 Welcome to Connecta!', 
+          `Hi ${first_name}! Your account has been created successfully. You can now access all features.`,
+          [
+            {
+              text: 'Go to Dashboard',
+              onPress: () => router.replace('/(tabs)'),
+            },
+            {
+              text: 'Go to Login',
+              onPress: () => router.replace('/login'),
+              style: 'cancel',
+            },
+          ]
+        );
       }
     } catch (error) {
-      showError(error.message || 'Registration failed. Please try again.');
+      Alert.alert('❌ Signup Failed', error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

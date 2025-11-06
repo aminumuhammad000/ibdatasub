@@ -18,6 +18,16 @@ const userSchema = new Schema<IUser>({
   referral_code: { type: String, unique: true, required: true },
   referred_by: { type: Schema.Types.ObjectId, ref: 'User' },
   biometric_enabled: { type: Boolean, default: false },
+  nin: { type: String },
+  bvn: { type: String },
+  virtual_account: {
+    account_number: { type: String },
+    account_name: { type: String },
+    bank_name: { type: String },
+    account_reference: { type: String },
+    provider: { type: String },
+    status: { type: String },
+  },
   status: { type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }

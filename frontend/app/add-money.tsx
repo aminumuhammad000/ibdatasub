@@ -10,11 +10,13 @@ import {
   Image,
   ActivityIndicator,
   Linking,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { authService } from '@/services/auth.service';
 import { paymentService } from '@/services/payment.service';
+import { payrantService, VirtualAccountResponse } from '@/services/payrant.service';
 import { useAlert } from '@/components/AlertContext';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -41,6 +43,9 @@ export default function AddMoneyScreen() {
   const [selectedMethod, setSelectedMethod] = useState<string | null>('payrant'); // Default to Payrant
   const [userName, setUserName] = useState('Loading...');
   const [isLoading, setIsLoading] = useState(false);
+  const [virtualAccount, setVirtualAccount] = useState<VirtualAccountResponse | null>(null);
+  const [isLoadingVirtualAccount, setIsLoadingVirtualAccount] = useState(true);
+  const [isCreatingVirtualAccount, setIsCreatingVirtualAccount] = useState(false);
 
   useEffect(() => {
     const loadUserName = async () => {
@@ -52,6 +57,61 @@ export default function AddMoneyScreen() {
     };
     loadUserName();
   }, []);
+
+  useEffect(() => {
+    loadVirtualAccount();
+  }, []);
+
+  const loadVirtualAccount = async () => {
+    try {
+      setIsLoadingVirtualAccount(true);
+      const account = await payrantService.getVirtualAccount();
+      setVirtualAccount(account);
+    } catch (error: any) {
+      console.error('Error loading virtual account:', error);
+    } finally {
+      setIsLoadingVirtualAccount(false);
+    }
+  };
+
+  const handleCreateVirtualAccount = async () => {
+    try {
+      setIsCreatingVirtualAccount(true);
+      showInfo('Creating your virtual account...');
+
+      const user = await authService.getCurrentUser();
+      if (!user) {
+        showError('User not found. Please login again.');
+        return;
+      }
+
+      // Generate unique account reference
+      const accountReference = `${user._id}-${Date.now().toString(36)}`;
+
+      // Use phone number as document number
+      const account = await payrantService.createVirtualAccount({
+        documentType: 'nin',
+        documentNumber: user.phone_number, // Using phone number as NIN
+        virtualAccountName: `${user.first_name} ${user.last_name}`,
+        customerName: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        accountReference,
+      });
+
+      setVirtualAccount(account);
+      showSuccess('Virtual account created successfully!');
+    } catch (error: any) {
+      console.error('Error creating virtual account:', error);
+      showError(error.message || 'Failed to create virtual account');
+    } finally {
+      setIsCreatingVirtualAccount(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    // Simple copy function - you can enhance this
+    Alert.alert('Copied', `${label} copied to clipboard`);
+  };
 
   const quickAmounts = [1000, 2000, 5000, 10000, 20000, 50000];
 
@@ -228,59 +288,99 @@ export default function AddMoneyScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Virtual Account ATM Card */}
-        <View style={styles.atmCard}>
-          {/* Card Background Gradient Effect */}
-          <View style={styles.atmCardGradient}>
-            {/* Card Header */}
-            <View style={styles.atmCardHeader}>
-              <View style={styles.atmCardChip}>
-                <Ionicons name="card" size={28} color="#FFD700" />
-              </View>
-              <Text style={styles.atmCardBank}>WEMA BANK</Text>
-            </View>
-
-            {/* Account Number */}
-            <View style={styles.atmAccountSection}>
-              <Text style={styles.atmLabel}>ACCOUNT NUMBER</Text>
-              <View style={styles.atmAccountNumberRow}>
-                <Text style={styles.atmAccountNumber}>7852 4693 10</Text>
-                <TouchableOpacity 
-                  style={styles.atmCopyButton}
-                  onPress={() => alert('Account number copied!')}
-                >
-                  <Ionicons name="copy-outline" size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Account Name and Virtual Tag */}
-            <View style={styles.atmCardFooter}>
-              <View style={styles.atmNameSection}>
-                <Text style={styles.atmLabel}>ACCOUNT NAME</Text>
-                <Text style={styles.atmAccountName}>{userName}</Text>
-              </View>
-              <View style={styles.virtualBadge}>
-                <Ionicons name="shield-checkmark" size={12} color="#00D4AA" />
-                <Text style={styles.virtualBadgeText}>VIRTUAL</Text>
-              </View>
-            </View>
-
-            {/* Card Pattern/Design */}
-            <View style={styles.atmPattern}>
-              <View style={styles.atmCircle1} />
-              <View style={styles.atmCircle2} />
-              <View style={styles.atmCircle3} />
-            </View>
-          </View>
-
-          {/* Info Text */}
-          <View style={styles.atmInfoBox}>
-            <Ionicons name="information-circle" size={16} color={theme.accent} />
-            <Text style={styles.atmInfoText}>
-              Transfer to this account to fund your wallet instantly
+        {isLoadingVirtualAccount ? (
+          <View style={[styles.atmCard, { backgroundColor: cardBgColor, padding: 40 }]}>
+            <ActivityIndicator size="large" color={theme.accent} />
+            <Text style={[styles.atmInfoText, { color: textBodyColor, marginTop: 16, textAlign: 'center' }]}>
+              Loading virtual account...
             </Text>
           </View>
-        </View>
+        ) : virtualAccount ? (
+          <View style={styles.atmCard}>
+            {/* Card Background Gradient Effect */}
+            <View style={styles.atmCardGradient}>
+              {/* Card Header */}
+              <View style={styles.atmCardHeader}>
+                <View style={styles.atmCardChip}>
+                  <Ionicons name="card" size={28} color="#FFD700" />
+                </View>
+                <Text style={styles.atmCardBank}>PAYRANT (PALMPAY)</Text>
+              </View>
+
+              {/* Account Number */}
+              <View style={styles.atmAccountSection}>
+                <Text style={styles.atmLabel}>ACCOUNT NUMBER</Text>
+                <View style={styles.atmAccountNumberRow}>
+                  <Text style={styles.atmAccountNumber}>
+                    {virtualAccount.virtualAccountNo.replace(/(\d{4})(?=\d)/g, '$1 ')}
+                  </Text>
+                  <TouchableOpacity 
+                    style={styles.atmCopyButton}
+                    onPress={() => copyToClipboard(virtualAccount.virtualAccountNo, 'Account number')}
+                  >
+                    <Ionicons name="copy-outline" size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Account Name and Virtual Tag */}
+              <View style={styles.atmCardFooter}>
+                <View style={styles.atmNameSection}>
+                  <Text style={styles.atmLabel}>ACCOUNT NAME</Text>
+                  <Text style={styles.atmAccountName}>{virtualAccount.virtualAccountName}</Text>
+                </View>
+                <View style={styles.virtualBadge}>
+                  <Ionicons name="shield-checkmark" size={12} color="#00D4AA" />
+                  <Text style={styles.virtualBadgeText}>
+                    {virtualAccount.status.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Card Pattern/Design */}
+              <View style={styles.atmPattern}>
+                <View style={styles.atmCircle1} />
+                <View style={styles.atmCircle2} />
+                <View style={styles.atmCircle3} />
+              </View>
+            </View>
+
+            {/* Info Text */}
+            <View style={styles.atmInfoBox}>
+              <Ionicons name="information-circle" size={16} color={theme.accent} />
+              <Text style={styles.atmInfoText}>
+                Transfer to this account to fund your wallet instantly
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.noAccountCard, { backgroundColor: cardBgColor, borderColor }]}>
+            <Ionicons name="wallet-outline" size={64} color={textBodyColor} />
+            <Text style={[styles.noAccountTitle, { color: textColor }]}>
+              No Virtual Account Yet
+            </Text>
+            <Text style={[styles.noAccountText, { color: textBodyColor }]}>
+              Create a virtual account to receive instant deposits
+            </Text>
+            <TouchableOpacity
+              style={[styles.createAccountButton, { backgroundColor: theme.accent }]}
+              onPress={handleCreateVirtualAccount}
+              disabled={isCreatingVirtualAccount}
+            >
+              {isCreatingVirtualAccount ? (
+                <>
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <Text style={styles.createAccountButtonText}>Creating...</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.createAccountButtonText}>Generate Virtual Account</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Amount Input */}
         <View style={styles.section}>
@@ -388,7 +488,7 @@ export default function AddMoneyScreen() {
         </View>
 
         {/* Virtual Account Details */}
-        {selectedMethod === 'virtual' && (
+        {selectedMethod === 'virtual' && virtualAccount && (
           <View style={[styles.accountDetailsCard, { backgroundColor: cardBgColor }]}>
             <View style={styles.accountDetailsHeader}>
               <Ionicons name="shield-checkmark-outline" size={24} color={theme.success} />
@@ -405,9 +505,9 @@ export default function AddMoneyScreen() {
                 <Text style={[styles.accountInfoLabel, { color: textBodyColor }]}>Bank Name:</Text>
                 <View style={styles.accountInfoValueContainer}>
                   <Text style={[styles.accountInfoValue, { color: textColor }]}>
-                    Wema Bank
+                    Payrant (PalmPay)
                   </Text>
-                  <TouchableOpacity onPress={() => alert('Copied!')}>
+                  <TouchableOpacity onPress={() => copyToClipboard('Payrant (PalmPay)', 'Bank name')}>
                     <Ionicons name="copy-outline" size={18} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
@@ -417,9 +517,9 @@ export default function AddMoneyScreen() {
                 <Text style={[styles.accountInfoLabel, { color: textBodyColor }]}>Account Number:</Text>
                 <View style={styles.accountInfoValueContainer}>
                   <Text style={[styles.accountInfoValue, { color: textColor, fontWeight: '700' }]}>
-                    7852469310
+                    {virtualAccount.virtualAccountNo}
                   </Text>
-                  <TouchableOpacity onPress={() => alert('Account number copied!')}>
+                  <TouchableOpacity onPress={() => copyToClipboard(virtualAccount.virtualAccountNo, 'Account number')}>
                     <Ionicons name="copy-outline" size={18} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
@@ -429,9 +529,9 @@ export default function AddMoneyScreen() {
                 <Text style={[styles.accountInfoLabel, { color: textBodyColor }]}>Account Name:</Text>
                 <View style={styles.accountInfoValueContainer}>
                   <Text style={[styles.accountInfoValue, { color: textColor }]}>
-                    {userName}
+                    {virtualAccount.virtualAccountName}
                   </Text>
-                  <TouchableOpacity onPress={() => alert('Copied!')}>
+                  <TouchableOpacity onPress={() => copyToClipboard(virtualAccount.virtualAccountName, 'Account name')}>
                     <Ionicons name="copy-outline" size={18} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
@@ -945,5 +1045,38 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
+  },
+  noAccountCard: {
+    padding: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+  },
+  noAccountTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noAccountText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  createAccountButton: {
+    flexDirection: 'row',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    gap: 8,
+  },
+  createAccountButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

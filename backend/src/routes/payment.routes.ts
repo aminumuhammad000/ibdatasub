@@ -50,4 +50,27 @@ router.post('/webhook/paystack', (req: Request, res: Response) => {
  */
 router.get('/banks', authenticate, PaymentController.getBanks);
 
+/**
+ * @route   POST /api/payment/payrant/create-virtual-account
+ * @desc    Create Payrant virtual account for user
+ * @access  Private
+ */
+router.post('/payrant/create-virtual-account', authenticate, PaymentController.createVirtualAccount);
+
+/**
+ * @route   GET /api/payment/payrant/virtual-account
+ * @desc    Get user's Payrant virtual account
+ * @access  Private
+ */
+router.get('/payrant/virtual-account', authenticate, PaymentController.getVirtualAccount);
+
+/**
+ * @route   POST /api/payment/webhook/payrant
+ * @desc    Handle Payrant webhook for virtual account deposits
+ * @access  Public (Webhook from Payrant)
+ */
+router.post('/webhook/payrant', (req: Request, res: Response) => {
+  return PaymentController.handlePayrantWebhook(req, res);
+});
+
 export default router;

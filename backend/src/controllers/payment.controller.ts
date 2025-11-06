@@ -284,4 +284,183 @@ export class PaymentController {
       return ApiResponse.error(res, error.message || 'Failed to verify payment', 500);
     }
   }
+
+  /**
+   * Create Payrant virtual account for user
+   */
+  static async createVirtualAccount(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return ApiResponse.error(res, 'User not authenticated', 401);
+      }
+
+      // Get user details
+      const user = await User.findById(userId);
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      // Check if user already has a virtual account
+      if (user.virtual_account && user.virtual_account.account_number) {
+        return ApiResponse.success(res, user.virtual_account, 'Virtual account already exists');
+      }
+
+      // Use phone number as NIN (Payrant requires a document number)
+      const documentNumber = user.phone_number;
+      if (!documentNumber) {
+        return ApiResponse.error(res, 'Phone number is required to create virtual account.', 400);
+      }
+
+      // Import Payrant service
+      const { default: PayrantService } = await import('../services/payrant.service.js');
+      const payrantService = new PayrantService();
+
+      // Generate account reference
+      const accountReference = `${userId}-${Date.now().toString(36)}${Math.random().toString(36).substring(2, 8)}`;
+
+      // Create virtual account with Payrant (using phone number as document number)
+      const virtualAccount = await payrantService.createVirtualAccount({
+        documentType: 'nin',
+        documentNumber: documentNumber,
+        virtualAccountName: `${user.first_name} ${user.last_name}`,
+        customerName: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        accountReference,
+      });
+
+      // Save virtual account details to user
+      user.virtual_account = {
+        account_number: virtualAccount.virtualAccountNo,
+        account_name: virtualAccount.virtualAccountName,
+        bank_name: 'Payrant (PalmPay)',
+        account_reference: virtualAccount.accountReference,
+        provider: 'payrant',
+        status: virtualAccount.status,
+      };
+      await user.save();
+
+      return ApiResponse.success(res, user.virtual_account, 'Virtual account created successfully');
+    } catch (error: any) {
+      console.error('Create virtual account error:', error);
+      return ApiResponse.error(res, error.message || 'Failed to create virtual account', 500);
+    }
+  }
+
+  /**
+   * Get user's virtual account
+   */
+  static async getVirtualAccount(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return ApiResponse.error(res, 'User not authenticated', 401);
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      if (!user.virtual_account || !user.virtual_account.account_number) {
+        return ApiResponse.success(res, null, 'No virtual account found');
+      }
+
+      return ApiResponse.success(res, user.virtual_account, 'Virtual account retrieved successfully');
+    } catch (error: any) {
+      console.error('Get virtual account error:', error);
+      return ApiResponse.error(res, error.message || 'Failed to get virtual account', 500);
+    }
+  }
+
+  /**
+   * Handle Payrant webhook for virtual account deposits
+   */
+  static async handlePayrantWebhook(req: Request, res: Response) {
+    try {
+      const webhookData = req.body;
+      const signature = req.headers['x-payrant-signature'] as string;
+
+      // Import Payrant service
+      const { default: PayrantService } = await import('../services/payrant.service.js');
+      const payrantService = new PayrantService();
+
+      // Verify webhook signature
+      const isValid = payrantService.verifyWebhookSignature(
+        JSON.stringify(webhookData),
+        signature
+      );
+
+      if (!isValid) {
+        console.error('Invalid Payrant webhook signature');
+        return res.status(400).json({ status: false, message: 'Invalid signature' });
+      }
+
+      // Process webhook
+      if (webhookData.status === 'success' && webhookData.transaction) {
+        const { transaction } = webhookData;
+        const accountReference = transaction.metadata?.account_reference;
+
+        if (!accountReference) {
+          console.error('No account reference in webhook');
+          return res.status(400).json({ status: false, message: 'Missing account reference' });
+        }
+
+        // Find user by account reference
+        const user = await User.findOne({ 'virtual_account.account_reference': accountReference });
+        if (!user) {
+          console.error('User not found for account reference:', accountReference);
+          return res.status(404).json({ status: false, message: 'User not found' });
+        }
+
+        // Get or create wallet
+        let wallet = await Wallet.findOne({ user_id: user._id });
+        if (!wallet) {
+          wallet = await Wallet.create({
+            user_id: user._id,
+            balance: 0,
+          });
+        }
+
+        // Check if transaction already processed
+        const existingTransaction = await Transaction.findOne({ reference_number: transaction.reference });
+        if (existingTransaction) {
+          console.log('Transaction already processed:', transaction.reference);
+          return res.status(200).json({ status: true, message: 'Already processed' });
+        }
+
+        // Credit wallet
+        const netAmount = transaction.net_amount || transaction.amount;
+        wallet.balance += netAmount;
+        await wallet.save();
+
+        // Create transaction record
+        await Transaction.create({
+          user_id: user._id,
+          amount: netAmount,
+          type: 'deposit',
+          status: 'completed',
+          reference_number: transaction.reference,
+          description: `Virtual account deposit from ${transaction.payer_details?.account_name || 'Unknown'}`,
+          gateway: 'payrant',
+          metadata: {
+            payer_account: transaction.payer_details?.account_number,
+            payer_name: transaction.payer_details?.account_name,
+            payer_bank: transaction.payer_details?.bank_name,
+            fee: transaction.fee,
+            gross_amount: transaction.amount,
+          },
+        });
+
+        console.log(`✅ Wallet credited: User ${user.email}, Amount: ₦${netAmount}`);
+      }
+
+      return res.status(200).json({ status: true, message: 'Webhook processed' });
+    } catch (error: any) {
+      console.error('Payrant webhook error:', error);
+      return res.status(500).json({ status: false, message: 'Webhook processing failed' });
+    }
+  }
 }

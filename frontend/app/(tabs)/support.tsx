@@ -2,12 +2,12 @@ import { useTheme } from '@/components/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function SupportScreen() {
@@ -93,7 +93,7 @@ export default function SupportScreen() {
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </View>
   );
@@ -177,3 +177,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+
+
+                  
+

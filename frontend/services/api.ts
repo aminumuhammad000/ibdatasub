@@ -1,15 +1,14 @@
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import axios from 'axios';
 
 // API Configuration
 // For Android emulator: use 10.0.2.2
 // For iOS simulator: use localhost
-// For physical device: use your computer's IP address (192.168.43.204)
+// For physical device: use your computer's IP address
 const getApiUrl = () => {
   // Using IP address for physical device testing
-  // Change this back to platform-specific URLs if using emulator
-  return 'http://192.168.43.204:5000/api';
+  // Current local IP: 172.20.10.3
+  return 'http://172.20.10.3:5000/api';
   
   // Uncomment below for emulator testing:
   // if (Platform.OS === 'android') {
