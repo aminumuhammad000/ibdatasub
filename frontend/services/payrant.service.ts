@@ -16,6 +16,25 @@ export interface VirtualAccountResponse {
   account_reference: string;
   provider: string;
   status: string;
+  virtualAccountName?: string;
+  virtualAccountNo?: string;
+  identityType?: string;
+  licenseNumber?: string;
+  customerName?: string;
+}
+
+// Type guard to check if an object is a VirtualAccountResponse
+export function isVirtualAccountResponse(obj: any): obj is VirtualAccountResponse {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    'account_number' in obj &&
+    'account_name' in obj &&
+    'bank_name' in obj &&
+    'account_reference' in obj &&
+    'provider' in obj &&
+    'status' in obj
+  );
 }
 
 export interface PayrantWebhookPayload {
@@ -70,19 +89,64 @@ export const payrantService = {
   /**
    * Get user's virtual account details
    */
-  getVirtualAccount: async (): Promise<VirtualAccountResponse | null> => {
+  getVirtualAccount: async (): Promise<VirtualAccountResponse | { exists: boolean } | null> => {
     try {
-      console.log('🔍 Fetching virtual account...');
+      console.log('🔍 [Payrant Service] Fetching virtual account...');
       
-      const response = await api.get<{ success: boolean; data: VirtualAccountResponse | null }>('/payment/payrant/virtual-account');
+      // Define the expected response type
+      type ApiResponse = {
+        success: boolean;
+        message: string;
+        data?: {
+          data?: VirtualAccountResponse | { exists: boolean };
+        };
+      };
       
-      if (response.data.success && response.data.data) {
-        console.log('✅ Virtual account found:', response.data.data);
-        return response.data.data;
+      const response = await api.get<ApiResponse>('/payment/payrant/virtual-account');
+      
+      console.log('📥 [Payrant Service] Raw API response:', JSON.stringify(response.data, null, 2));
+      
+      if (!response.data.success) {
+        console.log('ℹ️ [Payrant Service] API returned non-success status');
+        return { exists: false };
       }
       
-      console.log('ℹ️ No virtual account found');
-      return null;
+      // Handle nested data structure
+      const responseData = response.data.data?.data;
+      
+      // If we have account data
+      if (responseData && isVirtualAccountResponse(responseData)) {
+        console.log('✅ [Payrant Service] Virtual account found:', {
+          accountNumber: responseData.account_number,
+          accountName: responseData.account_name,
+          bankName: responseData.bank_name,
+          status: responseData.status,
+          reference: responseData.account_reference
+        });
+        return responseData;
+      }
+      
+      // If account doesn't exist
+      if (responseData && 'exists' in responseData && responseData.exists === false) {
+        console.log('ℹ️ [Payrant Service] Virtual account does not exist');
+        return { exists: false };
+      }
+      
+      // Handle case where data is in the root
+      if (response.data.data && isVirtualAccountResponse(response.data.data as any)) {
+        const accountData = response.data.data as VirtualAccountResponse;
+        console.log('✅ [Payrant Service] Virtual account found (root level):', {
+          accountNumber: accountData.account_number,
+          accountName: accountData.account_name,
+          bankName: accountData.bank_name,
+          status: accountData.status,
+          reference: accountData.account_reference
+        });
+        return accountData;
+      }
+      
+      console.log('ℹ️ [Payrant Service] No valid virtual account data found in response');
+      return { exists: false };
     } catch (error: any) {
       console.error('❌ Failed to fetch virtual account:', error);
       
