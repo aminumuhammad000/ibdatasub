@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
+    setIsLoading(true);
     try {
       if (!userData?.email || !userData?.password) {
         throw new Error('Email and password are required');
