@@ -51,5 +51,3 @@ Join our community of developers creating universal apps.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 =======
 # VTUApp
-VTU APP With React native
->>>>>>> 6be4ac4d439b75292e4e590500f05f12206476e2

@@ -113,8 +113,16 @@ export const authService = {
    * Logout user
    */
   logout: async (): Promise<void> => {
-    await AsyncStorage.removeItem('authToken');
-    await AsyncStorage.removeItem('user');
+    // Clear tokens and user data from storage
+    await AsyncStorage.multiRemove(['authToken', 'user']);
+    
+    // Clear any API authorization headers
+    if (api.defaults.headers.common['Authorization']) {
+      delete api.defaults.headers.common['Authorization'];
+    }
+    
+    // Clear any other cached data if needed
+    await AsyncStorage.multiRemove(['walletData', 'transactions', 'profileData']);
   },
 
   /**

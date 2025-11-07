@@ -2,8 +2,12 @@
 import { Request, Response, Router } from 'express';
 import { PaymentController } from '../controllers/payment.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
+import payrantRouter from './payrant.routes.js';
 
 const router = Router();
+
+// Mount Payrant routes under /payment/payrant
+router.use('/payrant', payrantRouter);
 
 /**
  * @route   POST /api/payment/initiate

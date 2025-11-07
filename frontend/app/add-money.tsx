@@ -63,10 +63,29 @@ export default function AddMoneyScreen() {
   const loadVirtualAccount = async () => {
     try {
       setIsLoadingVirtualAccount(true);
+      console.log('Loading virtual account...');
+      
       const account = await payrantService.getVirtualAccount();
-      setVirtualAccount(account);
+      console.log('Virtual account response:', account);
+      
+      if (account && account.account_number) {
+        console.log('Virtual account found:', {
+          accountNumber: account.account_number,
+          accountName: account.account_name,
+          status: account.status
+        });
+        setVirtualAccount(account);
+      } else {
+        console.log('No virtual account found or invalid account data');
+        setVirtualAccount(null);
+      }
     } catch (error: any) {
-      console.error('Error loading virtual account:', error);
+      console.error('Error loading virtual account:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      setVirtualAccount(null);
     } finally {
       setIsLoadingVirtualAccount(false);
     }
@@ -293,7 +312,7 @@ export default function AddMoneyScreen() {
               Loading virtual account...
             </Text>
           </View>
-        ) : virtualAccount ? (
+        ) : virtualAccount?.account_number ? (
           <View style={styles.atmCard}>
             {/* Card Background Gradient Effect */}
             <View style={styles.atmCardGradient}>
@@ -309,7 +328,7 @@ export default function AddMoneyScreen() {
             <View style={styles.atmAccountSection}>
               <Text style={styles.atmLabel}>ACCOUNT NUMBER</Text>
               <View style={styles.atmAccountNumberRow}>
-                <Text style={styles.atmAccountNumber}>{virtualAccount.accountNumber}</Text>
+                <Text style={styles.atmAccountNumber}>{virtualAccount.account_number}</Text>
                 <TouchableOpacity 
                   style={styles.atmCopyButton}
                   onPress={() => {
@@ -328,12 +347,12 @@ export default function AddMoneyScreen() {
               <View style={styles.atmCardFooter}>
                 <View style={styles.atmNameSection}>
                   <Text style={styles.atmLabel}>ACCOUNT NAME</Text>
-                  <Text style={styles.atmAccountName}>{virtualAccount.account_name}</Text>
+                  <Text style={styles.atmAccountName}>{virtualAccount?.account_name || 'Loading...'}</Text>
                 </View>
                 <View style={styles.virtualBadge}>
                   <Ionicons name="shield-checkmark" size={12} color="#00D4AA" />
                   <Text style={styles.virtualBadgeText}>
-                    {virtualAccount.status.toUpperCase()}
+                    {virtualAccount?.status?.toUpperCase() || 'INACTIVE'}
                   </Text>
                 </View>
               </View>

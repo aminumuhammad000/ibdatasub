@@ -1,6 +1,17 @@
 import { Document, Types } from 'mongoose';
 import { Request } from 'express';
 
+export interface IVirtualAccount {
+  account_number: string;
+  account_name: string;
+  bank_name: string;
+  account_reference: string;
+  provider: string;
+  status: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
 export interface IUser extends Document {
   _id: Types.ObjectId;
   email: string;
@@ -19,9 +30,12 @@ export interface IUser extends Document {
   referral_code: string;
   referred_by?: Types.ObjectId;
   biometric_enabled: boolean;
+  virtual_account?: IVirtualAccount;
   status: 'active' | 'inactive' | 'suspended';
   created_at: Date;
   updated_at: Date;
+  nin?: string;
+  bvn?: string;
 }
 
 export interface IWallet extends Document {

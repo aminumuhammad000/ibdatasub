@@ -1,23 +1,61 @@
-import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import express, { NextFunction, Request, Response } from "express";
 
-import authRoutes from "./routes/auth.routes.js";
-import usersRoutes from "./routes/users.routes.js";
-import transactionsRoutes from "./routes/transactions.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import promotionsRoutes from "./routes/promotions.routes.js";
 import supportRoutes from "./routes/support.routes.js";
+import transactionsRoutes from "./routes/transactions.routes.js";
+import usersRoutes from "./routes/users.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
-import paymentRoutes from "./routes/payment.routes.js";
 // import billpaymentRoutes from "./routes/billpayment.routes.js";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// CORS Configuration
+// const corsOptions = {
+//   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+//     // Allow requests with no origin (like mobile apps, curl, etc.)
+//     if (!origin) return callback(null, true);
+    
+//     const allowedOrigins = [
+//       'http://localhost:19006', // Expo web
+//       'http://localhost:19000', // Expo dev client
+//       'http://localhost:3000',  // Common React dev server
+//       'http://10.0.2.2:19006',  // Android emulator
+//       'exp://10.0.2.2:19000',   // Expo dev client on Android
+//       'http://10.0.2.2:5000',   // Android emulator direct to backend
+//       'http://localhost:5001',   // Common alternative port
+//       'http://localhost:8081',   // React Native debugger
+//       'http://localhost:19002',  // Expo dev tools
+//       /^https?:\/\/.*\.exp\.direct$/,  // Expo tunnel URLs
+//       /^https?:\/\/.*\.exp\.app$/      // Expo production URLs
+//     ];
+
+//     if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'test') {
+//       return callback(null, true);
+//     }
+
+//     const msg = `The CORS policy for this site does not allow access from ${origin}`;
+//     console.error('CORS Error:', msg);
+//     return callback(new Error(msg), false);
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+//   credentials: true,
+//   optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+// };
+
+// app.use(cors(corsOptions));
+
+app.use(cors({
+  origin: "*", // or restrict later to your Expo dev IP if you want
+}));
 app.use(express.json());
 
 // Routes

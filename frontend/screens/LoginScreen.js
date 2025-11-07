@@ -1,31 +1,45 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useAlert } from '../components/AlertContext';
+import CustomAlert from '../components/CustomAlert';
 import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
-  const { showSuccess, showError } = useAlert();
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
   const router = useRouter();
+
+  const showAlert = useCallback((message, type = 'info') => {
+    setAlert({
+      visible: true,
+      message,
+      type,
+    });
+  }, []);
+
+  const hideAlert = useCallback(() => {
+    setAlert(prev => ({ ...prev, visible: false }));
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,35 +51,33 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     // Validation
     if (!email || !password) {
-      showError('Please enter both email and password');
+      showAlert('Please enter both email and password', 'error');
       return;
     }
 
     if (password.length < 6) {
-      showError('Password must be at least 6 characters');
+      showAlert('Password must be at least 6 characters', 'error');
       return;
     }
     
+    setIsLoggingIn(true);
+    
     try {
-      console.log('🔐 Starting login process...');
-      
       const response = await login({
         email: email.trim().toLowerCase(),
         password,
       });
       
-      console.log('✅ Login response:', response);
-      
       if (response.success) {
-        showSuccess('Login successful! Welcome back!');
-        // Navigation is handled by the useEffect above
+        showAlert('Login successful! Welcome back!', 'success');
       } else {
-        // Show the error message from the response
-        showError(response.message || 'Login failed. Please check your credentials.');
+        showAlert(
+          response.message || 'Invalid email or password. Please try again.',
+          'error'
+        );
       }
     } catch (error) {
       console.error('❌ Login error:', error);
-      // Show a user-friendly error message
       let errorMessage = 'An unexpected error occurred. Please try again.';
       
       if (error.message && (error.message.includes('Network Error') || error.message.includes('timeout'))) {
@@ -74,15 +86,25 @@ const LoginScreen = () => {
         errorMessage = error.message;
       }
       
-      showError(errorMessage);
+      showAlert(errorMessage, 'error');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.container}>
+      <CustomAlert
+        visible={alert.visible}
+        message={alert.message}
+        type={alert.type}
+        onClose={hideAlert}
+        duration={5000}
+      />
+      <KeyboardAvoidingView 
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <ScrollView 
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
@@ -92,17 +114,17 @@ const LoginScreen = () => {
             source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCNmLt70vBl51N44lPp2_PhjggOAG8xKje7lYXmWc8X24jwhToxdayIVXORUOtpNLKUAckLXftXWI7ofIthz26meu2eTrKWvy6P5nHxlHRt8dTiEojOQYtZozWxl3HGOXPv3QlJO5NxLyS6bc5TZnW6A8cbhEj0M23nYWfDMEdtgGLqE-jv1F_9GaGc_gYRxq_gWYGl1aJCWaN-YpIfYxAkjigmOMsGiHgtUlWOLR3V2ynPCxJWg50VYJ_i179vEcrEekVRiL_O3oE' }} 
             style={styles.logo} 
           />
-          <Text style={styles.title}>Welcome to Connecta</Text>
-          <Text style={styles.subtitle}>Enter your email or phone number to get started.</Text>
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Sign in to access your account</Text>
         </View>
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Email or Phone Number</Text>
+            <Text style={styles.inputLabel}>Email</Text>
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your email or phone number"
+                placeholder="Enter your email address"
                 placeholderTextColor="#9CA3AF"
                 value={email}
                 onChangeText={setEmail}
@@ -135,40 +157,28 @@ const LoginScreen = () => {
             </View>
           </View>
 
-          <View style={styles.optionsRow}>
-            <View style={{ flex: 1 }} />
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
-
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
               style={[
                 styles.button, 
                 styles.primaryButton, 
-                (isLoading || !email || !password) && styles.buttonDisabled
+                (isLoggingIn || !email || !password) && styles.buttonDisabled
               ]}
               onPress={handleLogin}
-              disabled={isLoading || !email || !password}
+              disabled={isLoggingIn || !email || !password}
               activeOpacity={0.8}
             >
-              {isLoading ? (
+              {isLoggingIn ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text style={styles.primaryButtonText}>Continue</Text>
+                <Text style={styles.primaryButtonText}>Sign In</Text>
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.secondaryButton]}>
-              <MaterialIcons name="fingerprint" size={24} color="#111921" />
-              <Text style={styles.secondaryButtonText}>Sign in with Biometrics</Text>
-            </TouchableOpacity>
-
-            <View style={styles.dividerContainer}>
-              <View style={styles.divider} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.divider} />
+            <View style={styles.forgotPasswordContainer}>
+              <TouchableOpacity onPress={() => router.push('/forgot-password')}>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
             </View>
 
           </View>
@@ -179,15 +189,10 @@ const LoginScreen = () => {
               <Text style={styles.signupLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.termsText}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.linkText}>Terms of Service</Text> and{' '}
-            <Text style={styles.linkText}>Privacy Policy</Text>.
-          </Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -197,6 +202,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#111418',
+    position: 'relative',
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
