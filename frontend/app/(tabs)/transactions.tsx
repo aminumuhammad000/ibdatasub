@@ -216,7 +216,7 @@ export default function TransactionsScreen() {
     }
 
     return filtered;
-  }, [filters]);
+  }, [filters, allTransactions]);
 
   const handleTransactionPress = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -311,7 +311,7 @@ export default function TransactionsScreen() {
                   <Text style={[styles.transactionAmount, { color: textColor }]}>-{transaction.amount}</Text>
                   <Text style={[
                     styles.transactionStatus,
-                    { color: transaction.status === 'Successful' ? '#10B981' : transaction.status === 'Failed' ? '#EF4444' : '#FF9F43' }
+                    { color: (transaction.status === 'Successful' || transaction.status === 'Completed') ? '#10B981' : transaction.status === 'Failed' ? '#EF4444' : '#FF9F43' }
                   ]}>
                     {transaction.status}
                   </Text>
