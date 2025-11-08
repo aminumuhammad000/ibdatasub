@@ -58,32 +58,14 @@ interface CheckoutResponse {
   data: CheckoutResponseData;
 }
 
-interface VerifyTransactionResponse {
-  status: boolean;
-  data: {
-    reference: string;
-    amount: number;
-    email: string;
-    account_number: string;
-    bank_name: string;
-    status: 'successful' | 'pending' | 'failed';
-    paid_at?: string;
-  };
-  message?: string;
-}
-
-interface TransactionStatus {
-  status: 'successful' | 'pending' | 'failed';
-  paid_at?: string;
-}
-
 interface TransactionData {
   reference: string;
   amount: number;
   email: string;
   account_number: string;
   bank_name: string;
-  status: TransactionStatus;
+  status: 'successful' | 'pending' | 'failed';
+  paid_at?: string;
 }
 
 interface VerifyTransactionResponse {
@@ -131,7 +113,6 @@ export class PayrantService {
       if (existingAccount) {
         return {
           status: 'exists',
-          message: 'User already has a virtual account number',
           account_no: existingAccount.accountNumber,
           virtualAccountName: existingAccount.accountName,
           virtualAccountNo: existingAccount.accountNumber,
@@ -139,7 +120,7 @@ export class PayrantService {
           licenseNumber: existingAccount.metadata?.licenseNumber || '',
           customerName: data.customerName,
           accountReference: existingAccount.reference || ''
-        };
+        } as VirtualAccountResponse;
       }
     }
 
@@ -178,11 +159,6 @@ export class PayrantService {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.config.apiKey}`,
-            },
-            // Enable retry on network errors
-            'axios-retry': {
-              retries: 0, // We handle retries manually
-              retryCondition: () => false, // Disable axios-retry's default retry
             },
           }
         );

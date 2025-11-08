@@ -17,3 +17,4 @@ export * from './promotion.model.js';
 export * from './referral_setting.model.js';
 export * from './support_ticket.model.js';
 export * from './audit_log.model.js';
+export { default as VirtualAccount } from './VirtualAccount.js';

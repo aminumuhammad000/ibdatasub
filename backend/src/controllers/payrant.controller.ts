@@ -93,8 +93,8 @@ export class PayrantController {
         status: 'active',
         virtualAccountName: virtualAccount.virtualAccountName,
         virtualAccountNo: virtualAccount.account_no,
-        identityType: virtualAccount.documentType,
-        licenseNumber: virtualAccount.documentNumber,
+        identityType: req.body.documentType,
+        licenseNumber: req.body.documentNumber,
         customerName: virtualAccount.customerName
       };
 
@@ -305,8 +305,8 @@ export class PayrantController {
 
       return ApiResponse.success(
         res,
-        'Payment initialized successfully',
-        paymentData
+        paymentData,
+        'Payment initialized successfully'
       );
     } catch (error: any) {
       console.error('❌ Error initializing payment:', error);

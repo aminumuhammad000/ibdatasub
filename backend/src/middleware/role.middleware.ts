@@ -2,7 +2,7 @@
 import { Response, NextFunction } from 'express';
 import { ApiResponse } from '../utils/response.js';
 import { AuthRequest } from '../types/index.js';
-import { AdminUser, RolePermission } from '../models';
+import { AdminUser, RolePermission } from '../models/index.js';
 
 export const checkPermission = (permission: string) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -35,7 +35,7 @@ export const checkPermission = (permission: string) => {
 };
 
 const getPermissionId = async (permissionName: string) => {
-  const { AdminPermission } = await import('../models');
+  const { AdminPermission } = await import('../models/index.js');
   const permission = await AdminPermission.findOne({ name: permissionName });
   return permission?._id;
 };

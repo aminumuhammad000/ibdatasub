@@ -1,6 +1,6 @@
 // controllers/payment.controller.ts
 import { Request, Response } from 'express';
-import { Transaction, User, Wallet } from '../models/index.js';
+import { Transaction, User, Wallet, VirtualAccount } from '../models/index.js';
 import { MonnifyService } from '../services/monnify.service.js';
 import { PaystackService } from '../services/paystack.service.js';
 import { AuthRequest } from '../types/index.js';
@@ -30,18 +30,17 @@ export class PaymentController {
     try {
       const userId = req.user?.id;
       
-      // Find and update the virtual account
-      const virtualAccount = await VirtualAccount.findOneAndUpdate(
-        { user: userId, isActive: true },
-        { isActive: false },
-        { new: true }
-      );
-
-      if (!virtualAccount) {
-        return ApiResponse.notFound(res, 'No active virtual account found');
+      // Find user and update virtual account status
+      const user = await User.findById(userId);
+      
+      if (!user || !user.virtual_account) {
+        return ApiResponse.error(res, 'No active virtual account found', 404);
       }
 
-      return ApiResponse.success(res, 'Virtual account deactivated successfully');
+      user.virtual_account.status = 'inactive';
+      await user.save();
+
+      return ApiResponse.success(res, null, 'Virtual account deactivated successfully');
     } catch (error) {
       console.error('Error deactivating virtual account:', error);
       return ApiResponse.error(res, 'Failed to deactivate virtual account');
@@ -328,19 +327,12 @@ export class PaymentController {
         return ApiResponse.error(res, 'User not found', 404);
       }
 
-      // Check if user already has a virtual account in our database
-      const VirtualAccount = (await import('../models/VirtualAccount')).default;
-      const existingAccount = await VirtualAccount.findOne({ 
-        user: userId, 
-        provider: 'payrant',
-        isActive: true 
-      });
-
-      if (existingAccount) {
+      // Check if user already has a virtual account
+      if (user.virtual_account?.account_number) {
         return ApiResponse.success(
           res, 
           { 
-            ...existingAccount.toObject(),
+            ...user.virtual_account,
             exists: true 
           }, 
           'Virtual account already exists'

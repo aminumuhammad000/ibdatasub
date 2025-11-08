@@ -1,7 +1,7 @@
 // middleware/validation.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { sendError } from '../utils/response.js';
+import { ApiResponse } from '../utils/response.js';
 
 export const validate = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +16,7 @@ export const validate = (schema: Joi.ObjectSchema) => {
         message: detail.message,
       }));
 
-      return sendError(res, 'Validation error', 422, { errors });
+      return ApiResponse.error(res, 'Validation error', 422);
     }
 
     // Replace request body with validated value
