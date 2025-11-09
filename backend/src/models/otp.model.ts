@@ -1,6 +1,6 @@
 // models/otp.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IOTP } from '../types';
+import { IOTP } from '../types.js';
 
 const otpSchema = new Schema<IOTP>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },

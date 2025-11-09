@@ -1,6 +1,6 @@
 // models/promotion.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IPromotion } from '../types';
+import { IPromotion } from '../types.js';
 
 const promotionSchema = new Schema<IPromotion>({
   name: { type: String, required: true },

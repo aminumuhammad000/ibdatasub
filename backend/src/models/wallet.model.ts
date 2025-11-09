@@ -1,6 +1,6 @@
 // models/wallet.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IWallet } from '../types';
+import { IWallet } from '../types.js';
 
 const walletSchema = new Schema<IWallet>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },

@@ -1,6 +1,6 @@
 // models/notification.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { INotification } from '../types';
+import { INotification } from '../types.js';
 
 const notificationSchema = new Schema<INotification>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },

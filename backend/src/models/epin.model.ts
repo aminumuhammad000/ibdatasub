@@ -1,6 +1,6 @@
 // models epin.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IEPin } from '../types';
+import { IEPin } from '../types.js';
 
 const epinSchema = new Schema<IEPin>({
   e_pin_product_id: { type: Schema.Types.ObjectId, ref: 'EPinProduct', required: true },

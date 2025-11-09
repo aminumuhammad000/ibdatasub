@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
-    "lib": [
-      "ES2020"
-    ],
+    "target": "ES2022",
+  "module": "Node16",
+  "moduleResolution": "Node16",
+    "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
@@ -14,13 +12,29 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmitOnError": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "./src",
+    "paths": {
+      "*": ["*", "types/*"]
+    }
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
+    "dist",
     "src/tests/**/*"
   ]
 }

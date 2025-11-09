@@ -1,6 +1,6 @@
 // models/admin_role.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IAdminRole } from '../types';
+import { IAdminRole } from '../types.js';
 
 const adminRoleSchema = new Schema<IAdminRole>({
   name: { type: String, required: true, unique: true },

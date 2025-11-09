@@ -1,6 +1,6 @@
 // models/biller.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IBiller } from '../types';
+import { IBiller } from '../types.js';
 
 const billerSchema = new Schema<IBiller>({
   name: { type: String, required: true },

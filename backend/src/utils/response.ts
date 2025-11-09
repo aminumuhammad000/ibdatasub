@@ -2,7 +2,23 @@
 import { Response } from 'express';
 
 export class ApiResponse {
-  static success(res: Response, data: any, message = 'Success', statusCode = 200) {
+  // Support both signatures:
+  // ApiResponse.success(res, data, message?)
+  // ApiResponse.success(res, message, data?)
+  static success(res: Response, a: any, b: any = undefined, statusCode = 200) {
+    let data: any;
+    let message: string;
+
+    // If second arg is a string, treat as message: (res, message, data?)
+    if (typeof a === 'string') {
+      message = a;
+      data = b;
+    } else {
+      // Otherwise treat as (res, data, message?)
+      data = a;
+      message = typeof b === 'string' ? b : 'Success';
+    }
+
     return res.status(statusCode).json({
       success: true,
       message,

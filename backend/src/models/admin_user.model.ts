@@ -1,6 +1,6 @@
 // modelsadmin_user.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IAdminUser } from '../types';
+import { IAdminUser } from '../types.js';
 
 const adminUserSchema = new Schema<IAdminUser>({
   email: { type: String, required: true, unique: true },

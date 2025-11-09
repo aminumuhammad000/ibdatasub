@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose';
 import { Request } from 'express';
+import { Document, Types } from 'mongoose';
 
 export interface IVirtualAccount {
   account_number: string;
@@ -19,6 +19,9 @@ export interface IUser extends Document {
   password_hash: string;
   first_name: string;
   last_name: string;
+  // CamelCase aliases used across the codebase
+  firstName?: string;
+  lastName?: string;
   date_of_birth?: Date;
   address?: string;
   city?: string;
@@ -41,6 +44,8 @@ export interface IUser extends Document {
 export interface IWallet extends Document {
   _id: Types.ObjectId;
   user_id: Types.ObjectId;
+  // camelCase alias
+  userId?: Types.ObjectId;
   balance: number;
   currency: string;
   last_transaction_at?: Date;
@@ -51,12 +56,14 @@ export interface IWallet extends Document {
 export interface ITransaction extends Document {
   _id: Types.ObjectId;
   user_id: Types.ObjectId;
+  // camelCase alias
+  user?: any;
   wallet_id: Types.ObjectId;
-  type: 'airtime_topup' | 'data_purchase' | 'bill_payment' | 'wallet_topup' | 'e-pin_purchase';
+  type: 'airtime_topup' | 'data_purchase' | 'bill_payment' | 'wallet_topup' | 'e-pin_purchase' | 'credit' | 'airtime' | 'data' | 'cable' | 'electricity' | 'exampin' | 'e-pin';
   amount: number;
   fee: number;
   total_charged: number;
-  status: 'pending' | 'successful' | 'failed' | 'refunded';
+  status: 'pending' | 'successful' | 'failed' | 'refunded' | 'success';
   reference_number: string;
   description?: string;
   payment_method: string;
@@ -67,6 +74,8 @@ export interface ITransaction extends Document {
   error_message?: string;
   created_at: Date;
   updated_at: Date;
+  metadata?: any;
+  gateway?: string;
 }
 
 export interface IOperator extends Document {

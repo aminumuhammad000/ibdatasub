@@ -1,6 +1,6 @@
 // models audit_log.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IAuditLog } from '../types';
+import { IAuditLog } from '../types.js';
 
 const auditLogSchema = new Schema<IAuditLog>({
   admin_id: { type: Schema.Types.ObjectId, ref: 'AdminUser' },

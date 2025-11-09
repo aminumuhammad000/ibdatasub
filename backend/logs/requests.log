@@ -279,3 +279,204 @@
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-08 17:29:42"}
 {"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-08 17:29:50"}
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-08 17:29:50"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 04:06:15"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 04:06:16"}
+{"headers":{},"ip":"::ffff:192.168.43.167","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 04:06:39","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"6ms","ip":"::ffff:192.168.43.167","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 04:06:40","url":"/api/users/profile","userId":"anonymous"}
+{"level":"info","message":"::ffff:192.168.43.167 - anonymous [09/Nov/2025:03:06:40 +0000] \"GET /api/users/profile HTTP/1.1\" 401 47 \"-\" \"okhttp/4.12.0\" 8.794 ms","timestamp":"2025-11-09 04:06:40"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 04:08:33"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 04:08:33"}
+{"headers":{},"ip":"::ffff:192.168.43.167","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 04:08:58","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"10ms","ip":"::ffff:192.168.43.167","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 04:08:58","url":"/api/users/profile","userId":"anonymous"}
+{"level":"info","message":"::ffff:192.168.43.167 - anonymous [09/Nov/2025:03:08:58 +0000] \"GET /api/users/profile HTTP/1.1\" 401 47 \"-\" \"okhttp/4.12.0\" 8.366 ms","timestamp":"2025-11-09 04:08:58"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 10:58:44"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 10:58:44"}
+{"headers":{},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:02:06","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"5ms","ip":"::ffff:192.168.43.193","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 11:02:06","url":"/api/users/profile","userId":"anonymous"}
+{"level":"info","message":"::ffff:192.168.43.193 - anonymous [09/Nov/2025:10:02:06 +0000] \"GET /api/users/profile HTTP/1.1\" 401 47 \"-\" \"okhttp/4.12.0\" 5.798 ms","timestamp":"2025-11-09 11:02:06"}
+{"body":{"email":"aminumuhammadhadejia@gmail.com","password":"***"},"headers":{"contentType":"application/json"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"POST","path":"/api/auth/login","query":{},"timestamp":"2025-11-09 11:02:33","url":"/api/auth/login","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"319ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"POST","statusCode":200,"timestamp":"2025-11-09 11:02:33","url":"/api/auth/login","userId":"anonymous"}
+{"level":"info","message":"::ffff:192.168.43.193 - anonymous [09/Nov/2025:10:02:33 +0000] \"POST /api/auth/login HTTP/1.1\" 200 915 \"-\" \"okhttp/4.12.0\" 318.504 ms","timestamp":"2025-11-09 11:02:33"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:02:34","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/wallet","query":{},"timestamp":"2025-11-09 11:02:34","url":"/api/wallet","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/transactions","query":{"limit":"5","page":"1"},"timestamp":"2025-11-09 11:02:34","url":"/api/transactions?page=1&limit=5","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"93ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:34","url":"/api/users/profile","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:34 +0000] \"GET /api/users/profile HTTP/1.1\" 200 659 \"-\" \"okhttp/4.12.0\" 96.456 ms","timestamp":"2025-11-09 11:02:34"}
+{"duration":"250ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:34","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:34 +0000] \"GET /api/wallet HTTP/1.1\" 200 305 \"-\" \"okhttp/4.12.0\" 247.757 ms","timestamp":"2025-11-09 11:02:34"}
+{"duration":"263ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:34","url":"/api/transactions?page=1&limit=5","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:34 +0000] \"GET /api/transactions?page=1&limit=5 HTTP/1.1\" 200 1904 \"-\" \"okhttp/4.12.0\" 264.315 ms","timestamp":"2025-11-09 11:02:34"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/transactions","query":{"limit":"5","page":"1"},"timestamp":"2025-11-09 11:02:51","url":"/api/transactions?page=1&limit=5","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:02:51","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/wallet","query":{},"timestamp":"2025-11-09 11:02:51","url":"/api/wallet","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"26ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:51","url":"/api/users/profile","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:51 +0000] \"GET /api/users/profile HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 26.569 ms","timestamp":"2025-11-09 11:02:51"}
+{"duration":"22ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:51","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:51 +0000] \"GET /api/wallet HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 21.346 ms","timestamp":"2025-11-09 11:02:51"}
+{"duration":"50ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:51","url":"/api/transactions?page=1&limit=5","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:51 +0000] \"GET /api/transactions?page=1&limit=5 HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 47.877 ms","timestamp":"2025-11-09 11:02:51"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/payment/payrant/virtual-account","query":{},"timestamp":"2025-11-09 11:02:54","url":"/api/payment/payrant/virtual-account","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"20ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:02:54","url":"/api/payment/payrant/virtual-account","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:02:54 +0000] \"GET /api/payment/payrant/virtual-account HTTP/1.1\" 200 393 \"-\" \"okhttp/4.12.0\" 18.385 ms","timestamp":"2025-11-09 11:02:54"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:03:01","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/wallet","query":{},"timestamp":"2025-11-09 11:03:01","url":"/api/wallet","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/transactions","query":{"limit":"5","page":"1"},"timestamp":"2025-11-09 11:03:01","url":"/api/transactions?page=1&limit=5","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"25ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:03:01","url":"/api/users/profile","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:03:01 +0000] \"GET /api/users/profile HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 25.038 ms","timestamp":"2025-11-09 11:03:01"}
+{"duration":"23ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:03:01","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:03:01 +0000] \"GET /api/wallet HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 22.077 ms","timestamp":"2025-11-09 11:03:01"}
+{"duration":"25ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:03:01","url":"/api/transactions?page=1&limit=5","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:03:01 +0000] \"GET /api/transactions?page=1&limit=5 HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 24.762 ms","timestamp":"2025-11-09 11:03:01"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:16:45"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:16:45"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:17:12"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:17:12"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:18:09"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:18:10"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:18:55"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:18:55"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:19:18"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:19:18"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:19:18"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:19:18"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:21:24"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:21:24"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:22:34"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:22:35"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:23:12"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:23:12"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:23:36"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:23:36"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/wallet","query":{},"timestamp":"2025-11-09 11:25:22","url":"/api/wallet","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:25:22","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"78ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:22","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:22 +0000] \"GET /api/wallet HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 77.162 ms","timestamp":"2025-11-09 11:25:22"}
+{"duration":"33ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:22","url":"/api/users/profile","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:22 +0000] \"GET /api/users/profile HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 31.532 ms","timestamp":"2025-11-09 11:25:22"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/transactions","query":{"limit":"50","page":"1"},"timestamp":"2025-11-09 11:25:38","url":"/api/transactions?page=1&limit=50","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"577ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:39","url":"/api/transactions?page=1&limit=50","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:39 +0000] \"GET /api/transactions?page=1&limit=50 HTTP/1.1\" 200 1905 \"-\" \"okhttp/4.12.0\" 571.899 ms","timestamp":"2025-11-09 11:25:39"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/users/profile","query":{},"timestamp":"2025-11-09 11:25:44","url":"/api/users/profile","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"41ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:44","url":"/api/users/profile","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:44 +0000] \"GET /api/users/profile HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 43.087 ms","timestamp":"2025-11-09 11:25:44"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/wallet","query":{},"timestamp":"2025-11-09 11:25:44","url":"/api/wallet","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/transactions","query":{"limit":"5","page":"1"},"timestamp":"2025-11-09 11:25:44","url":"/api/transactions?page=1&limit=5","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"47ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:44","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:44 +0000] \"GET /api/wallet HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 44.148 ms","timestamp":"2025-11-09 11:25:44"}
+{"duration":"111ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:44","url":"/api/transactions?page=1&limit=5","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:44 +0000] \"GET /api/transactions?page=1&limit=5 HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 112.161 ms","timestamp":"2025-11-09 11:25:44"}
+{"headers":{"authorization":"Bearer ***"},"ip":"::ffff:192.168.43.193","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/payment/payrant/virtual-account","query":{},"timestamp":"2025-11-09 11:25:46","url":"/api/payment/payrant/virtual-account","userAgent":"okhttp/4.12.0","userId":"anonymous"}
+{"duration":"25ms","ip":"::ffff:192.168.43.193","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2025-11-09 11:25:46","url":"/api/payment/payrant/virtual-account","userId":"690c7de84d4df744806907b2"}
+{"level":"info","message":"::ffff:192.168.43.193 - 690c7de84d4df744806907b2 [09/Nov/2025:10:25:46 +0000] \"GET /api/payment/payrant/virtual-account HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 15.306 ms","timestamp":"2025-11-09 11:25:46"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:25:49"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:25:49"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:26:00"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:26:00"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:26:22"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:26:23"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:29:06"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:29:06"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:29:24"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:29:24"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:30:18"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:30:19"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:30:49"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:30:49"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:32:13"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:32:13"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:32:40"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:32:40"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:32:56"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:32:57"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:33:08"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:33:08"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:33:35"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:33:35"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:34:24"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:34:24"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:34:31"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:34:31"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:34:43"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:34:43"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:34:50"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:34:50"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:34:57"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:34:57"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:06"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:06"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:13"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:14"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:22"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:22"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:29"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:29"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:36"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:36"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:42"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:42"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:48"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:48"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:35:58"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:35:58"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:36:15"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:36:15"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:36:33"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:36:33"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:36:55"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:36:55"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:37:03"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:37:03"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:37:14"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:37:14"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:38:09"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:38:09"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:39:36"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:39:36"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:39:44"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:39:45"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:40:31"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:40:31"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:40:44"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:40:45"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:40:53"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:40:53"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:01"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:01"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:22"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:22"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:31"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:31"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:38"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:38"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:47"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:47"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:41:55"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:41:55"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:04"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:04"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:13"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:13"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:30"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:30"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:38"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:38"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:47"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:47"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:42:56"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:42:56"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:43:04"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:43:04"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:43:12"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:43:12"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:43:22"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:43:22"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:43:41"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:43:41"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:43:53"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:43:53"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:44:48"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:44:48"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:46:53"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:46:53"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 11:47:37"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 11:47:37"}

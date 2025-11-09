@@ -1,6 +1,6 @@
 // modelssupport_ticket.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { ISupportTicket } from '../types';
+import { ISupportTicket } from '../types.js';
 
 const supportTicketSchema = new Schema<ISupportTicket>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },

@@ -1,6 +1,6 @@
 // models/operator.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IOperator } from '../types';
+import { IOperator } from '../types.js';
 
 const operatorSchema = new Schema<IOperator>({
   name: { type: String, required: true },

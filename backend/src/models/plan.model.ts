@@ -1,6 +1,6 @@
 // models/plan.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IPlan } from '../types';
+import { IPlan } from '../types.js';
 
 const planSchema = new Schema<IPlan>({
   operator_id: { type: Schema.Types.ObjectId, ref: 'Operator', required: true },

@@ -1,6 +1,6 @@
 // models/role_permission.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IRolePermission } from '../types';
+import { IRolePermission } from '../types.js';
 
 const rolePermissionSchema = new Schema<IRolePermission>({
   role_id: { type: Schema.Types.ObjectId, ref: 'AdminRole', required: true },

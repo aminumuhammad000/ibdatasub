@@ -1,6 +1,6 @@
 // models/admin_permission.model.ts
 import mongoose, { Schema } from 'mongoose';
-import { IAdminPermission } from '../types';
+import { IAdminPermission } from '../types.js';
 
 const adminPermissionSchema = new Schema<IAdminPermission>({
   name: { type: String, required: true, unique: true },

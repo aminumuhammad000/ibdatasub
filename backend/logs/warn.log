@@ -31,3 +31,6 @@
 {"duration":"2ms","ip":"::ffff:192.168.0.112","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-08 14:12:50","url":"/api/transactions?page=1&limit=5","userId":"anonymous"}
 {"duration":"1ms","ip":"::ffff:192.168.0.112","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-08 16:31:41","url":"/api/payment/payrant/virtual-account","userId":"anonymous"}
 {"duration":"1ms","ip":"::ffff:192.168.0.112","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-08 16:32:23","url":"/api/users/profile","userId":"anonymous"}
+{"duration":"6ms","ip":"::ffff:192.168.43.167","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 04:06:40","url":"/api/users/profile","userId":"anonymous"}
+{"duration":"10ms","ip":"::ffff:192.168.43.167","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 04:08:58","url":"/api/users/profile","userId":"anonymous"}
+{"duration":"5ms","ip":"::ffff:192.168.43.193","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-09 11:02:06","url":"/api/users/profile","userId":"anonymous"}
