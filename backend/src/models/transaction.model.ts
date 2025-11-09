@@ -1,6 +1,6 @@
 // models/transaction.model.ts
 import mongoose, { Schema } from 'mongoose';
-import type { ITransaction } from '../types/index.js';
+import { ITransaction } from '../types';
 
 const transactionSchema = new Schema<ITransaction>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -15,7 +15,7 @@ const transactionSchema = new Schema<ITransaction>({
   total_charged: { type: Number, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'completed', 'successful', 'failed', 'refunded', 'cancelled'],
+    enum: ['pending', 'successful', 'failed', 'refunded'],
     default: 'pending' 
   },
   reference_number: { type: String, unique: true, required: true },

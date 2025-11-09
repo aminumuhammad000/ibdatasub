@@ -1,6 +1,6 @@
 // controllers/payment.controller.ts
 import { Request, Response } from 'express';
-import { Transaction, User, VirtualAccount, Wallet } from '../models/index.js';
+import { Transaction, User, Wallet, VirtualAccount } from '../models/index.js';
 import { MonnifyService } from '../services/monnify.service.js';
 import { PaystackService } from '../services/paystack.service.js';
 import { AuthRequest } from '../types/index.js';
@@ -77,17 +77,13 @@ export class PaymentController {
           
           // Record transaction
           await Transaction.create({
-            user_id: wallet.user_id,
-            wallet_id: wallet._id,
+            userId: wallet.userId,
             amount,
             type: 'credit',
             status: 'completed',
-            reference_number: paymentReference,
-            payment_method: 'monnify',
+            reference: paymentReference,
             description: 'Wallet funding via Monnify',
-            metadata: { gateway: 'monnify' },
-            fee: 0,
-            total_charged: amount
+            metadata: { gateway: 'monnify' }
           });
         }
       }
@@ -106,7 +102,7 @@ export class PaymentController {
   static async getBanks(_req: Request, res: Response) {
     try {
       const banks = await paystackService.listBanks();
-      return ApiResponse.success(res, banks, 'Banks retrieved successfully');
+      return ApiResponse.success(res, 'Banks retrieved successfully', banks);
     } catch (error: any) {
       console.error('Error fetching banks:', error);
       return ApiResponse.error(res, error.message || 'Failed to fetch banks', 500);
@@ -256,22 +252,22 @@ export class PaymentController {
         case 'monnify':
           // For Monnify, we'll just return the transaction status
           // since we don't have a verification endpoint in the service yet
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Payment status retrieved', JSON.stringify({
             status: transaction.status,
             reference: transaction.reference_number,
             amount: transaction.amount,
             gateway: transaction.gateway
-          }, 'Payment status retrieved');
+          }));
           
         case 'payrant':
           // For Payrant, we'll just return the transaction status
           // since we don't have a direct verification endpoint
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Payment status retrieved', JSON.stringify({
             status: transaction.status,
             reference: transaction.reference_number,
             amount: transaction.amount,
             gateway: transaction.gateway
-          }, 'Payment status retrieved');
+          }));
           
         default:
           return ApiResponse.error(res, 'Unsupported payment gateway', 400);

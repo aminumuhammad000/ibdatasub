@@ -1,6 +1,6 @@
 // models/operator.model.ts
-import { Schema, model } from 'mongoose';
-import { IOperator } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IOperator } from '../types';
 
 const operatorSchema = new Schema<IOperator>({
   name: { type: String, required: true },
@@ -11,4 +11,4 @@ const operatorSchema = new Schema<IOperator>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const Operator = model<IOperator>('Operator', operatorSchema);
+export const Operator = mongoose.model<IOperator>('Operator', operatorSchema);

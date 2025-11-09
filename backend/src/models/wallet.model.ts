@@ -1,6 +1,6 @@
 // models/wallet.model.ts
-import { Schema, model } from 'mongoose';
-import { IWallet } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IWallet } from '../types';
 
 const walletSchema = new Schema<IWallet>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
@@ -11,4 +11,4 @@ const walletSchema = new Schema<IWallet>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const Wallet = model<IWallet>('Wallet', walletSchema);
+export const Wallet = mongoose.model<IWallet>('Wallet', walletSchema);

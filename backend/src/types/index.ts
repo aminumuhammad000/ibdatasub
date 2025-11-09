@@ -52,11 +52,11 @@ export interface ITransaction extends Document {
   _id: Types.ObjectId;
   user_id: Types.ObjectId;
   wallet_id: Types.ObjectId;
-  type: 'airtime_topup' | 'data_purchase' | 'bill_payment' | 'wallet_topup' | 'e-pin_purchase' | 'credit' | 'deposit';
+  type: 'airtime_topup' | 'data_purchase' | 'bill_payment' | 'wallet_topup' | 'e-pin_purchase';
   amount: number;
   fee: number;
   total_charged: number;
-  status: 'pending' | 'successful' | 'failed' | 'refunded' | 'completed';
+  status: 'pending' | 'successful' | 'failed' | 'refunded';
   reference_number: string;
   description?: string;
   payment_method: string;
@@ -65,8 +65,6 @@ export interface ITransaction extends Document {
   plan_id?: Types.ObjectId;
   receipt_url?: string;
   error_message?: string;
-  gateway?: string;
-  metadata?: Record<string, any>;
   created_at: Date;
   updated_at: Date;
 }

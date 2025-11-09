@@ -7,28 +7,12 @@ import { ApiResponse } from '../utils/response.js';
 import { logger } from '../config/logger.js';
 import { AuthRequest } from '../types/index.js';
 
-// Network mapping helper
-const networkMap: Record<string, string> = {
-  'mtn': '1',
-  'airtel': '2',
-  'glo': '3',
-  '9mobile': '4',
-  'MTN': '1',
-  'AIRTEL': '2',
-  'GLO': '3',
-  '9MOBILE': '4',
-};
-
-function getNetworkId(network: string): string {
-  return networkMap[network.toLowerCase()] || network;
-}
-
 export class BillPaymentController {
   // Get networks
   async getNetworks(req: Request, res: Response, next: NextFunction) {
     try {
       const networks = await topupmateService.getNetworks();
-      return ApiResponse.success(res, networks.response, 'Networks retrieved successfully');
+      return ApiResponse.success(res, 'Networks retrieved successfully', networks.response);
     } catch (error) {
       next(error);
     }
@@ -38,7 +22,7 @@ export class BillPaymentController {
   async getDataPlans(req: Request, res: Response, next: NextFunction) {
     try {
       const plans = await topupmateService.getDataPlans();
-      return ApiResponse.success(res, plans.response, 'Data plans retrieved successfully');
+      return ApiResponse.success(res, 'Data plans retrieved successfully', plans.response);
     } catch (error) {
       next(error);
     }
@@ -48,7 +32,7 @@ export class BillPaymentController {
   async getCableProviders(req: Request, res: Response, next: NextFunction) {
     try {
       const providers = await topupmateService.getCableProviders();
-      return ApiResponse.success(res, providers.response, 'Cable providers retrieved successfully');
+      return ApiResponse.success(res, 'Cable providers retrieved successfully', providers.response);
     } catch (error) {
       next(error);
     }
@@ -58,7 +42,7 @@ export class BillPaymentController {
   async getElectricityProviders(req: Request, res: Response, next: NextFunction) {
     try {
       const providers = await topupmateService.getElectricityProviders();
-      return ApiResponse.success(res, providers.response, 'Electricity providers retrieved successfully');
+      return ApiResponse.success(res, 'Electricity providers retrieved successfully', providers.response);
     } catch (error) {
       next(error);
     }
@@ -68,7 +52,7 @@ export class BillPaymentController {
   async getExamPinProviders(req: Request, res: Response, next: NextFunction) {
     try {
       const providers = await topupmateService.getExamPinProviders();
-      return ApiResponse.success(res, providers.response, 'Exam pin providers retrieved successfully');
+      return ApiResponse.success(res, 'Exam pin providers retrieved successfully', providers.response);
     } catch (error) {
       next(error);
     }
@@ -79,11 +63,6 @@ export class BillPaymentController {
     try {
       const { network, phone, amount, airtime_type = 'VTU', ported_number = true } = req.body;
       const userId = req.user?.id;
-
-      // Validate phone number
-      if (!phone || phone.length !== 11 || !phone.match(/^0[789][01]\d{8}$/)) {
-        return ApiResponse.error(res, 'Please enter a valid 11-digit Nigerian phone number (e.g., 08012345678)', 400);
-      }
 
       // Validate user balance
       const wallet = await WalletService.getWalletByUserId(userId);
@@ -100,22 +79,17 @@ export class BillPaymentController {
       // Create transaction record
       const transaction = await Transaction.create({
         user_id: userId,
-        wallet_id: wallet._id,
-        type: 'airtime_topup',
+        type: 'airtime',
         amount: parseFloat(amount),
-        fee: 0,
-        total_charged: parseFloat(amount),
-        reference_number: ref,
-        payment_method: 'wallet',
-        destination_account: phone,
+        reference: ref,
         status: 'pending',
-        description: `Airtime purchase for ${phone}`,
+        metadata: { network, phone, airtime_type },
       });
 
       try {
         // Purchase airtime
         const result = await topupmateService.purchaseAirtime({
-          network: getNetworkId(network),
+          network,
           phone,
           ref,
           airtime_type,
@@ -129,10 +103,10 @@ export class BillPaymentController {
             status: 'completed', 
             response: result 
           });
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Airtime purchase successful', {
             transaction,
             provider_response: result,
-          }, 'Airtime purchase successful');
+          });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
@@ -162,35 +136,13 @@ export class BillPaymentController {
       const { network, phone, plan, ported_number = true } = req.body;
       const userId = req.user?.id;
 
-      // Validate phone number
-      if (!phone || phone.length !== 11 || !phone.match(/^0[789][01]\d{8}$/)) {
-        return ApiResponse.error(res, 'Please enter a valid 11-digit Nigerian phone number (e.g., 08012345678)', 400);
-      }
-
       // Get plan details to determine amount
       const plans = await topupmateService.getDataPlans();
-      logger.info('Data plans response status:', plans.status);
-      logger.info('Searching for plan ID:', plan, 'Type:', typeof plan);
-      
-      // TopupMate returns plans as an object with IDs as keys, not an array
-      let selectedPlan: any = null;
-      if (plans.response && typeof plans.response === 'object') {
-        // If response is an object with plan IDs as keys
-        selectedPlan = plans.response[String(plan)];
-        logger.info('Found plan in object:', selectedPlan);
-      } else if (Array.isArray(plans.response)) {
-        // If response is an array
-        selectedPlan = plans.response.find((p: any) => String(p.id) === String(plan) || String(p.planid) === String(plan));
-        logger.info('Found plan in array:', selectedPlan);
-      }
+      const selectedPlan = plans.response?.find((p: any) => p.id === plan);
       
       if (!selectedPlan) {
-        logger.error('Plan not found. Plan ID:', plan);
-        logger.error('Available plans structure:', typeof plans.response);
-        logger.error('Sample plan keys:', plans.response ? Object.keys(plans.response).slice(0, 5) : 'none');
         return ApiResponse.error(res, 'Invalid plan selected', 400);
       }
-      logger.info('Selected plan:', selectedPlan);
 
       const amount = parseFloat(selectedPlan.price);
 
@@ -209,22 +161,17 @@ export class BillPaymentController {
       // Create transaction record
       const transaction = await Transaction.create({
         user_id: userId,
-        wallet_id: wallet._id,
-        type: 'data_purchase',
+        type: 'data',
         amount,
-        fee: 0,
-        total_charged: amount,
-        reference_number: ref,
-        payment_method: 'wallet',
-        destination_account: phone,
+        reference: ref,
         status: 'pending',
-        description: `Data purchase for ${phone} - ${selectedPlan.name}`,
+        metadata: { network, phone, plan: selectedPlan },
       });
 
       try {
         // Purchase data
         const result = await topupmateService.purchaseData({
-          network: getNetworkId(network),
+          network,
           phone,
           ref,
           plan,
@@ -237,10 +184,10 @@ export class BillPaymentController {
             status: 'completed', 
             response: result 
           });
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Data purchase successful', {
             transaction,
             provider_response: result,
-          }, 'Data purchase successful');
+          });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, amount, 'Data purchase refund');
@@ -275,10 +222,10 @@ export class BillPaymentController {
       });
 
       if (result.status === 'success') {
-        return ApiResponse.success(res, {
+        return ApiResponse.success(res, 'Account verification successful', {
           customer_name: result.Customer_Name,
           iucnumber,
-        }, 'Account verification successful');
+        });
       } else {
         return ApiResponse.error(res, 'Account verification failed', 400);
       }
@@ -295,15 +242,11 @@ export class BillPaymentController {
 
       // Get plan details
       const plans = await topupmateService.getCableTVPlans();
-      logger.info('Available cable plans:', plans.response);
-      logger.info('Searching for plan:', plan);
-      const selectedPlan = plans.response?.find((p: any) => String(p.id) === String(plan));
+      const selectedPlan = plans.response?.find((p: any) => p.id === plan);
       
       if (!selectedPlan) {
-        logger.error('Cable plan not found. Available plan IDs:', plans.response?.map((p: any) => p.id));
         return ApiResponse.error(res, 'Invalid plan selected', 400);
       }
-      logger.info('Selected cable plan:', selectedPlan);
 
       const amount = parseFloat(selectedPlan.price);
 
@@ -346,10 +289,10 @@ export class BillPaymentController {
             status: 'completed', 
             response: result 
           });
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Cable TV purchase successful', {
             transaction,
             provider_response: result,
-          }, 'Cable TV purchase successful');
+          });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, amount, 'Cable TV purchase refund');
@@ -385,10 +328,10 @@ export class BillPaymentController {
       });
 
       if (result.status === 'success') {
-        return ApiResponse.success(res, {
+        return ApiResponse.success(res, 'Meter verification successful', {
           customer_name: result.Customer_Name,
           meternumber,
-        }, 'Meter verification successful');
+        });
       } else {
         return ApiResponse.error(res, 'Meter verification failed', 400);
       }
@@ -442,11 +385,11 @@ export class BillPaymentController {
             status: 'completed', 
             response: result 
           });
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Electricity purchase successful', {
             transaction,
             token: result.token,
             provider_response: result,
-          }, 'Electricity purchase successful');
+          });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, parseFloat(amount), 'Electricity purchase refund');
@@ -478,15 +421,11 @@ export class BillPaymentController {
 
       // Get provider details
       const providers = await topupmateService.getExamPinProviders();
-      logger.info('Available exam pin providers:', providers.response);
-      logger.info('Searching for provider:', provider);
-      const selectedProvider = providers.response?.find((p: any) => String(p.id) === String(provider));
+      const selectedProvider = providers.response?.find((p: any) => p.id === provider);
       
       if (!selectedProvider) {
-        logger.error('Provider not found. Available provider IDs:', providers.response?.map((p: any) => p.id));
         return ApiResponse.error(res, 'Invalid provider selected', 400);
       }
-      logger.info('Selected provider:', selectedProvider);
 
       const amount = parseFloat(selectedProvider.price) * parseInt(quantity);
 
@@ -526,11 +465,11 @@ export class BillPaymentController {
             status: 'completed', 
             response: result 
           });
-          return ApiResponse.success(res, {
+          return ApiResponse.success(res, 'Exam pin purchase successful', {
             transaction,
             pins: result.pins || result.pin,
             provider_response: result,
-          }, 'Exam pin purchase successful');
+          });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, amount, 'Exam pin purchase refund');
@@ -562,7 +501,7 @@ export class BillPaymentController {
       const result = await topupmateService.getTransactionStatus(reference);
 
       if (result.status === 'success') {
-        return ApiResponse.success(res, result.response, 'Transaction status retrieved');
+        return ApiResponse.success(res, 'Transaction status retrieved', result.response);
       } else {
         return ApiResponse.error(res, 'Failed to retrieve transaction status', 400);
       }

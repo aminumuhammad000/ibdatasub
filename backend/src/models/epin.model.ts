@@ -1,6 +1,6 @@
 // models epin.model.ts
-import { Schema, model } from 'mongoose';
-import { IEPin } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IEPin } from '../types';
 
 const epinSchema = new Schema<IEPin>({
   e_pin_product_id: { type: Schema.Types.ObjectId, ref: 'EPinProduct', required: true },
@@ -12,4 +12,4 @@ const epinSchema = new Schema<IEPin>({
   used_at: { type: Date }
 });
 
-export const EPin = model<IEPin>('EPin', epinSchema);
+export const EPin = mongoose.model<IEPin>('EPin', epinSchema);

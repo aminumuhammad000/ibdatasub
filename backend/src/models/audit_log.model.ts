@@ -1,6 +1,6 @@
 // models audit_log.model.ts
-import { Schema, model } from 'mongoose';
-import { IAuditLog } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IAuditLog } from '../types';
 
 const auditLogSchema = new Schema<IAuditLog>({
   admin_id: { type: Schema.Types.ObjectId, ref: 'AdminUser' },
@@ -14,4 +14,4 @@ const auditLogSchema = new Schema<IAuditLog>({
   timestamp: { type: Date, default: Date.now }
 });
 
-export const AuditLog = model<IAuditLog>('AuditLog', auditLogSchema);
+export const AuditLog = mongoose.model<IAuditLog>('AuditLog', auditLogSchema);

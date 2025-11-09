@@ -8,7 +8,7 @@ export interface Transaction {
   amount: number;
   fee: number;
   total_charged: number;
-  status: 'pending' | 'completed' | 'successful' | 'failed' | 'refunded' | 'cancelled';
+  status: 'pending' | 'successful' | 'failed' | 'refunded';
   reference_number: string;
   description?: string;
   payment_method: string;
@@ -23,12 +23,11 @@ export interface Transaction {
 
 export interface TransactionResponse {
   success: boolean;
-  data: Transaction[];
-  pagination: {
+  data: {
+    transactions: Transaction[];
     total: number;
     page: number;
     limit: number;
-    pages: number;
   };
   message: string;
 }

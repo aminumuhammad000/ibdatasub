@@ -1,6 +1,6 @@
 // models/biller.model.ts
-import { Schema, model } from 'mongoose';
-import { IBiller } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IBiller } from '../types';
 
 const billerSchema = new Schema<IBiller>({
   name: { type: String, required: true },
@@ -12,4 +12,4 @@ const billerSchema = new Schema<IBiller>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const Biller = model<IBiller>('Biller', billerSchema);
+export const Biller = mongoose.model<IBiller>('Biller', billerSchema);

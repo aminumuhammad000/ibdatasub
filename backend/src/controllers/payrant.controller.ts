@@ -50,8 +50,8 @@ export class PayrantController {
       const virtualAccountData = {
         documentType: req.body.documentType as 'nin' | 'bvn',
         documentNumber: req.body.documentNumber,
-        virtualAccountName: (req.body.virtualAccountName || `${user.first_name} ${user.last_name}`).substring(0, 50),
-        customerName: (req.body.customerName || `${user.first_name} ${user.last_name}`).substring(0, 100),
+        virtualAccountName: (req.body.virtualAccountName || `${user.firstName} ${user.lastName}`).substring(0, 50),
+        customerName: (req.body.customerName || `${user.firstName} ${user.lastName}`).substring(0, 100),
         email: req.body.email || user.email,
         accountReference: req.body.accountReference || `user-${userId}-${Date.now()}`,
       };
@@ -232,7 +232,7 @@ export class PayrantController {
       }
 
       // Update transaction status
-      transaction.status = 'successful';
+      transaction.status = 'success';
       transaction.amount = amount / 100; // Convert from kobo to naira
       transaction.metadata = {
         ...transaction.metadata,
@@ -244,7 +244,7 @@ export class PayrantController {
 
       // Update user's wallet balance
       await User.findByIdAndUpdate(
-        transaction.user_id,
+        transaction.user,
         { $inc: { walletBalance: amount / 100 } }
       );
 

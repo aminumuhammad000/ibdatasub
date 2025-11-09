@@ -1,6 +1,6 @@
 // models/promotion.model.ts
-import { Schema, model } from 'mongoose';
-import { IPromotion } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IPromotion } from '../types';
 
 const promotionSchema = new Schema<IPromotion>({
   name: { type: String, required: true },
@@ -16,4 +16,4 @@ const promotionSchema = new Schema<IPromotion>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const Promotion = model<IPromotion>('Promotion', promotionSchema);
+export const Promotion = mongoose.model<IPromotion>('Promotion', promotionSchema);

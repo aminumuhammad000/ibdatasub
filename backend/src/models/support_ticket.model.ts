@@ -1,6 +1,6 @@
 // modelssupport_ticket.model.ts
-import { Schema, model } from 'mongoose';
-import { ISupportTicket } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { ISupportTicket } from '../types';
 
 const supportTicketSchema = new Schema<ISupportTicket>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -17,4 +17,4 @@ const supportTicketSchema = new Schema<ISupportTicket>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const SupportTicket = model<ISupportTicket>('SupportTicket', supportTicketSchema);
+export const SupportTicket = mongoose.model<ISupportTicket>('SupportTicket', supportTicketSchema);

@@ -1,6 +1,6 @@
 // models/otp.model.ts
-import { Schema, model } from 'mongoose';
-import { IOTP } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IOTP } from '../types';
 
 const otpSchema = new Schema<IOTP>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -12,4 +12,4 @@ const otpSchema = new Schema<IOTP>({
   created_at: { type: Date, default: Date.now }
 });
 
-export const OTP = model<IOTP>('OTP', otpSchema);
+export const OTP = mongoose.model<IOTP>('OTP', otpSchema);

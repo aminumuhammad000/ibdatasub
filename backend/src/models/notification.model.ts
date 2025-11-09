@@ -1,6 +1,6 @@
 // models/notification.model.ts
-import { Schema, model } from 'mongoose';
-import { INotification } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { INotification } from '../types';
 
 const notificationSchema = new Schema<INotification>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -12,4 +12,4 @@ const notificationSchema = new Schema<INotification>({
   action_link: { type: String }
 });
 
-export const Notification = model<INotification>('Notification', notificationSchema);
+export const Notification = mongoose.model<INotification>('Notification', notificationSchema);

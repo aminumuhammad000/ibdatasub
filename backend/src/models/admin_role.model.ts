@@ -1,6 +1,6 @@
 // models/admin_role.model.ts
-import { Schema, model } from 'mongoose';
-import { IAdminRole } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IAdminRole } from '../types';
 
 const adminRoleSchema = new Schema<IAdminRole>({
   name: { type: String, required: true, unique: true },
@@ -9,4 +9,4 @@ const adminRoleSchema = new Schema<IAdminRole>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const AdminRole = model<IAdminRole>('AdminRole', adminRoleSchema);
+export const AdminRole = mongoose.model<IAdminRole>('AdminRole', adminRoleSchema);

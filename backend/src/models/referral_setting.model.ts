@@ -1,6 +1,6 @@
 // models/referral_setting.model.ts
-import { Schema, model } from 'mongoose';
-import { IReferralSetting } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IReferralSetting } from '../types';
 
 const referralSettingSchema = new Schema<IReferralSetting>({
   referrer_bonus_amount: { type: Number, required: true },
@@ -12,4 +12,4 @@ const referralSettingSchema = new Schema<IReferralSetting>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const ReferralSetting = model<IReferralSetting>('ReferralSetting', referralSettingSchema);
+export const ReferralSetting = mongoose.model<IReferralSetting>('ReferralSetting', referralSettingSchema);

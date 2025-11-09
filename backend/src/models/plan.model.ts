@@ -1,6 +1,6 @@
 // models/plan.model.ts
-import { Schema, model } from 'mongoose';
-import { IPlan } from '../types/index.js';
+import mongoose, { Schema } from 'mongoose';
+import { IPlan } from '../types';
 
 const planSchema = new Schema<IPlan>({
   operator_id: { type: Schema.Types.ObjectId, ref: 'Operator', required: true },
@@ -14,4 +14,4 @@ const planSchema = new Schema<IPlan>({
   updated_at: { type: Date, default: Date.now }
 });
 
-export const Plan = model<IPlan>('Plan', planSchema);
+export const Plan = mongoose.model<IPlan>('Plan', planSchema);
