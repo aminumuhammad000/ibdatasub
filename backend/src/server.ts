@@ -40,10 +40,16 @@ async function startServer() {
       throw dbError; // Re-throw to be caught by the outer catch
     }
     
-    const server = app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
-      console.log(`🔧 Environment: ${config.nodeEnv}`);
-    });
+    // const server = app.listen(PORT, () => {
+    //   console.log(`✅ Server running on http://localhost:${PORT}`);
+    //   console.log(`🔧 Environment: ${config.nodeEnv}`);
+    // });
+
+    const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🔧 Environment: ${config.nodeEnv}`);
+});
+
 
     // Handle server errors
     server.on('error', (error: NodeJS.ErrnoException) => {
@@ -54,11 +60,9 @@ async function startServer() {
         case 'EACCES':
           console.error(`Port ${PORT} requires elevated privileges`);
           process.exit(1);
-          break;
         case 'EADDRINUSE':
           console.error(`Port ${PORT} is already in use`);
           process.exit(1);
-          break;
         default:
           throw error;
       }

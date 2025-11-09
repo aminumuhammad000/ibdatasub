@@ -526,3 +526,5 @@
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 12:17:03"}
 {"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 13:14:23"}
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 13:14:23"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-09 13:18:14"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-09 13:18:14"}
