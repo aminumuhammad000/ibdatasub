@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Login successful, user:', response.data.user.email);
       setUser(response.data.user);
       setIsAuthenticated(true);
+      setIsLoading(false); // Reset loading state after successful login
       return { success: true };
       
     } catch (error) {
@@ -118,6 +119,7 @@ export const AuthProvider = ({ children }) => {
       
       setUser(null);
       setIsAuthenticated(false);
+      setIsLoading(false); // Reset loading state after error
       
       // Provide more user-friendly error messages
       let errorMessage = error.message || 'Login failed. Please try again.';
@@ -165,7 +167,7 @@ export const AuthProvider = ({ children }) => {
         logout,
       }}
     >
-      {!isLoading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

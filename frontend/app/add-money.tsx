@@ -167,11 +167,11 @@ export default function AddMoneyScreen() {
   const formatVirtualAccount = (va: any) => {
     // Handle nested data structure from API
     const accountData = va?.data?.data || va?.data || va;
-    
+    const bankName = 'PALMPAY';
     return {
       account_number: accountData.account_number || accountData.virtualAccountNo,
       account_name: accountData.account_name || accountData.virtualAccountName || accountData.customerName,
-      bank_name: accountData.bank_name || 'PALMPAY',
+      bank_name: bankName || accountData.bank_name,
       account_reference: accountData.account_reference || accountData.reference,
       status: accountData.status || 'active',
       provider: accountData.provider || 'payrant',

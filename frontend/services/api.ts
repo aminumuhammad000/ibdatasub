@@ -19,55 +19,24 @@ import {
 } from './types';
 
 // API Configuration
-const getApiUrl = () => {
-  // Check for environment variable first
-  const fromEnv = process.env.EXPO_PUBLIC_API_URL;
-  if (fromEnv && typeof fromEnv === 'string') {
-    // Ensure the URL doesn't end with a slash
-    let baseUrl = fromEnv.replace(/\/$/, '');
-    
-    // Add /api prefix if not already present
-    if (!baseUrl.endsWith('/api')) {
-      baseUrl = `${baseUrl}/api`;
-    }
-    
-    if (!/^https?:\/\//i.test(baseUrl)) {
-      console.warn('⚠️ EXPO_PUBLIC_API_URL is not a valid URL. Current:', baseUrl);
-    } else {
-      console.log('🔧 Using environment API URL:', baseUrl);
-      return baseUrl;
-    }
-  }
+// const getApiUrl = () => {
+//   if (__DEV__) {
+//     // Use environment variable if set, otherwise fallback to localhost
+//     if (process.env.EXPO_PUBLIC_API_URL) {
+//       return `${process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '')}/api`;
+//     }
+//     return 'http://localhost:5000/api';
+//   }
 
-  // Development URLs
-  if (__DEV__) {
-    // For web
-    if (Platform.OS === 'web') {
-      const hostname = window.location.hostname;
-      // Use the current hostname for web, which works for Expo web and local development
-      const webUrl = `http://${hostname}:5000/api`;
-      console.log('🌍 Using web API URL:', webUrl);
-      return webUrl;
-    }
-    
-    // For Android emulator
-    if (Platform.OS === 'android') {
-      console.log('🤖 Using Android emulator API URL');
-      return 'http://10.0.2.2:5000/api';
-    }
-    
-    // For iOS simulator and other platforms
-    console.log('🍏 Using localhost API URL');
-    return 'http://localhost:5000/api';
-  }
+//   // Production URL
+//   console.log('🚀 Using production API URL');
+//   return 'https://vtuapp-production.up.railway.app/api';
+// };
 
-  // Production URL - update this with your production URL
-  console.log('🚀 Using production API URL');
-  return 'https://your-production-api.com';
-};
 
-// const API_BASE_URL = getApiUrl();
-export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+  // export const API_BASE_URL = getApiUrl();
+// export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
 
 
 // Log the API URL being used
