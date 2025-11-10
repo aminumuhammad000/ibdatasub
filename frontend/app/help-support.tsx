@@ -79,21 +79,21 @@ export default function HelpSupportScreen() {
     },
     {
       title: 'Call Support',
-      description: '+234 800 123 4567',
+      description: '+234 80015498',
       icon: 'call',
-      action: () => Linking.openURL('tel:+2348001234567')
+      action: () => Linking.openURL('tel:+234 80015498')
     },
     {
       title: 'Email Support',
-      description: 'support@vtuapp.com',
+      description: 'aminuamee@yahoo.com',
       icon: 'mail',
-      action: () => Linking.openURL('mailto:support@vtuapp.com')
+      action: () => Linking.openURL('mailto:aminuamee@yahoo.com')
     },
     {
       title: 'WhatsApp',
       description: 'Message us on WhatsApp',
       icon: 'logo-whatsapp',
-      action: () => Linking.openURL('https://wa.me/2348001234567')
+      action: () => Linking.openURL('https://wa.me/23480015498')
     }
   ];
 

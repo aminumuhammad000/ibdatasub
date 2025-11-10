@@ -115,7 +115,7 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111418',
+    backgroundColor: '#fff',
   },
   header: {
     alignItems: 'center',
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoText: {
-    color: '#fff',
+    color: '#111418',
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 10,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 100,
-    backgroundColor: 'rgba(10, 51, 92, 0.3)',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
   },

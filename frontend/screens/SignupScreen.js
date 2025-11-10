@@ -1,57 +1,70 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { authService } from '../services/auth.service';
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { authService } from "../services/auth.service";
 
 const SignupScreen = () => {
-  const [email, setEmail] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [first_name, setFirstName] = useState('');
-  const [last_name, setLastName] = useState('');
-  const [referral_code, setReferralCode] = useState('');
+  const [email, setEmail] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [referral_code, setReferralCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignup = async () => {
     // Validation
-    if (!email || !password || !confirmPassword || !first_name || !last_name || !phone_number) {
-      Alert.alert('❌ Validation Error', 'Please fill in all required fields');
+    if (
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !first_name ||
+      !last_name ||
+      !phone_number
+    ) {
+      Alert.alert("❌ Validation Error", "Please fill in all required fields");
       return;
     }
-    
+
     if (!/^[0-9]{10,15}$/.test(phone_number)) {
-      Alert.alert('❌ Validation Error', 'Please enter a valid phone number (10-15 digits)');
+      Alert.alert(
+        "❌ Validation Error",
+        "Please enter a valid phone number (10-15 digits)"
+      );
       return;
     }
-    
+
     if (password !== confirmPassword) {
-      Alert.alert('❌ Validation Error', 'Passwords do not match');
+      Alert.alert("❌ Validation Error", "Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('❌ Validation Error', 'Password must be at least 6 characters');
+      Alert.alert(
+        "❌ Validation Error",
+        "Password must be at least 6 characters"
+      );
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       const response = await authService.register({
         email,
@@ -61,47 +74,52 @@ const SignupScreen = () => {
         last_name,
         referral_code: referral_code || undefined,
       });
-      
+
       if (response.success) {
         Alert.alert(
-          '🎉 Welcome to Connecta!', 
+          "🎉 Welcome to Connecta!",
           `Hi ${first_name}! Your account has been created successfully. You can now access all features.`,
           [
             {
-              text: 'Go to Dashboard',
-              onPress: () => router.replace('/(tabs)'),
+              text: "Go to Dashboard",
+              onPress: () => router.replace("/(tabs)"),
             },
             {
-              text: 'Go to Login',
-              onPress: () => router.replace('/login'),
-              style: 'cancel',
+              text: "Go to Login",
+              onPress: () => router.replace("/login"),
+              style: "cancel",
             },
           ]
         );
       }
     } catch (error) {
-      Alert.alert('❌ Signup Failed', error.message || 'Registration failed. Please try again.');
+      Alert.alert(
+        "❌ Signup Failed",
+        error.message || "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.logoContainer}>
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCNmLt70vBl51N44lPp2_PhjggOAG8xKje7lYXmWc8X24jwhToxdayIVXORUOtpNLKUAckLXftXWI7ofIthz26meu2eTrKWvy6P5nHxlHRt8dTiEojOQYtZozWxl3HGOXPv3QlJO5NxLyS6bc5TZnW6A8cbhEj0M23nYWfDMEdtgGLqE-jv1F_9GaGc_gYRxq_gWYGl1aJCWaN-YpIfYxAkjigmOMsGiHgtUlWOLR3V2ynPCxJWg50VYJ_i179vEcrEekVRiL_O3oE' }} 
-            style={styles.logo} 
+          <Image
+            source={require("../assets/images/ibdatalogo.png")}
+            style={styles.logo}
           />
           <Text style={styles.title}>Create an Account</Text>
-          <Text style={styles.subtitle}>Fill in your details to get started</Text>
+          <Text style={styles.subtitle}>
+            Fill in your details to get started
+          </Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -157,7 +175,7 @@ const SignupScreen = () => {
             <View style={styles.inputWrapper}>
               <Text style={styles.countryCode}>+234</Text>
               <TextInput
-                style={[styles.input, {marginLeft: 8}]}
+                style={[styles.input, { marginLeft: 8 }]}
                 placeholder="Enter your phone number"
                 placeholderTextColor="#9CA3AF"
                 value={phone_number}
@@ -181,11 +199,15 @@ const SignupScreen = () => {
                 secureTextEntry={!showPassword}
                 selectionColor="#3B82F6"
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color="#9CA3AF" />
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={20}
+                  color="#9CA3AF"
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -221,8 +243,12 @@ const SignupScreen = () => {
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                styles.primaryButton,
+                isLoading && styles.buttonDisabled,
+              ]}
               onPress={handleSignup}
               disabled={isLoading}
             >
@@ -258,14 +284,14 @@ const SignupScreen = () => {
 
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push('/login')}>
+            <TouchableOpacity onPress={() => router.push("/login")}>
               <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
           </View>
 
           <Text style={styles.termsText}>
-            By signing up, you agree to our{' '}
-            <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+            By signing up, you agree to our{" "}
+            <Text style={styles.linkText}>Terms of Service</Text> and{" "}
             <Text style={styles.linkText}>Privacy Policy</Text>.
           </Text>
         </View>
@@ -277,14 +303,14 @@ const SignupScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111418',
+    backgroundColor: "#fff",
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 40,
     marginBottom: 32,
   },
@@ -296,85 +322,85 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#F8FAFC',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "##1E293B",
+    textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#94A3B8',
-    textAlign: 'center',
+    color: "#5e6875ff",
+    textAlign: "center",
     marginBottom: 32,
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   inputContainer: {
     marginBottom: 16,
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#E2E8F0',
+    fontWeight: "500",
+    color: "#1E293B",
     marginBottom: 8,
   },
   inputWrapper: {
-    backgroundColor: '#1E293B',
+    backgroundColor: "#fff",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: "#334155",
     height: 56,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   countryCode: {
     fontSize: 16,
-    color: '#F8FAFC',
-    fontWeight: '500',
+    color: "#1E293B",
+    fontWeight: "500",
   },
   input: {
     fontSize: 16,
-    color: '#F8FAFC',
+    color: "#1E293B",
     padding: 0,
     margin: 0,
-    height: '100%',
+    height: "100%",
     flex: 1,
   },
   eyeIcon: {
     width: 24,
     height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonContainer: {
-    width: '100%',
+    width: "100%",
     marginTop: 8,
     marginBottom: 24,
   },
   button: {
-    width: '100%',
+    width: "100%",
     height: 48,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
     marginBottom: 16,
   },
   primaryButton: {
-    backgroundColor: '#0A2A4E',
+    backgroundColor: "#0A2A4E",
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   socialButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: "#D1D5DB",
   },
   socialIcon: {
     width: 24,
@@ -383,45 +409,45 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 20,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: "#D1D5DB",
   },
   dividerText: {
-    color: '#6B7280',
+    color: "#6B7280",
     fontSize: 14,
     marginHorizontal: 12,
   },
   loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 24,
   },
   loginText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   loginLink: {
     fontSize: 14,
-    color: '#3B82F6',
-    fontWeight: '500',
+    color: "#3B82F6",
+    fontWeight: "500",
   },
   termsText: {
     fontSize: 12,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
   },
   linkText: {
-    color: '#3B82F6',
-    textDecorationLine: 'underline',
+    color: "#3B82F6",
+    textDecorationLine: "underline",
   },
   buttonDisabled: {
     opacity: 0.7,

@@ -46,9 +46,9 @@ export interface Config {
 
 export const config: Config = {
   // Server Configuration
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '5000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  appUrl: process.env.APP_URL || 'http://localhost:3000',
+  appUrl: process.env.APP_URL || 'http://localhost:5000',
   
   // Database
   mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/connecta_vtu',

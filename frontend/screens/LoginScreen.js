@@ -115,14 +115,8 @@ const LoginScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoContainer}>
-            {/* <Image
-              source={{
-                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCNmLt70vBl51N44lPp2_PhjggOAG8xKje7lYXmWc8X24jwhToxdayIVXORUOtpNLKUAckLXftXWI7ofIthz26meu2eTrKWvy6P5nHxlHRt8dTiEojOQYtZozWxl3HGOXPv3QlJO5NxLyS6bc5TZnW6A8cbhEj0M23nYWfDMEdtgGLqE-jv1F_9GaGc_gYRxq_gWYGl1aJCWaN-YpIfYxAkjigmOMsGiHgtUlWOLR3V2ynPCxJWg50VYJ_i179vEcrEekVRiL_O3oE",
-              }}
-              style={styles.logo}
-            /> */}
             <Image
-              source={require("../assets/images/ibdatalogo.jpg")}
+              source={require("../assets/images/ibdatalogo.png")}
               style={styles.logo}
             />
             <Text style={styles.title}>Welcome Back</Text>
@@ -217,7 +211,7 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111418",
+    backgroundColor: "#fff",
     position: "relative",
   },
   keyboardView: {
@@ -241,13 +235,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#F8FAFC",
+    color: "#1E293B",
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#94A3B8",
+    color: "#1E293Bf0",
     textAlign: "center",
     marginBottom: 32,
   },
@@ -260,14 +254,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#E2E8F0",
+    color: "#1E293B",
     marginBottom: 8,
   },
   inputWrapper: {
-    backgroundColor: "#1E293B",
+    backgroundColor: "#fff",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: "#1E293B",
     height: 56,
     justifyContent: "center",
     paddingHorizontal: 16,
@@ -276,7 +270,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 16,
-    color: "#F8FAFC",
+    color: "#1E293B",
     padding: 0,
     margin: 0,
     height: "100%",
@@ -293,6 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   button: {
+    backgroundColor: "#1E293B",
     width: "100%",
     height: 48,
     borderRadius: 12,
@@ -302,7 +297,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   primaryButton: {
-    backgroundColor: "#0A2A4E",
+    backgroundColor: "#1E293B",
   },
   primaryButtonText: {
     color: "#FFFFFF",
@@ -315,7 +310,7 @@ const styles = StyleSheet.create({
     borderColor: "#D1D5DB",
   },
   secondaryButtonText: {
-    color: "#111921",
+    color: "#1E293B",
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 8,

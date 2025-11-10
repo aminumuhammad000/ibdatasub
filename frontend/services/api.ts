@@ -18,22 +18,6 @@ import {
   Wallet
 } from './types';
 
-// API Configuration
-// const getApiUrl = () => {
-//   if (__DEV__) {
-//     // Use environment variable if set, otherwise fallback to localhost
-//     if (process.env.EXPO_PUBLIC_API_URL) {
-//       return `${process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '')}/api`;
-//     }
-//     return 'http://localhost:5000/api';
-//   }
-
-//   // Production URL
-//   console.log('🚀 Using production API URL');
-//   return 'https://vtuapp-production.up.railway.app/api';
-// };
-
-
   // export const API_BASE_URL = getApiUrl();
 // export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
 export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';

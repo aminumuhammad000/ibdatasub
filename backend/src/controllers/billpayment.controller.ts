@@ -4,6 +4,7 @@ import { Transaction } from '../models/index.js';
 import topupmateService from '../services/topupmate.service.js';
 import { WalletService } from '../services/wallet.service.js';
 import { AuthRequest } from '../types/index.js';
+import { normalizeNetwork } from '../utils/network.js';
 import { ApiResponse } from '../utils/response.js';
 
 export class BillPaymentController {
@@ -63,6 +64,12 @@ export class BillPaymentController {
       const { network, phone, amount, airtime_type = 'VTU', ported_number = true } = req.body;
       const userId = req.user?.id;
 
+      // Normalize network input to provider ID
+      const providerId = normalizeNetwork(network);
+      if (!providerId) {
+        return ApiResponse.error(res, 'Invalid network. Must be: mtn, airtel, glo, or 9mobile', 400);
+      }
+
       // Validate user balance
       const wallet = await WalletService.getWalletByUserId(userId);
       if (wallet.balance < parseFloat(amount)) {
@@ -72,23 +79,30 @@ export class BillPaymentController {
       // Generate reference
       const ref = topupmateService.generateReference('AIRTIME');
 
+      // Get wallet for wallet_id
+      const walletData = await WalletService.getWalletByUserId(userId);
+
       // Deduct from wallet
       await WalletService.debit(userId, parseFloat(amount), 'Airtime purchase');
 
       // Create transaction record
       const transaction = await Transaction.create({
         user_id: userId,
-        type: 'airtime',
+        wallet_id: walletData._id,
+        type: 'airtime_topup',
         amount: parseFloat(amount),
-        reference: ref,
+        total_charged: parseFloat(amount),
+        reference_number: ref,
+        payment_method: 'wallet',
         status: 'pending',
-        metadata: { network, phone, airtime_type },
+        destination_account: phone,
+        description: `Airtime purchase - ${network.toUpperCase()} - ${phone}`,
       });
 
       try {
-        // Purchase airtime
+        // Purchase airtime using normalized network ID
         const result = await topupmateService.purchaseAirtime({
-          network: String(network),
+          network: String(providerId),
           phone: String(phone),
           ref,
           airtime_type,
@@ -99,8 +113,8 @@ export class BillPaymentController {
         // Update transaction status
         if (result.status === 'success') {
           await Transaction.findByIdAndUpdate(transaction._id, { 
-            status: 'completed', 
-            response: result 
+            status: 'successful', 
+            updated_at: new Date()
           });
           return ApiResponse.success(res, 'Airtime purchase successful', {
             transaction,
@@ -111,17 +125,21 @@ export class BillPaymentController {
           await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
           await Transaction.findByIdAndUpdate(transaction._id, { 
             status: 'failed', 
-            response: result 
+            error_message: result.msg || 'Unknown error',
+            updated_at: new Date()
           });
-          return ApiResponse.error(res, 'Airtime purchase failed', 400);
+          console.error('❌ Airtime purchase failed - TopUpMate Response:', JSON.stringify(result, null, 2));
+          return ApiResponse.error(res, `Airtime purchase failed: ${result.msg || 'Unknown error'}`, 400);
         }
       } catch (error: any) {
         // Refund user on error
         await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
         await Transaction.findByIdAndUpdate(transaction._id, { 
           status: 'failed', 
-          response: { error: error.message } 
+          error_message: error.message,
+          updated_at: new Date()
         });
+        console.error('❌ Airtime purchase error:', error);
         throw error;
       }
     } catch (error) {
@@ -135,9 +153,15 @@ export class BillPaymentController {
       const { network, phone, plan, ported_number = true } = req.body;
       const userId = req.user?.id;
 
+      // Normalize network input to provider ID
+      const providerId = normalizeNetwork(network);
+      if (!providerId) {
+        return ApiResponse.error(res, 'Invalid network. Must be: mtn, airtel, glo, or 9mobile', 400);
+      }
+
       // Get plan details to determine amount
       const plans = await topupmateService.getDataPlans();
-      const selectedPlan = plans.response?.find((p: any) => p.id === plan);
+      const selectedPlan = plans.response?.find((p: any) => p.planid === plan);
       
       if (!selectedPlan) {
         return ApiResponse.error(res, 'Invalid plan selected', 400);
@@ -154,23 +178,31 @@ export class BillPaymentController {
       // Generate reference
       const ref = topupmateService.generateReference('DATA');
 
+      // Get wallet for wallet_id
+      const walletData = await WalletService.getWalletByUserId(userId);
+
       // Deduct from wallet
       await WalletService.debit(userId, amount, 'Data purchase');
 
       // Create transaction record
       const transaction = await Transaction.create({
         user_id: userId,
-        type: 'data',
+        wallet_id: walletData._id,
+        type: 'data_purchase',
         amount,
-        reference: ref,
+        total_charged: amount,
+        reference_number: ref,
+        payment_method: 'wallet',
         status: 'pending',
-        metadata: { network, phone, plan: selectedPlan },
+        destination_account: phone,
+        description: `Data purchase - ${network.toUpperCase()} - ${phone}`,
+        plan_id: plan
       });
 
       try {
-        // Purchase data
+        // Purchase data using normalized network ID
         const result = await topupmateService.purchaseData({
-          network: String(network),
+          network: String(providerId),
           phone: String(phone),
           ref,
           plan: String(plan),
@@ -180,8 +212,8 @@ export class BillPaymentController {
         // Update transaction status
         if (result.status === 'success') {
           await Transaction.findByIdAndUpdate(transaction._id, { 
-            status: 'completed', 
-            response: result 
+            status: 'successful', 
+            updated_at: new Date()
           });
           return ApiResponse.success(res, 'Data purchase successful', {
             transaction,
@@ -192,7 +224,8 @@ export class BillPaymentController {
           await WalletService.credit(userId, amount, 'Data purchase refund');
           await Transaction.findByIdAndUpdate(transaction._id, { 
             status: 'failed', 
-            response: result 
+            error_message: result.msg || 'Unknown error',
+            updated_at: new Date()
           });
           return ApiResponse.error(res, 'Data purchase failed', 400);
         }
@@ -201,7 +234,8 @@ export class BillPaymentController {
         await WalletService.credit(userId, amount, 'Data purchase refund');
         await Transaction.findByIdAndUpdate(transaction._id, { 
           status: 'failed', 
-          response: { error: error.message } 
+          error_message: error.message,
+          updated_at: new Date()
         });
         throw error;
       }

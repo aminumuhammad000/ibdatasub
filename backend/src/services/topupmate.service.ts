@@ -14,6 +14,11 @@ class TopupmateService {
   private baseURL: string = 'https://connect.topupmate.com/api';
 
   constructor() {
+    console.log('🔑 TopUpMate Config:', {
+      apiKey: config.topupmate.apiKey ? `${config.topupmate.apiKey.substring(0, 10)}...` : 'NOT SET',
+      baseUrl: config.topupmate.baseUrl
+    });
+
     this.api = axios.create({
       baseURL: this.baseURL,
       headers: {
@@ -27,6 +32,7 @@ class TopupmateService {
     this.api.interceptors.request.use(
       (config) => {
         logger.info(`TopupMate API Request: ${config.method?.toUpperCase()} ${config.url}`);
+        console.log('📤 Authorization Header:', config.headers.Authorization ? `Token ${config.headers.Authorization.toString().substring(6, 20)}...` : 'MISSING');
         return config;
       },
       (error) => {

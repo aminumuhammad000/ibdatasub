@@ -163,7 +163,7 @@ export default function ProfileScreen() {
         <View style={[styles.profileCard, { backgroundColor: cardBg }]}>
           <View style={styles.profilePic}>
             <Image
-              source={{ uri: profileData?.profileImage || user?.avatar }}
+              source={{ uri: profileData?.profileImage || user?.profile_image || 'https://via.placeholder.com/150' }}
               style={styles.profileImage}
             />
           </View>

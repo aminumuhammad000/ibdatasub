@@ -64,14 +64,6 @@ export default function DashboardScreen() {
     },
   ];
 
-  const operators = [
-    { name: 'MTN', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-    { name: 'Airtel', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-    { name: 'Glo', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-    { name: '9mobile', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-    { name: 'DSTV', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-    { name: 'GoTV', logo: 'https://cdn.jsdelivr.net/gh/madebybowtie/FlagKit@2.2/Assets/SVG/NG.svg' },
-  ];
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
@@ -237,18 +229,6 @@ export default function DashboardScreen() {
               </View>
             ))}
           </View>
-        </View>
-
-        {/* Operators */}
-        <View style={styles.operatorsSection}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Operators</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.operatorsList}>
-            {operators.map((operator, index) => (
-              <View key={index} style={[styles.operatorItem, { backgroundColor: cardBg }]}>
-                <View style={styles.operatorLogoPlaceholder} />
-              </View>
-            ))}
-          </ScrollView>
         </View>
 
         {/* Bottom Spacing */}
