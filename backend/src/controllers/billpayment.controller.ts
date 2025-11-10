@@ -88,12 +88,12 @@ export class BillPaymentController {
       try {
         // Purchase airtime
         const result = await topupmateService.purchaseAirtime({
-          network,
-          phone,
+          network: String(network),
+          phone: String(phone),
           ref,
           airtime_type,
           ported_number,
-          amount,
+          amount: String(amount),
         });
 
         // Update transaction status
@@ -170,10 +170,10 @@ export class BillPaymentController {
       try {
         // Purchase data
         const result = await topupmateService.purchaseData({
-          network,
-          phone,
+          network: String(network),
+          phone: String(phone),
           ref,
-          plan,
+          plan: String(plan),
           ported_number,
         });
 
@@ -216,8 +216,8 @@ export class BillPaymentController {
       const { provider, iucnumber } = req.body;
 
       const result = await topupmateService.verifyCableAccount({
-        provider,
-        iucnumber,
+        provider: String(provider),
+        iucnumber: String(iucnumber),
       });
 
       if (result.status === 'success') {
