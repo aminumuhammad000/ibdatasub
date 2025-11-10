@@ -15,6 +15,7 @@ interface CreateVirtualAccountData {
   customerName: string;
   email: string;
   accountReference: string;
+  webhookUrl?: string;
 }
 
 interface VirtualAccountResponse {
@@ -150,10 +151,18 @@ export class PayrantService {
         const url = `${this.config.baseUrl}/palmpay/`;
         console.log(`🌐 Sending request to: ${url}`);
         
+        // Prepare request data with webhook URL
+        const requestData = {
+          ...data,
+          webhookUrl: data.webhookUrl || `${process.env.BACKEND_URL || 'https://vtuapp-production.up.railway.app'}/api/payment/webhook/payrant`
+        };
+        
+        console.log(`🔔 Webhook URL configured: ${requestData.webhookUrl}`);
+        
         // Make the API request with timeout and retry logic
         const response = await this.axiosInstance.post<VirtualAccountResponse>(
           '/palmpay/',  // Updated endpoint path to match documentation
-          data,
+          requestData,
           {
             timeout: 30000, // 30 seconds timeout
             headers: {

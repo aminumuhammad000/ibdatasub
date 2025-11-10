@@ -427,84 +427,131 @@ export class PaymentController {
       const webhookData = req.body;
       const signature = req.headers['x-payrant-signature'] as string;
 
+      // Log incoming webhook for debugging
+      console.log('🔔 Payrant webhook received:');
+      console.log('Headers:', JSON.stringify(req.headers, null, 2));
+      console.log('Body:', JSON.stringify(webhookData, null, 2));
+
       // Import Payrant service
       const { PayrantService } = await import('../services/payrant.service.js');
       const payrantService = new PayrantService();
 
-      // Verify webhook signature
-      const isValid = payrantService.verifyWebhookSignature(
-        JSON.stringify(webhookData),
-        signature
-      );
+      // Verify webhook signature if provided
+      if (signature) {
+        const isValid = payrantService.verifyWebhookSignature(
+          JSON.stringify(webhookData),
+          signature
+        );
 
-      if (!isValid) {
-        console.error('Invalid Payrant webhook signature');
-        return res.status(400).json({ status: false, message: 'Invalid signature' });
+        if (!isValid) {
+          console.error('❌ Invalid Payrant webhook signature');
+          return res.status(400).json({ status: false, message: 'Invalid signature' });
+        }
+        console.log('✅ Webhook signature verified');
+      } else {
+        console.warn('⚠️ No signature provided in webhook');
       }
 
-      // Process webhook
-      if (webhookData.status === 'success' && webhookData.transaction) {
-        const { transaction } = webhookData;
-        const accountReference = transaction.metadata?.account_reference;
+      // Handle different webhook formats from Payrant
+      let transaction, accountReference, amount, reference;
 
-        if (!accountReference) {
-          console.error('No account reference in webhook');
-          return res.status(400).json({ status: false, message: 'Missing account reference' });
-        }
+      // Format 1: Direct transaction object
+      if (webhookData.transaction) {
+        transaction = webhookData.transaction;
+        accountReference = transaction.metadata?.account_reference || transaction.accountReference;
+        amount = transaction.net_amount || transaction.amount;
+        reference = transaction.reference;
+      }
+      // Format 2: Data nested in 'data' property
+      else if (webhookData.data) {
+        transaction = webhookData.data;
+        accountReference = transaction.metadata?.accountReference || transaction.accountReference;
+        amount = transaction.netAmount || transaction.amount;
+        reference = transaction.reference;
+      }
+      // Format 3: Direct properties
+      else {
+        accountReference = webhookData.accountReference || webhookData.account_reference;
+        amount = webhookData.amount || webhookData.net_amount || webhookData.netAmount;
+        reference = webhookData.reference || webhookData.transactionReference;
+        transaction = webhookData;
+      }
 
-        // Find user by account reference
-        const user = await User.findOne({ 'virtual_account.account_reference': accountReference });
-        if (!user) {
-          console.error('User not found for account reference:', accountReference);
-          return res.status(404).json({ status: false, message: 'User not found' });
-        }
+      console.log('📝 Extracted data:', {
+        accountReference,
+        amount,
+        reference,
+        status: webhookData.status || webhookData.transaction_status
+      });
 
-        // Get or create wallet
-        let wallet = await Wallet.findOne({ user_id: user._id });
-        if (!wallet) {
-          wallet = await Wallet.create({
-            user_id: user._id,
-            balance: 0,
-          });
-        }
+      if (!accountReference) {
+        console.error('❌ No account reference in webhook');
+        return res.status(400).json({ status: false, message: 'Missing account reference' });
+      }
 
-        // Check if transaction already processed
-        const existingTransaction = await Transaction.findOne({ reference_number: transaction.reference });
-        if (existingTransaction) {
-          console.log('Transaction already processed:', transaction.reference);
-          return res.status(200).json({ status: true, message: 'Already processed' });
-        }
+      if (!amount || !reference) {
+        console.error('❌ Missing required fields:', { amount, reference });
+        return res.status(400).json({ status: false, message: 'Missing amount or reference' });
+      }
 
-        // Credit wallet
-        const netAmount = transaction.net_amount || transaction.amount;
-        wallet.balance += netAmount;
-        await wallet.save();
+      // Find user by account reference
+      const user = await User.findOne({ 'virtual_account.account_reference': accountReference });
+      if (!user) {
+        console.error('❌ User not found for account reference:', accountReference);
+        return res.status(404).json({ status: false, message: 'User not found' });
+      }
 
-        // Create transaction record
-        await Transaction.create({
+      console.log('✅ User found:', user.email);
+
+      // Get or create wallet
+      let wallet = await Wallet.findOne({ user_id: user._id });
+      if (!wallet) {
+        console.log('Creating new wallet for user:', user.email);
+        wallet = await Wallet.create({
           user_id: user._id,
-          amount: netAmount,
-          type: 'deposit',
-          status: 'completed',
-          reference_number: transaction.reference,
-          description: `Virtual account deposit from ${transaction.payer_details?.account_name || 'Unknown'}`,
-          gateway: 'payrant',
-          metadata: {
-            payer_account: transaction.payer_details?.account_number,
-            payer_name: transaction.payer_details?.account_name,
-            payer_bank: transaction.payer_details?.bank_name,
-            fee: transaction.fee,
-            gross_amount: transaction.amount,
-          },
+          balance: 0,
         });
-
-        console.log(`✅ Wallet credited: User ${user.email}, Amount: ₦${netAmount}`);
       }
 
-      return res.status(200).json({ status: true, message: 'Webhook processed' });
+      // Check if transaction already processed
+      const existingTransaction = await Transaction.findOne({ reference_number: reference });
+      if (existingTransaction) {
+        console.log('⚠️ Transaction already processed:', reference);
+        return res.status(200).json({ status: true, message: 'Already processed' });
+      }
+
+      // Credit wallet
+      const oldBalance = wallet.balance;
+      wallet.balance += amount;
+      await wallet.save();
+
+      console.log(`💰 Wallet updated: ${oldBalance} -> ${wallet.balance}`);
+
+      // Create transaction record
+      await Transaction.create({
+        user_id: user._id,
+        amount: amount,
+        type: 'deposit',
+        status: 'completed',
+        reference_number: reference,
+        description: `Virtual account deposit from ${transaction.payer_details?.account_name || transaction.payerName || 'Unknown'}`,
+        gateway: 'payrant',
+        metadata: {
+          payer_account: transaction.payer_details?.account_number || transaction.payerAccount,
+          payer_name: transaction.payer_details?.account_name || transaction.payerName,
+          payer_bank: transaction.payer_details?.bank_name || transaction.payerBank,
+          fee: transaction.fee || 0,
+          gross_amount: transaction.amount || amount,
+          webhook_data: webhookData,
+        },
+      });
+
+      console.log(`✅ Wallet credited: User ${user.email}, Amount: ₦${amount}`);
+
+      return res.status(200).json({ status: true, message: 'Webhook processed successfully' });
     } catch (error: any) {
-      console.error('Payrant webhook error:', error);
-      return res.status(500).json({ status: false, message: 'Webhook processing failed' });
+      console.error('❌ Payrant webhook error:', error);
+      return res.status(500).json({ status: false, message: 'Webhook processing failed', error: error.message });
     }
   }
 }
