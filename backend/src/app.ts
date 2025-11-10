@@ -11,7 +11,7 @@ import supportRoutes from "./routes/support.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
-// import billpaymentRoutes from "./routes/billpayment.routes.js";
+import billpaymentRoutes from "./routes/billpayment.routes.js";
 
 // Import logging middleware
 import { logger } from "./config/bootstrap.js";
@@ -91,7 +91,7 @@ app.use("/api/promotions", promotionsRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/payment", paymentRoutes);
-// app.use("/api/billpayment", billpaymentRoutes);
+app.use("/api/billpayment", billpaymentRoutes);
 
 // Root route
 app.get("/", (req: Request, res: Response) => {
