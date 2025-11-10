@@ -498,10 +498,21 @@ export class PaymentController {
         return res.status(400).json({ status: false, message: 'Missing amount or reference' });
       }
 
-      // Find user by account reference
-      const user = await User.findOne({ 'virtual_account.account_reference': accountReference });
+      // Find virtual account by account reference
+      const { default: VirtualAccount } = await import('../models/VirtualAccount.js');
+      const virtualAccount = await VirtualAccount.findOne({ reference: accountReference });
+      
+      if (!virtualAccount) {
+        console.error('❌ Virtual account not found for reference:', accountReference);
+        return res.status(404).json({ status: false, message: 'Virtual account not found' });
+      }
+
+      console.log('✅ Virtual account found:', virtualAccount.accountNumber);
+
+      // Find user from virtual account
+      const user = await User.findById(virtualAccount.user);
       if (!user) {
-        console.error('❌ User not found for account reference:', accountReference);
+        console.error('❌ User not found for virtual account');
         return res.status(404).json({ status: false, message: 'User not found' });
       }
 
