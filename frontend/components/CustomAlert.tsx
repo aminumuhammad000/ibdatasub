@@ -70,14 +70,14 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
   const getAlertStyles = () => {
     switch (type) {
       case 'success':
-        return { backgroundColor: '#10B981', icon: 'check-circle' };
+        return { backgroundColor: '#10B981', icon: 'check-circle' as const };
       case 'error':
-        return { backgroundColor: '#EF4444', icon: 'error' };
+        return { backgroundColor: '#EF4444', icon: 'error' as const };
       case 'warning':
-        return { backgroundColor: '#F59E0B', icon: 'warning' };
+        return { backgroundColor: '#F59E0B', icon: 'warning' as const };
       case 'info':
       default:
-        return { backgroundColor: '#3B82F6', icon: 'info' };
+        return { backgroundColor: '#3B82F6', icon: 'info' as const };
     }
   };
 

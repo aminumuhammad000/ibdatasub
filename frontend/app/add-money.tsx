@@ -292,12 +292,12 @@ export default function AddMoneyScreen() {
       
       const response = await paymentService.initiatePayment({
         amount: amountNum,
-        gateway: selectedMethod,
+        gateway: selectedMethod as "payrant" | "monnify" | "apystack",
       });
 
       if (response.success) {
-        const checkoutUrl = response.data.payment?.checkoutUrl || response.data.checkoutUrl;
-        const paymentReference = response.data.transaction?.reference || response.data.reference;
+        const checkoutUrl = response.data.payment?.checkoutUrl;
+        const paymentReference = response.data.transaction?.reference;
 
         if (!checkoutUrl) {
           throw new Error('Invalid payment URL');
@@ -459,13 +459,13 @@ export default function AddMoneyScreen() {
             <View style={styles.atmCardFooter}>
               <View style={styles.atmStatusBadge}>
                 <Ionicons 
-                  name={virtualAccount.isActive ? "checkmark-circle" : "alert-circle"} 
+                  name={virtualAccount.status === 'active' ? "checkmark-circle" : "alert-circle"} 
                   size={14} 
-                  color={virtualAccount.isActive ? "#00D4AA" : "#FF5B5B"} 
+                  color={virtualAccount.status === 'active' ? "#00D4AA" : "#FF5B5B"} 
                 />
                 <Text style={[
                   styles.atmStatusText,
-                  { color: virtualAccount.isActive ? "#00D4AA" : "#FF5B5B" }
+                  { color: virtualAccount.status === 'active' ? "#00D4AA" : "#FF5B5B" }
                 ]}>
                   {virtualAccount.status ? virtualAccount.status.toUpperCase() : 'ACTIVE'}
                 </Text>
@@ -752,6 +752,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
+  },
+  atmCopyButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginLeft: 12,
   },
   atmShareButton: {
     flexDirection: 'row',
