@@ -9,6 +9,10 @@ const router = Router();
 router.post('/login', AdminController.login);
 router.get('/dashboard', authMiddleware, AdminController.getDashboardStats);
 
+// Admin user management
+router.post('/admins', authMiddleware, AdminController.createAdminUser);
+router.get('/admins', authMiddleware, AdminController.getAllAdmins);
+
 // User management
 router.get('/users', authMiddleware, AdminController.getAllUsers);
 router.get('/users/:id', authMiddleware, AdminController.getUserById);

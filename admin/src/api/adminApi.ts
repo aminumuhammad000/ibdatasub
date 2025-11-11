@@ -7,6 +7,12 @@ export const login = (data: { email: string; password: string }) =>
 // Dashboard
 export const getDashboardStats = () => api.get('/dashboard');
 
+// Admin Management
+export const createAdminUser = (data: { email: string; first_name: string; last_name: string; password: string }) =>
+  api.post('/admins', data);
+export const getAllAdmins = (params?: { page?: number; limit?: number }) =>
+  api.get('/admins', { params });
+
 // Users
 export const getUsers = (params?: { page?: number; limit?: number }) =>
   api.get('/users', { params });

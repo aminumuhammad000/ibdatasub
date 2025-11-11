@@ -272,4 +272,98 @@ export class AdminController {
       return ApiResponse.error(res, error.message, 500);
     }
   }
+
+  /**
+   * Create a new admin user
+   * @route POST /api/admin/admins
+   * @access Private - Super Admin only
+   */
+  static async createAdminUser(req: AuthRequest, res: Response) {
+    try {
+      const { email, first_name, last_name, password } = req.body;
+
+      // Validate required fields
+      if (!email || !first_name || !last_name || !password) {
+        return ApiResponse.error(res, 'Email, first name, last name, and password are required', 400);
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return ApiResponse.error(res, 'Invalid email format', 400);
+      }
+
+      // Check if admin already exists
+      const existingAdmin = await AdminUser.findOne({ email: email.toLowerCase() });
+      if (existingAdmin) {
+        return ApiResponse.error(res, 'Admin with this email already exists', 409);
+      }
+
+      // Hash password
+      const password_hash = await bcrypt.hash(password, 10);
+
+      // Create new admin
+      const newAdmin = await AdminUser.create({
+        email: email.toLowerCase(),
+        password_hash,
+        first_name,
+        last_name,
+        status: 'active',
+      });
+
+      // Log action
+      await AdminService.logAction({
+        admin_id: req.user?.id as any,
+        action: 'admin_created',
+        entity_type: 'AdminUser',
+        entity_id: newAdmin._id,
+        old_value: {},
+        new_value: { email, first_name, last_name },
+        ip_address: req.ip
+      });
+
+      return ApiResponse.success(res, {
+        _id: newAdmin._id,
+        email: newAdmin.email,
+        first_name: newAdmin.first_name,
+        last_name: newAdmin.last_name,
+        password, // Return plain password only on creation
+        status: newAdmin.status,
+      }, 'Admin user created successfully', 201);
+    } catch (error: any) {
+      console.error('Error creating admin:', error);
+      return ApiResponse.error(res, error.message || 'Error creating admin user', 500);
+    }
+  }
+
+  /**
+   * Get all admin users
+   * @route GET /api/admin/admins
+   * @access Private - Super Admin only
+   */
+  static async getAllAdmins(req: AuthRequest, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      const admins = await AdminUser.find()
+        .select('-password_hash')
+        .skip(skip)
+        .limit(limit)
+        .sort({ created_at: -1 });
+
+      const total = await AdminUser.countDocuments();
+
+      return ApiResponse.paginated(res, admins, {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }, 'Admin users retrieved successfully');
+    } catch (error: any) {
+      console.error('Error fetching admins:', error);
+      return ApiResponse.error(res, error.message || 'Error fetching admin users', 500);
+    }
+  }
 }
