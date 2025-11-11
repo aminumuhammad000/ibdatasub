@@ -19,8 +19,8 @@ import {
 } from './types';
 
   // export const API_BASE_URL = getApiUrl();
-// export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
-export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
+export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+// export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
 
 
 // Log the API URL being used
