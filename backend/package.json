@@ -7,12 +7,13 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-  "start": "npm run build && node dist/server.js",
+    "start": "npm run build && node dist/server.js",
     "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
     "test:coverage": "NODE_ENV=test jest --coverage",
     "create-admin": "tsx scripts/create-admin.ts",
-    "seed:admin": "tsx src/scripts/seed-admin.ts"
+    "seed:admin": "tsx src/scripts/seed-admin.ts",
+    "init:admin": "tsx src/scripts/init-admin.ts"
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
