@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-    "start": "npm run build && node dist/server.js",
+    "start": "npm run build && npm run create-admin && node dist/server.js",
     "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
     "test:coverage": "NODE_ENV=test jest --coverage",
