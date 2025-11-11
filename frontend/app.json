@@ -4,7 +4,7 @@
     "slug": "vtu-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ibdatalogo.jpg",
+  "icon": "./assets/images/ibdatalogo.png",
     "scheme": "vtuapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

@@ -18,6 +18,7 @@ import {
 import { authService } from '@/services/auth.service';
 import { userService } from '@/services/user.service';
 import { walletService } from '@/services/wallet.service';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileScreen() {
   const { isDark } = useTheme();
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
   const [wallet, setWallet] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { logout } = useAuth();
 
   useEffect(() => {
     loadAllData();
@@ -90,13 +92,13 @@ export default function ProfileScreen() {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            await authService.logout();
+            await logout();
             router.replace('/login');
           },
         },
       ]
     );
-  };
+  }
 
   const theme = {
     primary: '#0A2540',

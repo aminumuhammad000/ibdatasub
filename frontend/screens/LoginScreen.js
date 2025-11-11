@@ -70,6 +70,7 @@ const LoginScreen = () => {
 
       if (response.success) {
         showAlert("Login successful! Welcome back!", "success");
+        router.replace("/(tabs)");
       } else {
         showAlert(
           response.message || "Invalid email or password. Please try again.",

@@ -511,18 +511,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Operators */}
-        <View style={styles.operatorsSection}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Operators</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.operatorsList}>
-            {operators.map((operator, index) => (
-              <View key={index} style={[styles.operatorItem, { backgroundColor: cardBg }]}>
-                <Text style={[styles.operatorText, { color: textColor }]}>{operator}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
         {/* Bottom Spacing */}
         <View style={{ height: 100 }} />
       </ScrollView>
