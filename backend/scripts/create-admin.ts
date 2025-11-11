@@ -3,8 +3,8 @@
 // Script to create an admin user for the VTU App
 
 import bcrypt from 'bcryptjs';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -43,7 +43,7 @@ const AdminUser = mongoose.model('AdminUser', adminUserSchema, 'admin_users');
 async function createAdmin() {
   try {
     console.log('🔌 Connecting to MongoDB...');
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/connecta_vtu';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://0.0.0.0/connecta_vtu';
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
 
