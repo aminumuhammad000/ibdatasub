@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import PricingPlans from './pages/PricingPlans';
 import Profile from './pages/Profile';
+import Transactions from './pages/Transactions';
 import Users from './pages/Users';
 import WalletCredit from './pages/WalletCredit';
 
@@ -18,6 +19,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/pricing" element={<PricingPlans />} />
           <Route path="/wallet-credit" element={<WalletCredit />} />
           <Route path="/audit-logs" element={<AuditLogs />} />

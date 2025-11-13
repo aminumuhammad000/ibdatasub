@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { getDashboardStats } from '../api/adminApi';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
+import Layout from '../components/Layout';
 
 const Dashboard: React.FC = () => {
   const { data, isLoading, isError } = useQuery({
@@ -62,21 +61,18 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-auto p-8">
-          <div className="max-w-7xl mx-auto">
+    <Layout>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-              <p className="text-slate-600">Monitor your VTU application metrics and activity</p>
+            <div className="mb-6 lg:mb-8">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
+              <p className="text-sm sm:text-base text-slate-600">Monitor your VTU application metrics and activity</p>
             </div>
 
             {/* Stats Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
                     <div className="h-12 bg-slate-200 rounded mb-4 w-12"></div>
@@ -95,7 +91,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {stats.map((stat, index) => (
                   <StatCard key={index} {...stat} />
                 ))}
@@ -103,7 +99,7 @@ const Dashboard: React.FC = () => {
             )}
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6 lg:mt-8">
               {/* Recent Activity */}
               <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -162,9 +158,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+    </Layout>
   );
 };
 

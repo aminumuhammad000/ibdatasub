@@ -1,4 +1,4 @@
-import api from './axios';
+import api, { generalApi } from './axios';
 
 // Auth
 export const login = (data: { email: string; password: string }) =>
@@ -37,3 +37,14 @@ export const deletePricingPlan = (id: string) =>
   api.delete(`/pricing/${id}`);
 export const bulkImportPricingPlans = (plans: any[]) =>
   api.post('/pricing/bulk-import', { plans });
+
+// Transactions
+export const getTransactions = (params?: { page?: number; limit?: number; status?: string; type?: string }) =>
+  generalApi.get('/transactions/all', { params });
+export const getTransactionById = (id: string) => generalApi.get(`/transactions/${id}`);
+
+// Admin Profile
+export const updateAdminProfile = (data: { first_name?: string; last_name?: string; email?: string }) =>
+  api.put('/profile', data);
+export const changeAdminPassword = (data: { currentPassword: string; newPassword: string }) =>
+  api.put('/profile/password', data);
