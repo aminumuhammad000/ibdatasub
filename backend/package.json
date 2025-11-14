@@ -4,16 +4,20 @@
   "description": "",
   "type": "module",
   "main": "index.js",
-"scripts": {
-  "dev": "nodemon --exec tsx src/server.ts",
-  "build": "tsc",
-  "start": "npm run build && npm run init:admin && npm run seed:admin && node dist/server.js",
-  "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
-  "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
-  "test:coverage": "NODE_ENV=test jest --coverage",
-  "seed:admin": "tsx src/scripts/seed-admin.ts",
-  "init:admin": "tsx src/scripts/init-admin.ts"
-},
+  "scripts": {
+    "dev": "nodemon --exec tsx src/server.ts",
+    "build": "tsc",
+    "start": "npm run build && npm run init:admin && npm run seed:admin && node dist/server.js",
+    "start:with-seed": "npm run build && npm run seed:pricing && npm run seed:providers && node dist/server.js",
+    "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
+    "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "seed:admin": "tsx src/scripts/seed-admin.ts",
+    "init:admin": "tsx src/scripts/init-admin.ts",
+    "seed:pricing": "tsx src/scripts/seed_pricing.ts",
+    "seed:providers": "tsx src/scripts/seed_providers.ts",
+    "seed:all": "npm run seed:pricing && npm run seed:providers"
+  },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
     "testEnvironment": "node",

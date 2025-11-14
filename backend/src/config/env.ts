@@ -42,6 +42,12 @@ export interface Config {
   monnify: MonnifyConfig;
   topupmate: TopupmateConfig;
   serviceCharges: ServiceCharges;
+  fundingAccount: {
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+    instructions?: string;
+  };
 }
 
 export const config: Config = {
@@ -93,6 +99,13 @@ export const config: Config = {
     cable: parseFloat(process.env.CABLE_SERVICE_CHARGE || '0'),
     electricity: parseFloat(process.env.ELECTRICITY_SERVICE_CHARGE || '0'),
     exampin: parseFloat(process.env.EXAMPIN_SERVICE_CHARGE || '0'),
+  },
+  // Default funding account details
+  fundingAccount: {
+    bankName: process.env.FUNDING_BANK_NAME || 'Access Bank',
+    accountName: process.env.FUNDING_ACCOUNT_NAME || 'Topupmate connect/ Aminu(Topupmate)',
+    accountNumber: process.env.FUNDING_ACCOUNT_NUMBER || '6600392859',
+    instructions: process.env.FUNDING_INSTRUCTIONS || 'Transfer to this account and notify support with your reference.',
   }
 };
 

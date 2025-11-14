@@ -4,6 +4,15 @@ import { useAuthContext } from '../hooks/AuthContext';
 
 const navItems = [
   {
+    to: '/funding',
+    label: 'Funding',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2m0-4h4m-4 0l-2-2m2 2l-2 2" />
+      </svg>
+    ),
+  },
+  {
     to: '/dashboard',
     label: 'Dashboard',
     icon: (
@@ -22,11 +31,29 @@ const navItems = [
     ),
   },
   {
+    to: '/transactions',
+    label: 'Transactions',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+      </svg>
+    ),
+  },
+  {
     to: '/pricing',
     label: 'Pricing Plans',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/providers',
+    label: 'Providers',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
       </svg>
     ),
   },
@@ -60,8 +87,13 @@ const navItems = [
   },
 ];
 
-const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true);
+interface SidebarProps {
+  isMobileOpen: boolean;
+  setIsMobileOpen: (open: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
+  const [isDesktopOpen, setIsDesktopOpen] = useState(true);
   const { logout } = useAuthContext();
   const navigate = useNavigate();
 
@@ -70,12 +102,37 @@ const Sidebar: React.FC = () => {
     navigate('/login');
   };
 
+  const handleNavClick = () => {
+    // Close mobile menu when nav item is clicked
+    if (window.innerWidth < 1024) {
+      setIsMobileOpen(false);
+    }
+  };
+
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen flex flex-col transition-all duration-300 border-r border-slate-700 shadow-2xl`}>
-      {/* Logo Section */}
-      <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-        {isOpen && (
-          <div>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          ${isDesktopOpen ? 'lg:w-64' : 'lg:w-20'} 
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          fixed lg:static inset-y-0 left-0 z-50
+          w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 
+          text-white h-screen flex flex-col transition-all duration-300 
+          border-r border-slate-700 shadow-2xl
+        `}
+      >
+        {/* Logo Section */}
+        <div className="p-4 lg:p-6 border-b border-slate-700 flex items-center justify-between">
+          {(isDesktopOpen || isMobileOpen) && (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -83,56 +140,83 @@ const Sidebar: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">VTU</h1>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  VTU
+                </h1>
                 <p className="text-xs text-slate-400">Admin Panel</p>
               </div>
             </div>
-          </div>
-        )}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="p-2 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'} />
-          </svg>
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                isActive
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg'
-                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`
-            }
+          )}
+          
+          {/* Desktop Toggle */}
+          <button
+            onClick={() => setIsDesktopOpen(!isDesktopOpen)}
+            className="hidden lg:block p-2 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
           >
-            <span className={`flex-shrink-0 ${isOpen ? '' : ''}`}>{item.icon}</span>
-            {isOpen && <span className="text-sm font-medium truncate">{item.label}</span>}
-          </NavLink>
-        ))}
-      </nav>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={isDesktopOpen ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'}
+              />
+            </svg>
+          </button>
 
-      {/* Logout Button */}
-      <div className="p-4 border-t border-slate-700 space-y-2">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-red-900/20 rounded-lg transition-all duration-200 text-sm font-medium"
-        >
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          {isOpen && <span>Logout</span>}
-        </button>
-        {isOpen && <p className="text-xs text-slate-500 px-4">v1.0.0</p>}
-      </div>
-    </aside>
+          {/* Mobile Close */}
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`
+              }
+            >
+              <span className="flex-shrink-0">{item.icon}</span>
+              {(isDesktopOpen || isMobileOpen) && (
+                <span className="text-sm font-medium truncate">{item.label}</span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t border-slate-700 space-y-2">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-red-900/20 rounded-lg transition-all duration-200 text-sm font-medium"
+          >
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            {(isDesktopOpen || isMobileOpen) && <span>Logout</span>}
+          </button>
+          {(isDesktopOpen || isMobileOpen) && <p className="text-xs text-slate-500 px-4">v1.0.0</p>}
+        </div>
+      </aside>
+    </>
   );
 };
 

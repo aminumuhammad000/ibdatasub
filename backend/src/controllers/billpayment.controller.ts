@@ -2,6 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Transaction, User } from '../models/index.js';
 import topupmateService from '../services/topupmate.service.js';
+import providerRegistry from '../services/providerRegistry.service.js';
 import { WalletService } from '../services/wallet.service.js';
 import { AuthRequest } from '../types/index.js';
 import { normalizeNetwork } from '../utils/network.js';
@@ -11,8 +12,11 @@ export class BillPaymentController {
   // Get networks
   async getNetworks(req: Request, res: Response, next: NextFunction) {
     try {
-      const networks = await topupmateService.getNetworks();
-      return ApiResponse.success(res, 'Networks retrieved successfully', networks.response);
+      const selected = await providerRegistry.getPreferredProviderFor('airtime');
+      const client = selected?.client || topupmateService;
+      const networks = await (client.getNetworks ? client.getNetworks() : topupmateService.getNetworks());
+      const payload = (networks as any).response || networks;
+      return ApiResponse.success(res, 'Networks retrieved successfully', payload);
     } catch (error) {
       next(error);
     }
@@ -21,8 +25,11 @@ export class BillPaymentController {
   // Get data plans
   async getDataPlans(req: Request, res: Response, next: NextFunction) {
     try {
-      const plans = await topupmateService.getDataPlans();
-      return ApiResponse.success(res, 'Data plans retrieved successfully', plans.response);
+      const selected = await providerRegistry.getPreferredProviderFor('data');
+      const client = selected?.client || topupmateService;
+      const plans = await (client.getDataPlans ? client.getDataPlans() : topupmateService.getDataPlans());
+      const payload = (plans as any).response || plans;
+      return ApiResponse.success(res, 'Data plans retrieved successfully', payload);
     } catch (error) {
       next(error);
     }
@@ -31,8 +38,11 @@ export class BillPaymentController {
   // Get cable providers
   async getCableProviders(req: Request, res: Response, next: NextFunction) {
     try {
-      const providers = await topupmateService.getCableProviders();
-      return ApiResponse.success(res, 'Cable providers retrieved successfully', providers.response);
+      const selected = await providerRegistry.getPreferredProviderFor('cable');
+      const client = selected?.client || topupmateService;
+      const providers = await (client.getCableProviders ? client.getCableProviders() : topupmateService.getCableProviders());
+      const payload = (providers as any).response || providers;
+      return ApiResponse.success(res, 'Cable providers retrieved successfully', payload);
     } catch (error) {
       next(error);
     }
@@ -41,8 +51,11 @@ export class BillPaymentController {
   // Get electricity providers
   async getElectricityProviders(req: Request, res: Response, next: NextFunction) {
     try {
-      const providers = await topupmateService.getElectricityProviders();
-      return ApiResponse.success(res, 'Electricity providers retrieved successfully', providers.response);
+      const selected = await providerRegistry.getPreferredProviderFor('electricity');
+      const client = selected?.client || topupmateService;
+      const providers = await (client.getElectricityProviders ? client.getElectricityProviders() : topupmateService.getElectricityProviders());
+      const payload = (providers as any).response || providers;
+      return ApiResponse.success(res, 'Electricity providers retrieved successfully', payload);
     } catch (error) {
       next(error);
     }
@@ -51,8 +64,11 @@ export class BillPaymentController {
   // Get exam pin providers
   async getExamPinProviders(req: Request, res: Response, next: NextFunction) {
     try {
-      const providers = await topupmateService.getExamPinProviders();
-      return ApiResponse.success(res, 'Exam pin providers retrieved successfully', providers.response);
+      const selected = await providerRegistry.getPreferredProviderFor('exampin');
+      const client = selected?.client || topupmateService;
+      const providers = await (client.getExamPinProviders ? client.getExamPinProviders() : topupmateService.getExamPinProviders());
+      const payload = (providers as any).response || providers;
+      return ApiResponse.success(res, 'Exam pin providers retrieved successfully', payload);
     } catch (error) {
       next(error);
     }
@@ -109,15 +125,25 @@ export class BillPaymentController {
       });
 
       try {
-        // Purchase airtime using normalized network ID
-        const result = await topupmateService.purchaseAirtime({
-          network: String(providerId),
-          phone: String(phone),
-          ref,
-          airtime_type,
-          ported_number,
-          amount: String(amount),
-        });
+        const selected = await providerRegistry.getPreferredProviderFor('airtime');
+        const client = selected?.client || topupmateService;
+        const result = await (client.purchaseAirtime
+          ? client.purchaseAirtime({
+              network: String(providerId),
+              phone: String(phone),
+              ref,
+              airtime_type,
+              ported_number,
+              amount: String(amount),
+            })
+          : topupmateService.purchaseAirtime({
+              network: String(providerId),
+              phone: String(phone),
+              ref,
+              airtime_type,
+              ported_number,
+              amount: String(amount),
+            }));
 
         // Update transaction status
         if (result.status === 'success') {
@@ -178,7 +204,9 @@ export class BillPaymentController {
       }
 
       // Get plan details to determine amount
-      const plans = await topupmateService.getDataPlans();
+      const selPlans = await providerRegistry.getPreferredProviderFor('data');
+      const planClient = selPlans?.client || topupmateService;
+      const plans = await (planClient.getDataPlans ? planClient.getDataPlans() : topupmateService.getDataPlans());
       const selectedPlan = plans.response?.find((p: any) => p.planid === plan);
       
       if (!selectedPlan) {
@@ -218,14 +246,23 @@ export class BillPaymentController {
       });
 
       try {
-        // Purchase data using normalized network ID
-        const result = await topupmateService.purchaseData({
-          network: String(providerId),
-          phone: String(phone),
-          ref,
-          plan: String(plan),
-          ported_number,
-        });
+        const selected = await providerRegistry.getPreferredProviderFor('data');
+        const client = selected?.client || topupmateService;
+        const result = await (client.purchaseData
+          ? client.purchaseData({
+              network: String(providerId),
+              phone: String(phone),
+              ref,
+              plan: String(plan),
+              ported_number,
+            })
+          : topupmateService.purchaseData({
+              network: String(providerId),
+              phone: String(phone),
+              ref,
+              plan: String(plan),
+              ported_number,
+            }));
 
         // Update transaction status
         if (result.status === 'success') {
@@ -266,11 +303,11 @@ export class BillPaymentController {
   async verifyCableAccount(req: Request, res: Response, next: NextFunction) {
     try {
       const { provider, iucnumber } = req.body;
-
-      const result = await topupmateService.verifyCableAccount({
-        provider: String(provider),
-        iucnumber: String(iucnumber),
-      });
+      const selected = await providerRegistry.getPreferredProviderFor('cable');
+      const client = selected?.client || topupmateService;
+      const result = await (client.verifyCableAccount
+        ? client.verifyCableAccount({ provider: String(provider), iucnumber: String(iucnumber) })
+        : topupmateService.verifyCableAccount({ provider: String(provider), iucnumber: String(iucnumber) }));
 
       if (result.status === 'success') {
         return ApiResponse.success(res, 'Account verification successful', {
@@ -324,15 +361,11 @@ export class BillPaymentController {
       });
 
       try {
-        // Purchase cable TV
-        const result = await topupmateService.purchaseCableTV({
-          provider,
-          iucnumber,
-          plan,
-          ref,
-          subtype,
-          phone,
-        });
+        const selected = await providerRegistry.getPreferredProviderFor('cable');
+        const client = selected?.client || topupmateService;
+        const result = await (client.purchaseCableTV
+          ? client.purchaseCableTV({ provider, iucnumber, plan, ref, subtype, phone })
+          : topupmateService.purchaseCableTV({ provider, iucnumber, plan, ref, subtype, phone }));
 
         // Update transaction status
         if (result.status === 'success') {
@@ -371,12 +404,11 @@ export class BillPaymentController {
   async verifyElectricityMeter(req: Request, res: Response, next: NextFunction) {
     try {
       const { provider, meternumber, metertype } = req.body;
-
-      const result = await topupmateService.verifyElectricityMeter({
-        provider,
-        meternumber,
-        metertype,
-      });
+      const selected = await providerRegistry.getPreferredProviderFor('electricity');
+      const client = selected?.client || topupmateService;
+      const result = await (client.verifyElectricityMeter
+        ? client.verifyElectricityMeter({ provider, meternumber, metertype })
+        : topupmateService.verifyElectricityMeter({ provider, meternumber, metertype }));
 
       if (result.status === 'success') {
         return ApiResponse.success(res, 'Meter verification successful', {
@@ -420,15 +452,11 @@ export class BillPaymentController {
       });
 
       try {
-        // Purchase electricity
-        const result = await topupmateService.purchaseElectricity({
-          provider,
-          meternumber,
-          amount,
-          metertype,
-          phone,
-          ref,
-        });
+        const selected = await providerRegistry.getPreferredProviderFor('electricity');
+        const client = selected?.client || topupmateService;
+        const result = await (client.purchaseElectricity
+          ? client.purchaseElectricity({ provider, meternumber, amount, metertype, phone, ref })
+          : topupmateService.purchaseElectricity({ provider, meternumber, amount, metertype, phone, ref }));
 
         // Update transaction status
         if (result.status === 'success') {
@@ -503,12 +531,11 @@ export class BillPaymentController {
       });
 
       try {
-        // Purchase exam pin
-        const result = await topupmateService.purchaseExamPin({
-          provider,
-          quantity,
-          ref,
-        });
+        const selected = await providerRegistry.getPreferredProviderFor('exampin');
+        const client = selected?.client || topupmateService;
+        const result = await (client.purchaseExamPin
+          ? client.purchaseExamPin({ provider, quantity, ref })
+          : topupmateService.purchaseExamPin({ provider, quantity, ref }));
 
         // Update transaction status
         if (result.status === 'success') {
@@ -549,7 +576,11 @@ export class BillPaymentController {
     try {
       const { reference } = req.params;
 
-      const result = await topupmateService.getTransactionStatus(reference);
+      const selected = await providerRegistry.getPreferredProviderFor('airtime');
+      const client = selected?.client || topupmateService;
+      const result = await (client.getTransactionStatus
+        ? client.getTransactionStatus(reference)
+        : topupmateService.getTransactionStatus(reference));
 
       if (result.status === 'success') {
         return ApiResponse.success(res, 'Transaction status retrieved', result.response);

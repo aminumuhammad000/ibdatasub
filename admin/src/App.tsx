@@ -6,9 +6,12 @@ import AuditLogs from './pages/AuditLogs';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import PricingPlans from './pages/PricingPlans';
+import Funding from './pages/Funding';
 import Profile from './pages/Profile';
+import Transactions from './pages/Transactions';
 import Users from './pages/Users';
 import WalletCredit from './pages/WalletCredit';
+import Providers from './pages/Providers';
 
 function App() {
   return (
@@ -18,7 +21,10 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/pricing" element={<PricingPlans />} />
+          <Route path="/funding" element={<Funding />} />
+          <Route path="/providers" element={<Providers />} />
           <Route path="/wallet-credit" element={<WalletCredit />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
           <Route path="/profile" element={<Profile />} />

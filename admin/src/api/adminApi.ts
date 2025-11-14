@@ -1,4 +1,4 @@
-import api from './axios';
+import api, { generalApi } from './axios';
 
 // Auth
 export const login = (data: { email: string; password: string }) =>
@@ -43,3 +43,34 @@ export const deletePricingPlan = (id: string) =>
   api.delete(`/pricing/${id}`);
 export const bulkImportPricingPlans = (plans: any[]) =>
   api.post('/pricing/bulk-import', { plans });
+
+// Providers (Bill payment API providers)
+export const getProviders = (params?: { active?: boolean }) =>
+  api.get('/providers', { params });
+export const getProviderById = (id: string) => api.get(`/providers/${id}`);
+export const createProvider = (data: any) => api.post('/providers', data);
+export const updateProvider = (id: string, data: any) => api.put(`/providers/${id}`, data);
+export const deleteProvider = (id: string) => api.delete(`/providers/${id}`);
+export const getProviderEnv = (id: string) => api.get(`/providers/${id}/env`);
+export const updateProviderEnv = (id: string, env: Record<string, string>) => api.put(`/providers/${id}/env`, { env });
+
+// Funding & Provider Balances
+export const getProviderBalances = () => api.get('/providers/balances');
+export const getFundingInfo = () => api.get('/funding/info');
+export const getFundingAccounts = () => api.get('/funding/accounts');
+export const createFundingAccount = (data: { bankName: string; accountName: string; accountNumber: string; instructions?: string; active?: boolean }) =>
+  api.post('/funding/accounts', data);
+export const updateFundingAccount = (id: string, data: Partial<{ bankName: string; accountName: string; accountNumber: string; instructions?: string; active?: boolean }>) =>
+  api.put(`/funding/accounts/${id}`, data);
+export const deleteFundingAccount = (id: string) => api.delete(`/funding/accounts/${id}`);
+
+// Transactions
+export const getTransactions = (params?: { page?: number; limit?: number; status?: string; type?: string }) =>
+  generalApi.get('/transactions/all', { params });
+export const getTransactionById = (id: string) => generalApi.get(`/transactions/${id}`);
+
+// Admin Profile
+export const updateAdminProfile = (data: { first_name?: string; last_name?: string; email?: string }) =>
+  api.put('/profile', data);
+export const changeAdminPassword = (data: { currentPassword: string; newPassword: string }) =>
+  api.put('/profile/password', data);

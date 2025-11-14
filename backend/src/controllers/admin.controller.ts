@@ -366,4 +366,58 @@ export class AdminController {
       return ApiResponse.error(res, error.message || 'Error fetching admin users', 500);
     }
   }
+
+  /**
+   * Update current admin profile (first_name, last_name, email)
+   * @route PUT /api/admin/profile
+   */
+  static async updateAdminProfile(req: AuthRequest, res: Response) {
+    try {
+      const allowed = ['first_name', 'last_name', 'email'];
+      const updates = Object.keys(req.body)
+        .filter((k) => allowed.includes(k))
+        .reduce((acc: any, k) => {
+          acc[k] = req.body[k];
+          return acc;
+        }, {});
+
+      const admin = await AdminUser.findByIdAndUpdate(
+        req.user?.id,
+        { ...updates, updated_at: new Date() },
+        { new: true }
+      ).select('-password_hash');
+
+      if (!admin) return ApiResponse.error(res, 'Admin not found', 404);
+      return ApiResponse.success(res, admin, 'Profile updated successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
+   * Change current admin password
+   * @route PUT /api/admin/profile/password
+   */
+  static async changeAdminPassword(req: AuthRequest, res: Response) {
+    try {
+      const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+      if (!currentPassword || !newPassword) {
+        return ApiResponse.error(res, 'currentPassword and newPassword are required', 400);
+      }
+
+      const admin = await AdminUser.findById(req.user?.id);
+      if (!admin) return ApiResponse.error(res, 'Admin not found', 404);
+
+      const ok = await bcrypt.compare(currentPassword, admin.password_hash);
+      if (!ok) return ApiResponse.error(res, 'Current password is incorrect', 400);
+
+      admin.password_hash = await bcrypt.hash(newPassword, 10);
+      admin.updated_at = new Date();
+      await admin.save();
+
+      return ApiResponse.success(res, null, 'Password changed successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
 }

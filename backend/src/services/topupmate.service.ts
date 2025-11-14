@@ -289,6 +289,28 @@ class TopupmateService {
     }
   }
 
+  // Get wallet balance (account info)
+  async getWalletBalance(): Promise<{ balance: number; currency?: string; name?: string; status?: string; raw?: any }> {
+    try {
+      const response = await this.api.get('/user/');
+      const data = response.data as any;
+      const rawBalance = data?.balance ?? data?.response?.balance;
+      const numeric = typeof rawBalance === 'number'
+        ? rawBalance
+        : parseFloat(String(rawBalance ?? '0').replace(/,/g, ''));
+      return {
+        balance: isNaN(numeric) ? 0 : numeric,
+        currency: 'NGN',
+        name: data?.name,
+        status: data?.status,
+        raw: data,
+      };
+    } catch (error: any) {
+      logger.error('TopupMate getWalletBalance error:', error.response?.data || error.message);
+      throw new Error(`Failed to fetch TopupMate balance: ${error.message}`);
+    }
+  }
+
   // Generate unique reference
   generateReference(prefix: string): string {
     return `${prefix}_${Date.now()}${Math.random().toString(36).substr(2, 9)}`;

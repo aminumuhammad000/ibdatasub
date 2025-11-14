@@ -41,4 +41,29 @@ api.interceptors.response.use(
   }
 );
 
+// General API instance for non-admin endpoints
+const API_BASE = "https://vtuapp-production.up.railway.app/api";
+
+export const generalApi = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
+});
+
+generalApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+generalApi.interceptors.response.use(
+  (response) => response,
+  (error) => Promise.reject(error)
+);
+
 export default api;

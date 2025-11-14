@@ -84,7 +84,7 @@ export class AdminPricingController {
       await newPlan.save();
       logger.info(`New plan created: ${newPlan._id}`);
 
-      res.status(201).json(ApiResponse.success(res, 'Plan created successfully', { plan: newPlan }));
+      ApiResponse.success(res, 'Plan created successfully', { plan: newPlan }, 201);
     } catch (error) {
       logger.error('Error creating plan:', error);
       ApiResponse.error(res, 'Failed to create plan', 500);
@@ -174,7 +174,7 @@ export class AdminPricingController {
       const result = await AirtimePlan.insertMany(plans);
       logger.info(`Bulk imported ${result.length} plans`);
 
-      res.status(201).json(ApiResponse.success(res, 'Plans imported successfully', { count: result.length }));
+      ApiResponse.success(res, 'Plans imported successfully', { count: result.length }, 201);
     } catch (error) {
       logger.error('Error bulk importing plans:', error);
       ApiResponse.error(res, 'Failed to import plans', 500);

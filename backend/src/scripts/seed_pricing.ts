@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import AirtimePlan from '../models/airtime_plan.model.js';
 import logger from '../utils/logger.js';
+import { config } from '../config/bootstrap.js';
 
 dotenv.config();
 
@@ -77,7 +78,7 @@ const PRICING_DATA = [
 
 const seedDatabase = async () => {
   try {
-    const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/vtuapp';
+    const mongoUrl = config.mongoUri;
     await mongoose.connect(mongoUrl);
     logger.info('Connected to MongoDB');
 

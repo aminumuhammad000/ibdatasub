@@ -36,6 +36,7 @@ const PricingPlans: React.FC = () => {
   const [deletePlan, setDeletePlan] = useState<any | null>(null);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const params = {
     page,
@@ -46,7 +47,7 @@ const PricingPlans: React.FC = () => {
 
   const { data, status } = useQuery({
     queryKey: ['pricing-plans', page, providerId, type],
-    queryFn: () => getPricingPlans(params).then((res: any) => res.data),
+    queryFn: () => getPricingPlans(params).then((res: any) => res.data?.data),
   });
 
   const plans = data?.plans || [];
@@ -89,9 +90,9 @@ const PricingPlans: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
@@ -250,23 +251,26 @@ const PricingPlans: React.FC = () => {
                                 {plan.active ? 'Active' : 'Inactive'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm space-x-2">
+                            <td className="px-6 py-4 text-sm space-x-3">
                               <button
                                 onClick={() => setViewPlan(plan)}
-                                className="text-blue-600 hover:text-blue-900 font-medium"
+                                className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-900 font-medium"
                               >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 View
                               </button>
                               <button
                                 onClick={() => setEditPlan(plan)}
-                                className="text-green-600 hover:text-green-900 font-medium"
+                                className="inline-flex items-center gap-1.5 text-green-600 hover:text-green-900 font-medium"
                               >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 Edit
                               </button>
                               <button
                                 onClick={() => setDeletePlan(plan)}
-                                className="text-red-600 hover:text-red-900 font-medium"
+                                className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-900 font-medium"
                               >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-3h6l1 3"/></svg>
                                 Delete
                               </button>
                             </td>
