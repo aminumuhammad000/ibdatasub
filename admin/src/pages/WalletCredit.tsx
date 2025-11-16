@@ -6,6 +6,7 @@ import Topbar from '../components/Topbar';
 
 const WalletCredit: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [amount, setAmount] = useState<string>('');
   const [description, setDescription] = useState<string>('Admin wallet credit');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,9 +63,9 @@ const WalletCredit: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-2xl mx-auto">
             {/* Header */}

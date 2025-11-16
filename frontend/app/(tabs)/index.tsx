@@ -35,6 +35,7 @@ export default function HomeScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [pinPrompted, setPinPrompted] = useState(false);
 
   // Load data when screen comes into focus (e.g., after login)
   useFocusEffect(
@@ -93,6 +94,18 @@ export default function HomeScreen() {
       const response = await userService.getProfile();
       if (response.success) {
         setUser(response.data);
+        // Prompt to set PIN if not set (legacy/new users)
+        if (!pinPrompted && !response.data?.transaction_pin) {
+          setPinPrompted(true);
+          Alert.alert(
+            'Set Transaction PIN',
+            'For your security, please set your 4-digit transaction PIN to proceed with purchases.',
+            [
+              { text: 'Later', style: 'cancel' },
+              { text: 'Set PIN', onPress: () => router.push('/security') }
+            ]
+          );
+        }
       }
     } catch (error: any) {
       console.log('Error loading profile:', error);

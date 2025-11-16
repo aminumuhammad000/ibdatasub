@@ -3,16 +3,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Linking,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  Linking,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
 
 const theme = {
@@ -79,21 +79,21 @@ export default function HelpSupportScreen() {
     },
     {
       title: 'Call Support',
-      description: '+234 80015498',
+      description: '09162989954',
       icon: 'call',
-      action: () => Linking.openURL('tel:+234 80015498')
+      action: () => Linking.openURL('tel:09162989954')
     },
     {
       title: 'Email Support',
-      description: 'aminuamee@yahoo.com',
+      description: 'indatasub001@gmail.com',
       icon: 'mail',
-      action: () => Linking.openURL('mailto:aminuamee@yahoo.com')
+      action: () => Linking.openURL('mailto:indatasub001@gmail.com')
     },
     {
       title: 'WhatsApp',
-      description: 'Message us on WhatsApp',
+      description: '09162989954',
       icon: 'logo-whatsapp',
-      action: () => Linking.openURL('https://wa.me/23480015498')
+      action: () => Linking.openURL('https://wa.me/23409162989954')
     }
   ];
 

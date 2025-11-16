@@ -44,6 +44,7 @@ export default function BuyDataScreen() {
   const [plans, setPlans] = useState<Array<{ id: string; data: string; validity: string; price: number }>>([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState<string | null>(null);
+  const [pin, setPin] = useState('');
 
   const networks = [
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -62,7 +63,7 @@ export default function BuyDataScreen() {
         const res = await billPaymentService.getDataPlans(selectedNetwork);
         if (res?.success && Array.isArray(res.data)) {
           const mapped = res.data.map((p: any, i: number) => ({
-            id: String(p.plan_id || p.id || p.plan || p.plan_name || `plan-${i}`),
+            id: String(p.planid || p.plan_id || p.id || p.plan || `plan-${i}`),
             data: p.plan_name || p.data_value || p.name || 'Plan',
             validity: p.validity || p.duration || '',
             price: Number(p.price || p.amount || 0),
@@ -95,6 +96,12 @@ export default function BuyDataScreen() {
       return;
     }
 
+    // Validate PIN
+    if (!/^\d{4}$/.test(pin)) {
+      showError('Enter your 4-digit transaction PIN');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -103,6 +110,7 @@ export default function BuyDataScreen() {
         phone: cleanPhone,
         plan: selectedPlan.id.toString(),
         ported_number: true,
+        pin,
       });
 
       if (response.success) {
@@ -111,6 +119,7 @@ export default function BuyDataScreen() {
         setPhoneNumber('');
         setSelectedPlan(null);
         setSelectedNetwork(null);
+        setPin('');
         // Navigate back after short delay
         setTimeout(() => {
           router.back();
@@ -198,7 +207,7 @@ export default function BuyDataScreen() {
         {/* Phone Number Input */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Phone Number</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}>
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
             <Ionicons name="call-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
             <TextInput
               style={[styles.input, { color: textColor }]}
@@ -208,6 +217,24 @@ export default function BuyDataScreen() {
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
               maxLength={11}
+            />
+          </View>
+        </View>
+
+        {/* Transaction PIN Input */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Transaction PIN</Text>
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
+            <Ionicons name="lock-closed-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
+            <TextInput
+              style={[styles.input, { color: textColor }]}
+              placeholder="Enter 4-digit PIN"
+              placeholderTextColor={textBodyColor}
+              value={pin}
+              onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0,4))}
+              keyboardType="number-pad"
+              secureTextEntry
+              maxLength={4}
             />
           </View>
         </View>

@@ -19,8 +19,8 @@ import {
 } from './types';
 
   // export const API_BASE_URL = getApiUrl();
-// export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
-export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
+export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+// export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
 
 
 // Log the API URL being used
@@ -223,6 +223,12 @@ const userService = {
     };
     return api.post<ApiResponse>('/users/kyc', formData, config);
   },
+
+  setTransactionPin: (pin: string) =>
+    api.post<ApiResponse>('/users/transaction-pin', { pin }),
+
+  updateTransactionPin: (data: { current_pin?: string; new_pin: string }) =>
+    api.put<ApiResponse>('/users/transaction-pin', data),
 };
 
 // Wallet Service

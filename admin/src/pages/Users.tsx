@@ -12,6 +12,7 @@ import UserViewModal from '../components/UserViewModal';
 
 const Users: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const limit = 10;
   const { data, status } = useQuery({
@@ -28,7 +29,7 @@ const Users: React.FC = () => {
   const [statusUser, setStatusUser] = useState<any | null>(null);
   const [deleteUserObj, setDeleteUserObj] = useState<any | null>(null);
   const statusMutation = useMutation({
-    mutationFn: (status: string) => updateUserStatus(statusUser.id, status).then((res: any) => res.data),
+    mutationFn: (status: string) => updateUserStatus(statusUser._id, status).then((res: any) => res.data),
     onSuccess: () => {
       setStatusUser(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -36,7 +37,7 @@ const Users: React.FC = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => deleteUser(deleteUserObj.id).then((res: any) => res.data),
+    mutationFn: () => deleteUser(deleteUserObj._id).then((res: any) => res.data),
     onSuccess: () => {
       setDeleteUserObj(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -45,7 +46,7 @@ const Users: React.FC = () => {
 
   const queryClient = useQueryClient();
   const editMutation = useMutation({
-    mutationFn: (data: any) => updateUser(editUser.id, data).then((res: any) => res.data),
+    mutationFn: (data: any) => updateUser(editUser._id, data).then((res: any) => res.data),
     onSuccess: () => {
       setEditUser(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -80,9 +81,9 @@ const Users: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
@@ -161,7 +162,7 @@ const Users: React.FC = () => {
                           </tr>
                         )}
                         {users.map((user: any) => (
-                          <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                          <tr key={user._id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
@@ -169,7 +170,7 @@ const Users: React.FC = () => {
                                 </div>
                                 <div>
                                   <p className="font-medium text-slate-900">{user.first_name} {user.last_name}</p>
-                                  <p className="text-xs text-slate-500">ID: {user.id}</p>
+                                  <p className="text-xs text-slate-500">ID: {user._id}</p>
                                 </div>
                               </div>
                             </td>

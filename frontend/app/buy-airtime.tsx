@@ -38,14 +38,13 @@ export default function BuyAirtimeScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
-  const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null); // code for API
-  const [selectedNetworkIndex, setSelectedNetworkIndex] = useState<number | null>(null); // for UI highlight
+  const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
+  const [selectedNetworkIndex, setSelectedNetworkIndex] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [pin, setPin] = useState('');
 
-  // Networks from backend
   const [networks, setNetworks] = useState<Array<{ id: string; name: string; color: string; icon: string }>>([
-    // Fallback defaults
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
     { id: 'glo', name: 'Glo', color: '#00A95C', icon: 'phone-portrait' },
     { id: 'airtel', name: 'Airtel', color: '#FF0000', icon: 'phone-portrait' },
@@ -75,7 +74,6 @@ export default function BuyAirtimeScreen() {
         setNetError(null);
         const res = await billPaymentService.getNetworks();
         if (res?.success && Array.isArray(res.data)) {
-          // Map backend fields to UI fields; guarantee unique, non-empty ids
           const mapped = res.data.map((n: any, i: number) => {
             const baseId = (n.network_code || n.network_id || n.network || n.name || '')
               .toString()
@@ -83,10 +81,19 @@ export default function BuyAirtimeScreen() {
               .toLowerCase()
               .replace(/\s+/g, '-');
             const id = baseId || `net-${i}`;
+            
+            // Map network colors to match Buy Data screen
+            let color = '#0A2540'; // default
+            const networkName = (n.name || n.network || n.network_code || '').toLowerCase();
+            if (networkName.includes('mtn')) color = '#FFCC00';
+            else if (networkName.includes('glo')) color = '#00A95C';
+            else if (networkName.includes('airtel')) color = '#FF0000';
+            else if (networkName.includes('9mobile') || networkName.includes('etisalat')) color = '#00693E';
+            
             return {
               id,
               name: n.name || n.network || n.network_code || 'Network',
-              color: '#0A2540',
+              color,
               icon: 'phone-portrait',
             };
           });
@@ -102,16 +109,19 @@ export default function BuyAirtimeScreen() {
   }, []);
 
   const handleBuyAirtime = async () => {
-    // Validation
     if (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount)) {
       showError('Please fill all required fields');
       return;
     }
 
-    // Validate phone number format
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     if (cleanPhone.length < 10 || cleanPhone.length > 11) {
       showError('Please enter a valid phone number');
+      return;
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+      showError('Enter your 4-digit transaction PIN');
       return;
     }
 
@@ -135,16 +145,16 @@ export default function BuyAirtimeScreen() {
         amount: amount,
         airtime_type: 'VTU',
         ported_number: true,
+        pin,
       });
 
       if (response.success) {
         showSuccess(`Airtime purchase successful! ₦${amount} sent to ${phoneNumber}`);
-        // Reset form
         setPhoneNumber('');
         setSelectedAmount(null);
         setCustomAmount('');
         setSelectedNetwork(null);
-        // Navigate back after short delay
+        setPin('');
         setTimeout(() => {
           router.back();
         }, 2000);
@@ -160,7 +170,6 @@ export default function BuyAirtimeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: cardBgColor }]}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -177,7 +186,6 @@ export default function BuyAirtimeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Network Selection */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Select Network</Text>
           {netLoading && <Text style={{ color: textBodyColor, marginBottom: 8 }}>Loading networks...</Text>}
@@ -224,10 +232,9 @@ export default function BuyAirtimeScreen() {
           </View>
         </View>
 
-        {/* Phone Number Input */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Phone Number</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}>
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
             <Ionicons name="call-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
             <TextInput
               style={[styles.input, { color: textColor }]}
@@ -241,7 +248,23 @@ export default function BuyAirtimeScreen() {
           </View>
         </View>
 
-        {/* Quick Amount Selection */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Transaction PIN</Text>
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
+            <Ionicons name="lock-closed-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
+            <TextInput
+              style={[styles.input, { color: textColor }]}
+              placeholder="Enter 4-digit PIN"
+              placeholderTextColor={textBodyColor}
+              value={pin}
+              onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0,4))}
+              keyboardType="number-pad"
+              secureTextEntry
+              maxLength={4}
+            />
+          </View>
+        </View>
+
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Select Amount</Text>
           <View style={styles.amountsGrid}>
@@ -251,12 +274,9 @@ export default function BuyAirtimeScreen() {
                 style={[
                   styles.amountCard,
                   {
-                    backgroundColor: selectedAmount === amount 
-                      ? (isDark ? theme.primary : theme.primary)
-                      : cardBgColor,
-                    borderColor: selectedAmount === amount 
-                      ? theme.accent 
-                      : borderColor,
+                    backgroundColor:
+                      selectedAmount === amount ? (isDark ? theme.primary : theme.primary) : cardBgColor,
+                    borderColor: selectedAmount === amount ? theme.accent : borderColor,
                   },
                 ]}
                 onPress={() => {
@@ -268,9 +288,7 @@ export default function BuyAirtimeScreen() {
                 <Text
                   style={[
                     styles.amountText,
-                    {
-                      color: selectedAmount === amount ? '#FFFFFF' : textColor,
-                    },
+                    { color: selectedAmount === amount ? '#FFFFFF' : textColor },
                   ]}
                 >
                   ₦{amount}
@@ -280,10 +298,9 @@ export default function BuyAirtimeScreen() {
           </View>
         </View>
 
-        {/* Custom Amount Input */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Or Enter Custom Amount</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}>
             <Text style={[styles.currencySymbol, { color: textBodyColor }]}>₦</Text>
             <TextInput
               style={[styles.input, { color: textColor }]}
@@ -297,14 +314,11 @@ export default function BuyAirtimeScreen() {
               keyboardType="numeric"
             />
           </View>
-          <Text style={[styles.helperText, { color: textBodyColor }]}> 
+          <Text style={[styles.helperText, { color: textBodyColor }]}>
             Minimum: ₦50 • Maximum: ₦50,000
           </Text>
         </View>
 
-        {/* Transaction PIN removed */}
-
-        {/* Transaction Summary */}
         {(selectedAmount || customAmount) && phoneNumber && selectedNetwork && (
           <View style={[styles.summaryCard, { backgroundColor: cardBgColor }]}>
             <Text style={[styles.summaryTitle, { color: textColor }]}>Transaction Summary</Text>
@@ -341,18 +355,17 @@ export default function BuyAirtimeScreen() {
           </View>
         )}
 
-        {/* Buy Button */}
         <TouchableOpacity
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading)
+              backgroundColor: (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleBuyAirtime}
-          disabled={!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading}
+          disabled={!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading}
           activeOpacity={0.8}
         >
           {isLoading ? (
@@ -364,7 +377,6 @@ export default function BuyAirtimeScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Recent Transactions Info */}
         <View style={[styles.infoCard, { backgroundColor: isDark ? '#1C1C1E' : '#EFF6FF' }]}> 
           <Ionicons 
             name="information-circle-outline" 
@@ -377,7 +389,6 @@ export default function BuyAirtimeScreen() {
         </View>
       </ScrollView>
 
-      {/* Success Modal */}
       <Modal
         visible={showSuccessModal}
         transparent={true}

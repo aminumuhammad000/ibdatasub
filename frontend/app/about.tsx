@@ -37,7 +37,7 @@ export default function AboutScreen() {
   const appInfo = {
     version: '1.0.0',
     buildNumber: '100',
-    releaseDate: 'November 2024',
+    releaseDate: 'November 2025',
     developer: 'AmeeTech'
   };
 
@@ -46,19 +46,19 @@ export default function AboutScreen() {
       title: 'Terms of Service',
       description: 'Read our terms and conditions',
       icon: 'document-text',
-      action: () => Linking.openURL('https://vtuapp.com/terms')
+      action: () => Linking.openURL('https://ibdata.com.ng/terms')
     },
     {
       title: 'Privacy Policy',
       description: 'How we protect your privacy',
       icon: 'shield-checkmark',
-      action: () => Linking.openURL('https://vtuapp.com/privacy')
+      action: () => Linking.openURL('https://ibdata.com.ng/privacy')
     },
     {
       title: 'License Agreement',
       description: 'Software license information',
       icon: 'document',
-      action: () => Linking.openURL('https://vtuapp.com/license')
+      action: () => Linking.openURL('https://ibdata.com.ng/license')
     }
   ];
 

@@ -27,6 +27,7 @@ const AdminManagement: React.FC = () => {
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [createdEmail, setCreatedEmail] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const limit = 10;
@@ -89,9 +90,9 @@ const AdminManagement: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}

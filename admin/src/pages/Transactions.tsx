@@ -7,6 +7,7 @@ import { getTransactions } from '../api/adminApi';
 
 const Transactions: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [viewTransaction, setViewTransaction] = useState<any | null>(null);
@@ -55,9 +56,9 @@ const Transactions: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}

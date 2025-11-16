@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { transactionService, Transaction as ApiTransaction } from '@/services/transaction.service';
+import { useRouter } from 'expo-router';
 
 interface Transaction {
   id: string;
@@ -30,9 +31,7 @@ interface Transaction {
 
 export default function TransactionsScreen() {
   const { isDark } = useTheme();
-  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
-  const [transactionDetails, setTransactionDetails] = useState<any>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
+  const router = useRouter();
   const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     status: [],
@@ -153,9 +152,9 @@ export default function TransactionsScreen() {
     setFilterVisible(false);
   };
 
-  const changeSelectedTransactionId = (id: string) => () => {
-    setSelectedTransactionId(id);
-  }
+  const openTransactionDetails = (id: string) => () => {
+    router.push({ pathname: '/transaction/[id]', params: { id } } as any);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
@@ -190,7 +189,7 @@ export default function TransactionsScreen() {
         >
           {filteredTransactions.length > 0 ? (
             filteredTransactions.map(transaction => (
-              <TouchableOpacity key={transaction.id} style={[styles.transactionItem, { backgroundColor: cardBg }]} onPress={changeSelectedTransactionId(transaction.id)}>
+              <TouchableOpacity key={transaction.id} style={[styles.transactionItem, { backgroundColor: cardBg }]} onPress={openTransactionDetails(transaction.id)}>
                 <View style={[styles.transactionLogo, { backgroundColor: transaction.bgColor }]}>
                   <View style={styles.logoPlaceholder} />
                 </View>

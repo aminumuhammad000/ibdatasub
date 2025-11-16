@@ -4,11 +4,16 @@ import Joi from 'joi';
 export const userValidation = {
   register: Joi.object({
     email: Joi.string().email().required(),
-    phone_number: Joi.string().required(),
+    phone_number: Joi.string().pattern(/^\d{10,11}$/).required().messages({
+      'string.pattern.base': 'Phone number must be 10 or 11 digits',
+      'string.empty': 'Phone number is required',
+      'any.required': 'Phone number is required',
+    }),
     password: Joi.string().min(8).required(),
     first_name: Joi.string().required(),
     last_name: Joi.string().required(),
-    referral_code: Joi.string().optional()
+    referral_code: Joi.string().optional(),
+    pin: Joi.string().pattern(/^\d{4}$/).optional()
   }),
   
   login: Joi.object({

@@ -156,4 +156,66 @@ export class UserController {
       return ApiResponse.error(res, error.message, 500);
     }
   }
+
+  static async setTransactionPin(req: AuthRequest, res: Response) {
+    try {
+      const { pin } = req.body as { pin: string };
+      if (!pin || !/^\d{4}$/.test(String(pin))) {
+        return ApiResponse.error(res, 'PIN must be a 4-digit number', 400);
+      }
+
+      const user = await User.findById(req.user?.id);
+      if (!user) return ApiResponse.error(res, 'User not found', 404);
+
+      if (user.transaction_pin) {
+        return ApiResponse.error(res, 'Transaction PIN already set. Use update endpoint.', 400);
+      }
+
+      const hash = await bcrypt.hash(String(pin), 10);
+      user.transaction_pin = hash;
+      user.updated_at = new Date();
+      await user.save();
+
+      return ApiResponse.success(res, null, 'Transaction PIN set successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async updateTransactionPin(req: AuthRequest, res: Response) {
+    try {
+      const { current_pin, new_pin } = req.body as { current_pin?: string; new_pin: string };
+      if (!new_pin || !/^\d{4}$/.test(String(new_pin))) {
+        return ApiResponse.error(res, 'New PIN must be a 4-digit number', 400);
+      }
+
+      const user = await User.findById(req.user?.id);
+      if (!user) return ApiResponse.error(res, 'User not found', 404);
+
+      if (!user.transaction_pin) {
+        const hash = await bcrypt.hash(String(new_pin), 10);
+        user.transaction_pin = hash;
+        user.updated_at = new Date();
+        await user.save();
+        return ApiResponse.success(res, null, 'Transaction PIN set successfully');
+      }
+
+      if (!current_pin || !/^\d{4}$/.test(String(current_pin))) {
+        return ApiResponse.error(res, 'Current PIN is required and must be 4 digits', 400);
+      }
+
+      const ok = await bcrypt.compare(String(current_pin), user.transaction_pin);
+      if (!ok) {
+        return ApiResponse.error(res, 'Current PIN is incorrect', 400);
+      }
+
+      user.transaction_pin = await bcrypt.hash(String(new_pin), 10);
+      user.updated_at = new Date();
+      await user.save();
+
+      return ApiResponse.success(res, null, 'Transaction PIN updated successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
 }

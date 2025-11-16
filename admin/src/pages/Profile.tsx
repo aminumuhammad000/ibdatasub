@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
@@ -9,7 +9,7 @@ import { useToast } from '../hooks/ToastContext';
 const Profile: React.FC = () => {
   const { admin, login } = useAuthContext();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Profile edit state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -110,9 +110,9 @@ const Profile: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
         <main className="flex-1 overflow-auto p-8">
           <div className="max-w-4xl mx-auto">
             {/* Header */}

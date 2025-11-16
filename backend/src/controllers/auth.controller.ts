@@ -18,7 +18,7 @@ export class AuthController {
         return ApiResponse.error(res, error.details[0].message, 400);
       }
 
-      const { email, phone_number, password, first_name, last_name, referral_code } = req.body;
+      const { email, phone_number, password, first_name, last_name, referral_code, pin } = req.body;
 
       const existingUser = await User.findOne({ $or: [{ email }, { phone_number }] });
       if (existingUser) {
@@ -44,7 +44,8 @@ export class AuthController {
         referred_by,
         country: 'Nigeria',
         kyc_status: 'pending',
-        status: 'active'
+        status: 'active',
+        transaction_pin: pin ? await bcrypt.hash(String(pin), 10) : undefined
       });
 
       await WalletService.createWallet(user._id);

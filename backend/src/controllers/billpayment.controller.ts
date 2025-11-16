@@ -1,6 +1,6 @@
 // controllers/billpayment.controller.ts
 import { NextFunction, Request, Response } from 'express';
-import { Transaction } from '../models/index.js';
+import { Transaction, User } from '../models/index.js';
 import providerRegistry from '../services/providerRegistry.service.js';
 import topupmateService from '../services/topupmate.service.js';
 import { WalletService } from '../services/wallet.service.js';
@@ -77,8 +77,26 @@ export class BillPaymentController {
   // Purchase airtime
   async purchaseAirtime(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { network, phone, amount, airtime_type = 'VTU', ported_number = true } = req.body;
+      const { network, phone, amount, airtime_type = 'VTU', ported_number = true, pin } = req.body;
       const userId = req.user?.id;
+
+      // Enforce transaction PIN
+      const user = await User.findById(userId);
+      if (!user) return ApiResponse.error(res, 'User not found', 404);
+      if (!pin || !/^\d{4}$/.test(String(pin))) {
+        return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
+      }
+      if (!user.transaction_pin) {
+        // Allow default PIN for legacy users without a stored PIN
+        if (String(pin) !== '1234') {
+          return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+        }
+      } else {
+        const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin as string));
+        if (!pinOk) {
+          return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+        }
+      }
 
       // Normalize network input to provider ID
       const providerId = normalizeNetwork(network);
@@ -176,8 +194,22 @@ export class BillPaymentController {
   // Purchase data
   async purchaseData(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { network, phone, plan, ported_number = true } = req.body;
+      const { network, phone, plan, ported_number = true, pin } = req.body;
       const userId = req.user?.id;
+
+      // Enforce transaction PIN
+      const user = await User.findById(userId);
+      if (!user) return ApiResponse.error(res, 'User not found', 404);
+      if (!user.transaction_pin) {
+        return ApiResponse.error(res, 'Please set your 4-digit transaction PIN before making purchases', 400);
+      }
+      if (!pin || !/^\d{4}$/.test(String(pin))) {
+        return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
+      }
+      const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin as string));
+      if (!pinOk) {
+        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+      }
 
       // Normalize network input to provider ID
       const providerId = normalizeNetwork(network);
@@ -189,7 +221,19 @@ export class BillPaymentController {
       const selPlans = await providerRegistry.getPreferredProviderFor('data');
       const planClient = selPlans?.client || topupmateService;
       const plans = await (planClient.getDataPlans ? planClient.getDataPlans() : topupmateService.getDataPlans());
-      const selectedPlan = plans.response?.find((p: any) => p.planid === plan);
+      
+      // Debug: Log plan structure and search criteria
+      console.log('🔍 Data Purchase Debug:', {
+        searchingForPlan: plan,
+        searchingForPlanType: typeof plan,
+        availablePlans: plans.response?.slice(0, 3).map((p: any) => ({ planid: p.planid, planidType: typeof p.planid }))
+      });
+      
+      const selectedPlan = plans.response?.find((p: any) => 
+        String(p.planid) === String(plan) || 
+        Number(p.planid) === Number(plan) ||
+        p.planid === plan
+      );
       
       if (!selectedPlan) {
         return ApiResponse.error(res, 'Invalid plan selected', 400);

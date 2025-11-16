@@ -25,6 +25,8 @@ const SignupScreen = () => {
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
   const [referral_code, setReferralCode] = useState("");
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -80,6 +82,17 @@ const SignupScreen = () => {
       return;
     }
 
+    // Validate Transaction PIN
+    if (!/^\d{4}$/.test(pin) || !/^\d{4}$/.test(confirmPin)) {
+      Alert.alert("❌ Validation Error", "Transaction PIN must be exactly 4 digits");
+      return;
+    }
+
+    if (pin !== confirmPin) {
+      Alert.alert("❌ Validation Error", "PIN codes do not match");
+      return;
+    }
+
 
     setIsLoading(true);
 
@@ -91,6 +104,7 @@ const SignupScreen = () => {
         first_name,
         last_name,
         referral_code: referral_code || undefined,
+        pin,
       });
 
       if (response.success) {
@@ -193,6 +207,42 @@ const SignupScreen = () => {
             </View>
           </View>
 
+          {/* Transaction PIN */}
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: textColor }]}>Transaction PIN</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: cardBg, borderColor }] }>
+              <TextInput
+                style={[styles.input, { color: textColor }]}
+                placeholder="Enter 4-digit PIN"
+                placeholderTextColor={textBodyColor}
+                value={pin}
+                onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0,4))}
+                keyboardType="number-pad"
+                secureTextEntry
+                maxLength={4}
+                selectionColor="#3B82F6"
+              />
+            </View>
+          </View>
+
+          {/* Confirm PIN */}
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: textColor }]}>Confirm PIN</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: cardBg, borderColor }] }>
+              <TextInput
+                style={[styles.input, { color: textColor }]}
+                placeholder="Confirm 4-digit PIN"
+                placeholderTextColor={textBodyColor}
+                value={confirmPin}
+                onChangeText={(t) => setConfirmPin(t.replace(/\D/g, '').slice(0,4))}
+                keyboardType="number-pad"
+                secureTextEntry
+                maxLength={4}
+                selectionColor="#3B82F6"
+              />
+            </View>
+          </View>
+
           <View style={styles.inputContainer}>
             <Text style={[styles.inputLabel, { color: textColor }]}>Password</Text>
             <View style={[styles.inputWrapper, { backgroundColor: cardBg, borderColor }] }>
@@ -232,9 +282,6 @@ const SignupScreen = () => {
               />
             </View>
           </View>
-
-          {/* Transaction PIN fields removed */}
-
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Referral Code (Optional)</Text>
             <View style={styles.inputWrapper}>
