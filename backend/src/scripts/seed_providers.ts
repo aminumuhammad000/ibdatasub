@@ -25,6 +25,25 @@ const PROVIDERS = [
     }
   },
   {
+    name: 'Payrant',
+    code: 'payrant',
+    base_url: process.env.PAYRANT_BASE_URL || 'https://api-core.payrant.com',
+    api_key: process.env.PAYRANT_API_KEY || '',
+    secret_key: process.env.PAYRANT_WEBHOOK_SECRET || '',
+    username: '',
+    password: '',
+    active: true,
+    priority: 1,
+    supported_services: [],
+    metadata: {
+      env: {
+        PAYRANT_API_KEY: process.env.PAYRANT_API_KEY || '',
+        PAYRANT_WEBHOOK_SECRET: process.env.PAYRANT_WEBHOOK_SECRET || '',
+        PAYRANT_BASE_URL: process.env.PAYRANT_BASE_URL || 'https://api-core.payrant.com'
+      }
+    }
+  },
+  {
     name: 'VTpass',
     code: 'vtpass',
     base_url: 'https://api-service.vtpass.com/api',

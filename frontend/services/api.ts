@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Alert } from 'react-native';
 // import * as Network from "expo-network";
-
 import {
   AdminService,
   AdminUser,
@@ -19,8 +18,8 @@ import {
 } from './types';
 
   // export const API_BASE_URL = getApiUrl();
-export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
-// export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
+// export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
 
 
 // Log the API URL being used
