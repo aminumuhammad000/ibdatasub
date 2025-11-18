@@ -112,6 +112,30 @@ export const authService = {
   },
 
   /**
+   * Request password reset via email (send OTP to email)
+   */
+  requestPasswordReset: async (data: { email: string }): Promise<any> => {
+    try {
+      const response = await api.post('/auth/forgot-password', data);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to request password reset' };
+    }
+  },
+
+  /**
+   * Verify OTP sent to email
+   */
+  verifyEmailOTP: async (data: { email: string; otp_code: string }): Promise<any> => {
+    try {
+      const response = await api.post('/auth/verify-email-otp', data);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'OTP verification failed' };
+    }
+  },
+
+  /**
    * Logout user
    */
   logout: async (): Promise<void> => {

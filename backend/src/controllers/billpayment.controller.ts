@@ -1,6 +1,7 @@
 // controllers/billpayment.controller.ts
 import { NextFunction, Request, Response } from 'express';
 import { Transaction, User } from '../models/index.js';
+import AirtimePlan from '../models/airtime_plan.model.js';
 import providerRegistry from '../services/providerRegistry.service.js';
 import topupmateService from '../services/topupmate.service.js';
 import { WalletService } from '../services/wallet.service.js';
@@ -25,10 +26,36 @@ export class BillPaymentController {
   // Get data plans
   async getDataPlans(req: Request, res: Response, next: NextFunction) {
     try {
-      const selected = await providerRegistry.getPreferredProviderFor('data');
-      const client = selected?.client || topupmateService;
-      const plans = await (client.getDataPlans ? client.getDataPlans() : topupmateService.getDataPlans());
-      const payload = (plans as any).response || plans;
+      const { network } = req.query;
+
+      // Optional filter by provider/network
+      let providerId: number | undefined;
+      if (network) {
+        const normalized = normalizeNetwork(String(network));
+        if (!normalized) {
+          return ApiResponse.error(res, 'Invalid network. Must be: mtn, airtel, glo, or 9mobile', 400);
+        }
+        providerId = normalized;
+      }
+
+      // Fetch from the same model the admin manages
+      const filter: any = { type: 'DATA', active: true };
+      if (providerId) filter.providerId = providerId;
+
+      const dbPlans = await AirtimePlan.find(filter).sort({ providerId: 1, price: 1, name: 1 });
+
+      // Map to frontend expected shape
+      const payload = dbPlans.map((p: any) => ({
+        plan_id: String(p._id),
+        network: String(p.providerId),
+        plan_name: p.name,
+        plan_type: 'DATA',
+        validity: p.meta?.validity || '',
+        price: Number(p.price),
+        data_value: p.meta?.data_value || p.code || '',
+        providerName: p.providerName,
+      }));
+
       return ApiResponse.success(res, 'Data plans retrieved successfully', payload);
     } catch (error) {
       next(error);

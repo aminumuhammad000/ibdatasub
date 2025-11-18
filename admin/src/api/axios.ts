@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const BASE_URL =
-  import.meta.env.MODE === 'production'
-    ? 'https://vtuapp-production.up.railway.app/api/admin'
-    : 'http://localhost:5000/api/admin';
+// const BASE_URL =
+//   import.meta.env.MODE === 'production'
+//     ? 'https://vtuapp-production.up.railway.app/api/admin'
+//     : 'http://localhost:5000/api/admin';
 
 
-    // const BASE_URL = "https://vtuapp-production.up.railway.app/api/admin";
+    const BASE_URL = "https://vtuapp-production.up.railway.app/api/admin";
 
 console.log('API Base URL:', BASE_URL);
 

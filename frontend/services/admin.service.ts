@@ -75,16 +75,39 @@ export const adminService = {
   },
 
   /**
-   * Get all users (admin only)
+   * Get all users (admin only) with optional search by name or status
    */
-  getAllUsers: async (page: number = 1, limit: number = 20): Promise<any> => {
+  getAllUsers: async (
+    page: number = 1,
+    limit: number = 20,
+    search?: string,
+    status?: 'active' | 'inactive' | 'suspended'
+  ): Promise<any> => {
     try {
       const response = await api.get('/admin/users', {
-        params: { page, limit },
+        params: { page, limit, search, status },
       });
       return response.data;
     } catch (error: any) {
       throw error.response?.data || { success: false, message: 'Failed to fetch users' };
+    }
+  },
+
+  /**
+   * Search users by name (admin only)
+   */
+  searchUsersByName: async (
+    name: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<any> => {
+    try {
+      const response = await api.get('/admin/users', {
+        params: { page, limit, search: name },
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to search users' };
     }
   },
 

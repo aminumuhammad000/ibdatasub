@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -14,15 +14,29 @@ const Users: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const limit = 10;
   const { data, status } = useQuery({
-    queryKey: ['users', page],
-    queryFn: () => getUsers({ page, limit }).then((res: any) => res.data),
+    queryKey: ['users', page, debouncedSearch],
+    queryFn: () => getUsers({ page, limit, search: debouncedSearch || undefined }).then((res: any) => res.data),
   });
 
 
   const users = data?.data || [];
   const pagination = data?.pagination || { page: 1, pages: 1 };
+
+  // Debounce search term and reset to first page on change
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current as any);
+    searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(1);
+    }, 400);
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current as any);
+    };
+  }, [searchTerm]);
 
   const [viewUser, setViewUser] = useState<any | null>(null);
   const [editUser, setEditUser] = useState<any | null>(null);

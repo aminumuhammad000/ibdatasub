@@ -14,7 +14,7 @@ export const getAllAdmins = (params?: { page?: number; limit?: number }) =>
   api.get('/admins', { params });
 
 // Users
-export const getUsers = (params?: { page?: number; limit?: number }) =>
+export const getUsers = (params?: { page?: number; limit?: number; search?: string }) =>
   api.get('/users', { params });
 export const getUser = (id: string) => api.get(`/users/${id}`);
 export const updateUser = (id: string, data: any) => api.put(`/users/${id}`, data);

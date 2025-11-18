@@ -115,8 +115,8 @@ export default function BuyAirtimeScreen() {
     }
 
     const cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-      showError('Please enter a valid phone number');
+    if (cleanPhone.length !== 11) {
+      showError('Phone number must be exactly 11 digits');
       return;
     }
 
@@ -241,7 +241,7 @@ export default function BuyAirtimeScreen() {
               placeholder="Enter phone number"
               placeholderTextColor={textBodyColor}
               value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={(t) => setPhoneNumber(t.replace(/\D/g, '').slice(0, 11))}
               keyboardType="phone-pad"
               maxLength={11}
             />
@@ -359,13 +359,13 @@ export default function BuyAirtimeScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading)
+              backgroundColor: (!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleBuyAirtime}
-          disabled={!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading}
+          disabled={!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading}
           activeOpacity={0.8}
         >
           {isLoading ? (

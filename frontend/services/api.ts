@@ -25,7 +25,6 @@ export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
 
 // Log the API URL being used
 console.log('🌐 API Base URL:', API_BASE_URL);
-
 // Create axios instance with better defaults
 const api = axios.create({
   baseURL: API_BASE_URL,

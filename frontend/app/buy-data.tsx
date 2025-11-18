@@ -91,8 +91,8 @@ export default function BuyDataScreen() {
 
     // Validate phone number format
     const cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-      showError('Please enter a valid phone number');
+    if (cleanPhone.length !== 11) {
+      showError('Phone number must be exactly 11 digits');
       return;
     }
 
@@ -214,7 +214,7 @@ export default function BuyDataScreen() {
               placeholder="Enter phone number"
               placeholderTextColor={textBodyColor}
               value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={(t) => setPhoneNumber(t.replace(/\D/g, '').slice(0, 11))}
               keyboardType="phone-pad"
               maxLength={11}
             />
@@ -355,13 +355,13 @@ export default function BuyDataScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || !selectedNetwork || !selectedPlan || isLoading)
+              backgroundColor: (!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || !selectedPlan || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
           onPress={handleBuyData}
-          disabled={!phoneNumber || !selectedNetwork || !selectedPlan || isLoading}
+          disabled={!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || !selectedPlan || isLoading}
           activeOpacity={0.8}
         >
           {isLoading ? (

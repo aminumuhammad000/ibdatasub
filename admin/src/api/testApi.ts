@@ -5,15 +5,15 @@
  */
 
 import {
-  login,
-  getDashboardStats,
-  getUsers,
-  getUser,
-  updateUser,
-  updateUserStatus,
+  deleteAuditLog,
   deleteUser,
   getAuditLogs,
-  deleteAuditLog,
+  getDashboardStats,
+  getUser,
+  getUsers,
+  login,
+  updateUser,
+  updateUserStatus,
 } from './adminApi';
 
 // Test credentials (update with your actual test account)

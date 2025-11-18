@@ -19,7 +19,7 @@ function AuthLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === 'login' || segments[0] === 'signup';
+    const inAuthGroup = ['login', 'signup', 'forgot-password', 'verify-otp'].includes(segments[0] as string);
 
     if (!isLoading) {
       if (!isAuthenticated && !inAuthGroup) {
@@ -49,6 +49,8 @@ function AuthLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="login" />
       <Stack.Screen name="signup" />
+      <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="verify-otp" />
       <Stack.Screen name="set-pin" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="more" />
@@ -63,6 +65,7 @@ function AuthLayout() {
       <Stack.Screen name="about" />
       <Stack.Screen name="payment-methods" />
       <Stack.Screen name="settings" />
+      <Stack.Screen name="admin-users" />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
     </Stack>
   );
