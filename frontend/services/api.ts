@@ -17,7 +17,7 @@ import {
   Wallet
 } from './types';
 
-  // export const API_BASE_URL = getApiUrl();
+// export const API_BASE_URL = getApiUrl();
 // export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
 export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
 
@@ -39,12 +39,12 @@ api.interceptors.request.use(
   async (config) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      
+
       // Add auth header if token exists
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
+
       // Log request details in development
       if (__DEV__) {
         console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
@@ -55,7 +55,7 @@ api.interceptors.request.use(
           hasParams: !!config.params,
         });
       }
-      
+
       return config;
     } catch (error) {
       console.error('Error in request interceptor:', error);
@@ -89,9 +89,9 @@ api.interceptors.response.use(
         stack: error.stack,
         config: error.config,
       };
-      
+
       console.error('❌ Request Error:', errorDetails);
-      
+
       return Promise.reject({
         success: false,
         message: errorMessage,
@@ -110,23 +110,23 @@ api.interceptors.response.use(
       try {
         // Get current route before clearing storage
         const currentRoute = window.location.pathname;
-        const isAuthPage = ['/login', '/register', '/forgot-password', '/auth/'].some(path => 
+        const isAuthPage = ['/login', '/register', '/forgot-password', '/auth/'].some(path =>
           currentRoute.includes(path)
         );
-        
+
         // Clear auth data
         await AsyncStorage.multiRemove(['authToken', 'user', 'walletData', 'transactions', 'profileData']);
-        
+
         // Clear API auth header
         if (api.defaults.headers.common['Authorization']) {
           delete api.defaults.headers.common['Authorization'];
         }
-        
+
         // Update error message for user
         if (!isAuthPage) {
           errorMessage = 'Your session has expired. Please log in again.';
         }
-        
+
         // Note: Navigation should be handled by the app's auth state management
         // The app will automatically redirect to login when it detects no token
       } catch (storageError) {
@@ -177,9 +177,9 @@ api.interceptors.response.use(
 
 // Authentication Service
 const authService = {
-  login: (credentials: { email: string; password: string }) => 
+  login: (credentials: { email: string; password: string }) =>
     api.post<ApiResponse<{ user: User; token: string }>>('/auth/login', credentials),
-    
+
   register: (userData: {
     email: string;
     password: string;
@@ -188,18 +188,18 @@ const authService = {
     last_name: string;
     referral_code?: string;
   }) => api.post<ApiResponse<{ user: User; token: string }>>('/auth/register', userData),
-  
-  verifyOtp: (otpData: { phone_number: string; otp_code: string }) => 
+
+  verifyOtp: (otpData: { phone_number: string; otp_code: string }) =>
     api.post<ApiResponse>('/auth/verify-otp', otpData),
-    
-  resendOtp: (phoneData: { phone_number: string }) => 
+
+  resendOtp: (phoneData: { phone_number: string }) =>
     api.post<ApiResponse>('/auth/resend-otp', phoneData),
 };
 
 // User Service
 const userService = {
   getProfile: () => api.get<ApiResponse<{ user: User }>>('/users/profile'),
-  
+
   updateProfile: (userData: {
     first_name?: string;
     last_name?: string;
@@ -210,9 +210,9 @@ const userService = {
     state?: string;
     country?: string;
   }) => api.put<ApiResponse<{ user: User }>>('/users/profile', userData),
-  
+
   deleteAccount: () => api.delete<ApiResponse>('/users/profile'),
-  
+
   uploadKyc: (formData: FormData) => {
     const config: AxiosRequestConfig = {
       headers: {
@@ -232,29 +232,29 @@ const userService = {
 // Wallet Service
 const walletService = {
   getWallet: () => api.get<ApiResponse<{ wallet: Wallet }>>('/wallet'),
-  
-  fundWallet: (fundData: { 
-    amount: number; 
-    paymentMethod: string; 
+
+  fundWallet: (fundData: {
+    amount: number;
+    paymentMethod: string;
     reference: string;
   }) => api.post<ApiResponse<{ balance: number }>>('/wallet/fund', fundData),
-  
-  getTransactions: (params: { 
-    page?: number; 
-    limit?: number; 
-    type?: string; 
+
+  getTransactions: (params: {
+    page?: number;
+    limit?: number;
+    type?: string;
     status?: string;
   } = {}) => api.get<ApiResponse<PaginatedResponse<Transaction>>>(
-    '/wallet/transactions', 
+    '/wallet/transactions',
     { params }
   ),
-  
+
   transferFunds: (transferData: {
     recipientId: string;
     amount: number;
     note?: string;
   }) => api.post<ApiResponse>('/wallet/transfer', transferData),
-  
+
   adjustBalance: (adjustmentData: {
     userId: string;
     amount: number;
@@ -267,82 +267,82 @@ const walletService = {
 const billPaymentService = {
   // Network & Providers
   getNetworks: () => api.get<ApiResponse<Network[]>>('/billpayment/networks'),
-  
+
   getCableProviders: () => api.get<ApiResponse<Array<{ id: string; name: string }>>>(
     '/billpayment/cable-providers'
   ),
-  
+
   getElectricityProviders: () => api.get<ApiResponse<Array<{ id: string; name: string }>>>(
     '/billpayment/electricity-providers'
   ),
-  
+
   getExamPinProviders: () => api.get<ApiResponse<Array<{ id: string; name: string }>>>(
     '/billpayment/exampin-providers'
   ),
-  
+
   // Data Services
-  getDataPlans: (network: string) => 
+  getDataPlans: (network: string) =>
     api.get<ApiResponse<DataPlan[]>>('/billpayment/data-plans', { params: { network } }),
-  
+
   // Airtime & Data
-  buyAirtime: (data: { 
-    network: string; 
-    phone: string; 
+  buyAirtime: (data: {
+    network: string;
+    phone: string;
     amount: number;
   }) => api.post<ApiResponse<BillPaymentResponse>>('/billpayment/airtime', data),
-  
+
   buyData: (data: {
     network: string;
     phone: string;
     planId: string;
     amount: number;
   }) => api.post<ApiResponse<BillPaymentResponse>>('/billpayment/data', data),
-  
+
   // Cable TV
   verifyCableAccount: (data: {
     provider: string;
     smartCardNumber: string;
   }) => api.post<ApiResponse<{ accountName: string; accountNumber: string }>>(
-    '/billpayment/cable/verify', 
+    '/billpayment/cable/verify',
     data
   ),
-  
+
   buyCableTv: (data: {
     provider: string;
     smartCardNumber: string;
     package: string;
     amount: number;
   }) => api.post<ApiResponse<BillPaymentResponse>>('/billpayment/cable/purchase', data),
-  
+
   // Electricity
   verifyMeter: (data: {
     provider: string;
     meterNumber: string;
     meterType: 'prepaid' | 'postpaid';
   }) => api.post<ApiResponse<{ accountName: string; address: string }>>(
-    '/billpayment/electricity/verify', 
+    '/billpayment/electricity/verify',
     data
   ),
-  
+
   buyElectricity: (data: {
     provider: string;
     meterNumber: string;
     meterType: 'prepaid' | 'postpaid';
     amount: number;
   }) => api.post<ApiResponse<BillPaymentResponse>>(
-    '/billpayment/electricity/purchase', 
+    '/billpayment/electricity/purchase',
     data
   ),
-  
+
   // Exam Pins
   buyExamPin: (data: {
     provider: string;
     quantity: number;
     examType: string;
   }) => api.post<ApiResponse<BillPaymentResponse>>('/billpayment/exampin', data),
-  
+
   // Transaction Status
-  getTransactionStatus: (reference: string) => 
+  getTransactionStatus: (reference: string) =>
     api.get<ApiResponse<{ transaction: Transaction }>>(
       `/billpayment/transaction/${reference}`
     ),
@@ -356,20 +356,20 @@ const transactionService = {
     type?: string;
     status?: string;
   } = {}) => api.get<ApiResponse<PaginatedResponse<Transaction>>>(
-    '/transactions', 
+    '/transactions',
     { params }
   ),
-  
-  getTransaction: (id: string) => 
+
+  getTransaction: (id: string) =>
     api.get<ApiResponse<{ transaction: Transaction }>>(`/transactions/${id}`),
-    
-  updateStatus: (id: string, status: string) => 
+
+  updateStatus: (id: string, status: string) =>
     api.put<ApiResponse>(`/transactions/${id}/status`, { status }),
 };
 
 // Notification Service
 const notificationService = {
-  getNotifications: () => 
+  getNotifications: () =>
     api.get<ApiResponse<Array<{
       id: string;
       title: string;
@@ -377,8 +377,8 @@ const notificationService = {
       read: boolean;
       created_at: string;
     }>>>('/notifications'),
-    
-  getNotification: (id: string) => 
+
+  getNotification: (id: string) =>
     api.get<ApiResponse<{
       id: string;
       title: string;
@@ -386,17 +386,17 @@ const notificationService = {
       read: boolean;
       created_at: string;
     }>>(`/notifications/${id}`),
-    
-  markAsRead: (id: string) => 
+
+  markAsRead: (id: string) =>
     api.put<ApiResponse>(`/notifications/${id}/read`),
-    
-  markAllAsRead: () => 
+
+  markAllAsRead: () =>
     api.put<ApiResponse>('/notifications/read-all'),
-    
-  deleteNotification: (id: string) => 
+
+  deleteNotification: (id: string) =>
     api.delete<ApiResponse>(`/notifications/${id}`),
-    
-  deleteAllNotifications: () => 
+
+  deleteAllNotifications: () =>
     api.delete<ApiResponse>('/notifications'),
 };
 
@@ -407,15 +407,15 @@ const supportService = {
     message: string;
     category: string;
     priority: 'low' | 'medium' | 'high';
-  }) => api.post<ApiResponse<{ 
-    ticket: { 
-      id: string; 
-      ticketNumber: string; 
+  }) => api.post<ApiResponse<{
+    ticket: {
+      id: string;
+      ticketNumber: string;
       status: string;
-    } 
+    }
   }>>('/support', ticketData),
-  
-  getTickets: () => 
+
+  getTickets: () =>
     api.get<ApiResponse<Array<{
       id: string;
       ticketNumber: string;
@@ -424,8 +424,8 @@ const supportService = {
       priority: string;
       created_at: string;
     }>>>('/support'),
-    
-  getTicket: (id: string) => 
+
+  getTicket: (id: string) =>
     api.get<ApiResponse<{
       id: string;
       ticketNumber: string;
@@ -443,20 +443,20 @@ const supportService = {
         created_at: string;
       }>;
     }>>(`/support/${id}`),
-    
-  updateTicket: (id: string, updateData: { message: string }) => 
+
+  updateTicket: (id: string, updateData: { message: string }) =>
     api.put<ApiResponse>(`/support/${id}`, updateData),
-    
-  updateTicketStatus: (id: string, status: string) => 
+
+  updateTicketStatus: (id: string, status: string) =>
     api.put<ApiResponse>(`/support/${id}/status`, { status }),
-    
-  deleteTicket: (id: string) => 
+
+  deleteTicket: (id: string) =>
     api.delete<ApiResponse>(`/support/${id}`),
 };
 
 // Promotion Service
 const promotionService = {
-  getPromotions: () => 
+  getPromotions: () =>
     api.get<ApiResponse<Array<{
       id: string;
       title: string;
@@ -467,8 +467,8 @@ const promotionService = {
       validTo: string;
       isActive: boolean;
     }>>>('/promotions'),
-    
-  getPromotion: (id: string) => 
+
+  getPromotion: (id: string) =>
     api.get<ApiResponse<{
       id: string;
       title: string;
@@ -481,7 +481,7 @@ const promotionService = {
       created_at: string;
       updated_at: string;
     }>>(`/promotions/${id}`),
-    
+
   createPromotion: (promoData: {
     title: string;
     description: string;
@@ -490,7 +490,7 @@ const promotionService = {
     validFrom: string;
     validTo: string;
   }) => api.post<ApiResponse>('/promotions', promoData),
-  
+
   updatePromotion: (id: string, promoData: {
     title?: string;
     description?: string;
@@ -500,8 +500,8 @@ const promotionService = {
     validTo?: string;
     isActive?: boolean;
   }) => api.put<ApiResponse>(`/promotions/${id}`, promoData),
-  
-  deletePromotion: (id: string) => 
+
+  deletePromotion: (id: string) =>
     api.delete<ApiResponse>(`/promotions/${id}`)
 };
 
@@ -509,7 +509,7 @@ const promotionService = {
 const adminService: AdminService = {
   // Auth
   adminLogin(credentials: { email: string; password: string }) {
-    return api.post<ApiResponse<{ 
+    return api.post<ApiResponse<{
       token: string;
       admin: {
         id?: string;
@@ -530,7 +530,7 @@ const adminService: AdminService = {
           // Add any other fields that might be present
           ...admin
         };
-        
+
         // Update the response with the properly typed admin object
         response.data.data = {
           token,
@@ -540,43 +540,43 @@ const adminService: AdminService = {
       return response as unknown as AxiosResponse<ApiResponse<{ token: string; admin: AdminUser }>>;
     });
   },
-  
+
   // Dashboard
   getDashboardStats() {
     return api.get<ApiResponse<DashboardStats>>('/admin/dashboard');
   },
-  
+
   // Users
-  getUsers(params: { 
-    page?: number; 
-    limit?: number; 
-    search?: string; 
+  getUsers(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
     status?: string;
   } = {}) {
     return api.get<ApiResponse<PaginatedResponse<AdminUser>>>('/admin/users', { params });
   },
-  
+
   getUser(id: string): Promise<AxiosResponse<ApiResponse<{ user: AdminUser }>>> {
     return api.get<ApiResponse<{ user: AdminUser }>>(`/admin/users/${id}`);
   },
-    
+
   updateUser(id: string, userData: Partial<User>) {
     return api.put<ApiResponse<{ user: User }>>(`/admin/users/${id}`, userData);
   },
-    
+
   updateUserStatus(id: string, status: 'active' | 'inactive' | 'suspended') {
     return api.put<ApiResponse>(`/admin/users/${id}/status`, { status });
   },
-    
+
   deleteUser(id: string) {
     return api.delete<ApiResponse>(`/admin/users/${id}`);
   },
-    
+
   // Audit Logs
   getAuditLogs(params = {}) {
     return api.get<ApiResponse<PaginatedResponse<AuditLog>>>('/admin/audit-logs', { params });
   },
-    
+
   deleteAuditLog(id: string) {
     return api.delete<ApiResponse<void>>(`/admin/audit-logs/${id}`);
   }
