@@ -12,7 +12,7 @@ const getToken = async () => {
 
         const user = await User.findOne({});
         if (user) {
-            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+            const token = jwt.sign({ id: user._id, role: (user as any).role || 'user' }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
             console.log('TOKEN:', token);
             console.log('USER_ID:', user._id);
             console.log('PIN:', user.transaction_pin);

@@ -5179,3 +5179,5 @@
 {"level":"info","message":"192.168.43.89 - 690c7de84d4df744806907b2 [21/Nov/2025:14:39:42 +0000] \"GET /api/transactions?page=1&limit=5 HTTP/1.1\" 200 2534 \"-\" \"okhttp/4.12.0\" 23.272 ms","timestamp":"2025-11-21 15:39:42"}
 {"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-21 15:40:35"}
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-21 15:40:35"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2025-11-21 16:02:17"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-11-21 16:02:17"}
