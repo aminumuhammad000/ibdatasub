@@ -6,8 +6,8 @@ import axios from 'axios';
 //     : 'http://localhost:5000/api/admin';
 
 
-// const BASE_URL = "https://vtuapp-production.up.railway.app/api/admin";
-const BASE_URL = "http://localhost:5000/api/admin";
+const BASE_URL = "https://vtuapp-production.up.railway.app/api/admin";
+// const BASE_URL = "http://localhost:5000/api/admin";
 
 console.log('API Base URL:', BASE_URL);
 
