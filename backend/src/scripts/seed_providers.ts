@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { config } from '../config/bootstrap.js';
 import ProviderConfig from '../models/provider.model.js';
 import logger from '../utils/logger.js';
-import { config } from '../config/bootstrap.js';
 
 dotenv.config();
 
@@ -67,7 +67,7 @@ const PROVIDERS = [
     name: 'SME Plug',
     code: 'smeplug',
     base_url: 'https://smeplug.ng/api',
-    api_key: process.env.SMEPLUG_API_KEY || '',
+    api_key: process.env.SMEPLUG_API_KEY || '5989493e4388a004dcc7319c79f9c9afea27c7498b478712b180b2446ec4951a',
     secret_key: '',
     username: '',
     password: '',
@@ -76,7 +76,7 @@ const PROVIDERS = [
     supported_services: ['airtime','data'],
     metadata: {
       env: {
-        SMEPLUG_API_KEY: process.env.SMEPLUG_API_KEY || ''
+        SMEPLUG_API_KEY: process.env.SMEPLUG_API_KEY || '5989493e4388a004dcc7319c79f9c9afea27c7498b478712b180b2446ec4951a'
       }
     }
   }
