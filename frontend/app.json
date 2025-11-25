@@ -4,12 +4,13 @@
     "slug": "vtu-app",
     "version": "1.0.0",
     "orientation": "portrait",
-  "icon": "./assets/images/ibdatalogo.png",
+    "icon": "./assets/images/ibdatalogo.png",
     "scheme": "vtuapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aminuamee.vtuapp"
     },
     "android": {
       "package": "com.aminuamee.vtuapp",

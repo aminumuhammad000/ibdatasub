@@ -1,5 +1,6 @@
 import { useTheme } from '@/components/ThemeContext';
 import TransactionFilter, { FilterOptions } from '@/components/TransactionFilter';
+import TransactionDetailsModal from '@/components/TransactionDetailsModal';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState, useEffect } from 'react';
 import {
@@ -13,7 +14,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { transactionService, Transaction as ApiTransaction } from '@/services/transaction.service';
-import { useRouter } from 'expo-router';
 
 interface Transaction {
   id: string;
@@ -31,8 +31,9 @@ interface Transaction {
 
 export default function TransactionsScreen() {
   const { isDark } = useTheme();
-  const router = useRouter();
   const [filterVisible, setFilterVisible] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     status: [],
     type: [],
@@ -153,7 +154,13 @@ export default function TransactionsScreen() {
   };
 
   const openTransactionDetails = (id: string) => () => {
-    router.push({ pathname: '/transaction/[id]', params: { id } } as any);
+    setSelectedTransactionId(id);
+    setDetailsModalVisible(true);
+  };
+
+  const closeTransactionDetails = () => {
+    setDetailsModalVisible(false);
+    setSelectedTransactionId(null);
   };
 
   return (
@@ -207,8 +214,8 @@ export default function TransactionsScreen() {
                           transaction.status === 'Successful'
                             ? '#10B981'
                             : transaction.status === 'Failed'
-                            ? '#EF4444'
-                            : '#FF9F43',
+                              ? '#EF4444'
+                              : '#FF9F43',
                       },
                     ]}
                   >
@@ -235,6 +242,12 @@ export default function TransactionsScreen() {
         onClose={handleCloseFilter}
         onApplyFilter={handleApplyFilter}
         currentFilters={filters}
+      />
+
+      <TransactionDetailsModal
+        visible={detailsModalVisible}
+        transactionId={selectedTransactionId}
+        onClose={closeTransactionDetails}
       />
     </View>
     // {selectedTransactionId && transactionDetails }
