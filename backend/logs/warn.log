@@ -244,3 +244,7 @@
 {"duration":"170ms","ip":"192.168.43.28","level":"warn","message":"📤 Response Warning","method":"POST","statusCode":400,"timestamp":"2025-11-25 11:57:24","url":"/api/billpayment/data","userId":"690c7de84d4df744806907b2"}
 {"duration":"1850ms","ip":"192.168.43.28","level":"warn","message":"📤 Response Warning","method":"POST","statusCode":400,"timestamp":"2025-11-25 11:57:42","url":"/api/billpayment/data","userId":"690c7de84d4df744806907b2"}
 {"duration":"2698ms","ip":"192.168.43.28","level":"warn","message":"📤 Response Warning","method":"POST","statusCode":400,"timestamp":"2025-11-25 12:07:59","url":"/api/billpayment/data","userId":"690c7de84d4df744806907b2"}
+{"level":"error","message":"TopupMate API Response Error:","timestamp":"2025-11-26 12:33:06"}
+{"level":"error","message":"TopupMate getWalletBalance error:","timestamp":"2025-11-26 12:33:06"}
+{"duration":"2ms","ip":"127.0.0.1","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-26 12:59:37","url":"/api/admin/support-content","userId":"anonymous"}
+{"duration":"2ms","ip":"127.0.0.1","level":"warn","message":"📤 Response Warning","method":"GET","statusCode":401,"timestamp":"2025-11-26 13:09:46","url":"/api/admin/dashboard","userId":"anonymous"}

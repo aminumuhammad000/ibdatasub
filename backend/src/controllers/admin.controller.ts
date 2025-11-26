@@ -16,7 +16,7 @@ export class AdminController {
 
       const admin = await AdminUser.findOne({ email }).populate('role_id');
       console.log('Admin found:', admin ? 'Yes' : 'No');
-      
+
       if (!admin) {
         console.log('Admin not found in database');
         return ApiResponse.error(res, 'Invalid credentials', 401);
@@ -25,7 +25,7 @@ export class AdminController {
       console.log('Comparing passwords...');
       const isPasswordValid = await bcrypt.compare(password, admin.password_hash);
       console.log('Password valid:', isPasswordValid);
-      
+
       if (!isPasswordValid) {
         console.log('Password mismatch');
         return ApiResponse.error(res, 'Invalid credentials', 401);
@@ -60,11 +60,47 @@ export class AdminController {
       const totalTransactions = await Transaction.countDocuments();
       const successfulTransactions = await Transaction.countDocuments({ status: 'successful' });
 
+      // Calculate total data sales (sum of successful data transactions)
+      const dataSalesResult = await Transaction.aggregate([
+        {
+          $match: {
+            type: 'data',
+            status: 'successful'
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: '$amount' }
+          }
+        }
+      ]);
+      const totalDataSales = dataSalesResult.length > 0 ? dataSalesResult[0].totalAmount : 0;
+
+      // Calculate total airtime sales (sum of successful airtime transactions)
+      const airtimeSalesResult = await Transaction.aggregate([
+        {
+          $match: {
+            type: 'airtime',
+            status: 'successful'
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: '$amount' }
+          }
+        }
+      ]);
+      const totalAirtimeSales = airtimeSalesResult.length > 0 ? airtimeSalesResult[0].totalAmount : 0;
+
       const stats = {
         totalUsers,
         activeUsers,
         totalTransactions,
-        successfulTransactions
+        successfulTransactions,
+        totalDataSales,
+        totalAirtimeSales
       };
 
       return ApiResponse.success(res, stats, 'Dashboard stats retrieved successfully');
@@ -238,18 +274,18 @@ export class AdminController {
 
       // Import WalletService
       const { WalletService } = await import('../services/wallet.service.js');
-      
+
       // Get wallet before credit
       const walletBefore = await WalletService.getWalletByUserId(userId);
       if (!walletBefore) {
         return ApiResponse.error(res, 'Wallet not found', 404);
       }
       const oldBalance = walletBefore.balance;
-      
+
       // Credit wallet
       await WalletService.credit(
-        userId, 
-        parseFloat(amount), 
+        userId,
+        parseFloat(amount),
         description || 'Admin manual credit'
       );
 

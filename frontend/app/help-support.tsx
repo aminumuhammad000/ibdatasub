@@ -1,7 +1,8 @@
 import { useAlert } from '@/components/AlertContext';
+import { SupportContent, supportService } from '@/services/support.service';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -42,6 +43,22 @@ export default function HelpSupportScreen() {
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
   const [supportMessage, setSupportMessage] = useState('');
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [supportContent, setSupportContent] = useState<SupportContent | null>(null);
+
+  useEffect(() => {
+    fetchSupportContent();
+  }, []);
+
+  const fetchSupportContent = async () => {
+    try {
+      const response = await supportService.getSupportContent();
+      if (response.success) {
+        setSupportContent(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch support content:', error);
+    }
+  };
 
   const faqData = [
     {
@@ -79,21 +96,35 @@ export default function HelpSupportScreen() {
     },
     {
       title: 'Call Support',
-      description: '09162989954',
+      description: supportContent?.phoneNumber || 'Loading...',
       icon: 'call',
-      action: () => Linking.openURL('tel:09162989954')
+      action: () => {
+        if (supportContent?.phoneNumber) {
+          Linking.openURL(`tel:${supportContent.phoneNumber}`);
+        }
+      }
     },
     {
       title: 'Email Support',
-      description: 'indatasub001@gmail.com',
+      description: supportContent?.email || 'Loading...',
       icon: 'mail',
-      action: () => Linking.openURL('mailto:indatasub001@gmail.com')
+      action: () => {
+        if (supportContent?.email) {
+          Linking.openURL(`mailto:${supportContent.email}`);
+        }
+      }
     },
     {
       title: 'WhatsApp',
-      description: '09162989954',
+      description: supportContent?.whatsappNumber || 'Loading...',
       icon: 'logo-whatsapp',
-      action: () => Linking.openURL('https://wa.me/23409162989954')
+      action: () => {
+        if (supportContent?.whatsappNumber) {
+          // Remove + and spaces for wa.me link
+          const cleanNumber = supportContent.whatsappNumber.replace(/[^0-9]/g, '');
+          Linking.openURL(`https://wa.me/${cleanNumber}`);
+        }
+      }
     }
   ];
 
@@ -108,7 +139,7 @@ export default function HelpSupportScreen() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       showSuccess('Support ticket submitted successfully! We\'ll get back to you within 24 hours.');
       setSupportMessage('');
     } catch (error) {
@@ -125,10 +156,10 @@ export default function HelpSupportScreen() {
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
+
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -138,7 +169,7 @@ export default function HelpSupportScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -146,9 +177,9 @@ export default function HelpSupportScreen() {
         {/* Quick Actions */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Contact Support</Text>
-          
+
           {contactOptions.map((option, index) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={index}
               style={styles.contactItem}
               onPress={option.action}
@@ -170,13 +201,13 @@ export default function HelpSupportScreen() {
         {/* Submit Support Ticket */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Submit a Support Ticket</Text>
-          
+
           <Text style={[styles.inputLabel, { color: textBodyColor }]}>Describe your issue</Text>
           <TextInput
-            style={[styles.textArea, { 
-              backgroundColor: inputBgColor, 
+            style={[styles.textArea, {
+              backgroundColor: inputBgColor,
               borderColor: borderColor,
-              color: textColor 
+              color: textColor
             }]}
             value={supportMessage}
             onChangeText={setSupportMessage}
@@ -187,10 +218,10 @@ export default function HelpSupportScreen() {
             textAlignVertical="top"
           />
 
-          <TouchableOpacity 
-            style={[styles.submitButton, { 
+          <TouchableOpacity
+            style={[styles.submitButton, {
               backgroundColor: theme.primary,
-              opacity: isSubmittingTicket ? 0.7 : 1 
+              opacity: isSubmittingTicket ? 0.7 : 1
             }]}
             onPress={handleSubmitTicket}
             disabled={isSubmittingTicket}
@@ -204,23 +235,23 @@ export default function HelpSupportScreen() {
         {/* FAQ Section */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Frequently Asked Questions</Text>
-          
+
           {faqData.map((faq, index) => (
             <View key={index} style={styles.faqItem}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.faqQuestion}
                 onPress={() => toggleFAQ(index)}
               >
                 <Text style={[styles.faqQuestionText, { color: textColor }]}>
                   {faq.question}
                 </Text>
-                <Ionicons 
-                  name={selectedFAQ === index ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color={textBodyColor} 
+                <Ionicons
+                  name={selectedFAQ === index ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color={textBodyColor}
                 />
               </TouchableOpacity>
-              
+
               {selectedFAQ === index && (
                 <View style={styles.faqAnswer}>
                   <Text style={[styles.faqAnswerText, { color: textBodyColor }]}>
@@ -235,7 +266,7 @@ export default function HelpSupportScreen() {
         {/* Additional Resources */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Additional Resources</Text>
-          
+
           <TouchableOpacity style={styles.resourceItem}>
             <View style={styles.resourceInfo}>
               <Ionicons name="document-text" size={24} color={theme.primary} />
@@ -262,13 +293,20 @@ export default function HelpSupportScreen() {
             <Ionicons name="chevron-forward" size={20} color={textBodyColor} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.resourceItem}>
+          <TouchableOpacity
+            style={styles.resourceItem}
+            onPress={() => {
+              if (supportContent?.websiteUrl) {
+                Linking.openURL(supportContent.websiteUrl);
+              }
+            }}
+          >
             <View style={styles.resourceInfo}>
               <Ionicons name="globe" size={24} color={theme.primary} />
               <View style={styles.resourceTextContainer}>
                 <Text style={[styles.resourceTitle, { color: textColor }]}>Visit Website</Text>
                 <Text style={[styles.resourceDescription, { color: textBodyColor }]}>
-                  www.vtuapp.com
+                  {supportContent?.websiteUrl || 'www.vtuapp.com'}
                 </Text>
               </View>
             </View>

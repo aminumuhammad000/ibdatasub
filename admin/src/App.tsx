@@ -4,14 +4,17 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import PrivateRoute from './components/PrivateRoute';
 import AuditLogs from './pages/AuditLogs';
 import Dashboard from './pages/Dashboard';
+import Funding from './pages/Funding';
 import Login from './pages/Login';
 import PricingPlans from './pages/PricingPlans';
-import Funding from './pages/Funding';
 import Profile from './pages/Profile';
+import Providers from './pages/Providers';
+import Settings from './pages/Settings';
 import Transactions from './pages/Transactions';
 import Users from './pages/Users';
 import WalletCredit from './pages/WalletCredit';
-import Providers from './pages/Providers';
+
+
 
 function App() {
   return (
@@ -28,6 +31,8 @@ function App() {
           <Route path="/wallet-credit" element={<WalletCredit />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+
         </Route>
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

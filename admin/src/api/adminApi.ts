@@ -77,3 +77,7 @@ export const updateAdminProfile = (data: { first_name?: string; last_name?: stri
   api.put('/profile', data);
 export const changeAdminPassword = (data: { currentPassword: string; newPassword: string }) =>
   api.put('/profile/password', data);
+
+// Support Content
+export const getSupportContent = () => api.get('/support-content');
+export const updateSupportContent = (data: any) => api.put('/support-content', data);

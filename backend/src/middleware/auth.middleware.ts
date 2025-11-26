@@ -8,7 +8,7 @@ import { ApiResponse } from '../utils/response.js';
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
       return ApiResponse.error(res, 'No token provided', 401);
     }
@@ -23,3 +23,19 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
 // Alias for compatibility
 export const authenticate = authMiddleware;
+
+export const authorize = (roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user || (req.user.role && !roles.includes(req.user.role))) {
+      // If role is present but not in allowed list
+      return ApiResponse.error(res, 'Unauthorized access', 403);
+    }
+    // If no role in token, we might want to fetch user to check role, 
+    // but for now let's assume token has role or we proceed if we can't check.
+    // Better: if no role in token, assume unauthorized if roles are required.
+    if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
+      return ApiResponse.error(res, 'Unauthorized access', 403);
+    }
+    next();
+  };
+};

@@ -4,14 +4,17 @@ import express, { NextFunction, Request, Response } from "express";
 
 import adminRoutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import billpaymentRoutes from "./routes/billpayment.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import promotionsRoutes from "./routes/promotions.routes.js";
 import supportRoutes from "./routes/support.routes.js";
+import supportContentRoutes from "./routes/support_content.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
-import billpaymentRoutes from "./routes/billpayment.routes.js";
+
+
 
 // Import logging middleware
 import { logger } from "./config/bootstrap.js";
@@ -26,7 +29,7 @@ const app = express();
 //   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
 //     // Allow requests with no origin (like mobile apps, curl, etc.)
 //     if (!origin) return callback(null, true);
-    
+
 //     const allowedOrigins = [
 //       'http://localhost:19006', // Expo web
 //       'http://localhost:19000', // Expo dev client
@@ -92,6 +95,8 @@ app.use("/api/support", supportRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/billpayment", billpaymentRoutes);
+app.use("/api/support-content", supportContentRoutes);
+
 
 // Root route
 app.get("/", (req: Request, res: Response) => {
@@ -132,10 +137,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     method: req.method,
     ip: req.ip
   });
-  
-  res.status(500).json({ 
+
+  res.status(500).json({
     success: false,
-    message: "Internal Server Error", 
+    message: "Internal Server Error",
     error: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred'
   });
 });

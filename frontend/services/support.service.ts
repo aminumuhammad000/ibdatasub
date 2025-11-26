@@ -35,6 +35,22 @@ export interface SingleTicketResponse {
   message: string;
 }
 
+export interface SupportContent {
+  email: string;
+  phoneNumber: string;
+  whatsappNumber: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
+}
+
+export interface SupportContentResponse {
+  success: boolean;
+  data: SupportContent;
+  message: string;
+}
+
 export const supportService = {
   /**
    * Create a new support ticket
@@ -110,6 +126,18 @@ export const supportService = {
       return response.data;
     } catch (error: any) {
       throw error.response?.data || { success: false, message: 'Failed to delete ticket' };
+    }
+  },
+
+  /**
+   * Get support contact content
+   */
+  getSupportContent: async (): Promise<SupportContentResponse> => {
+    try {
+      const response = await api.get<SupportContentResponse>('/support-content');
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch support content' };
     }
   },
 };

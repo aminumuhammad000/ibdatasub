@@ -76,7 +76,7 @@ const navItems = [
     ),
   },
   {
-    to: '/profile',
+    to: '/settings',
     label: 'Settings',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
               </div>
             </div>
           )}
-          
+
           {/* Desktop Toggle */}
           <button
             onClick={() => setIsDesktopOpen(!isDesktopOpen)}
@@ -182,10 +182,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
               to={item.to}
               onClick={handleNavClick}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${isActive
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`
               }
             >
