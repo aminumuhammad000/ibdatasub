@@ -1,4 +1,3 @@
-import cors from "cors";
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 
@@ -60,9 +59,10 @@ const app = express();
 
 // app.use(cors(corsOptions));
 
-app.use(cors({
-  origin: "*", // or restrict later to your Expo dev IP if you want
-}));
+// CORS is now handled by nginx reverse proxy
+// app.use(cors({
+//   origin: "*", // or restrict later to your Expo dev IP if you want
+// }));
 
 // For webhook routes, we need to capture the raw body for signature verification
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
