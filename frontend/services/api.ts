@@ -17,9 +17,9 @@ import {
   Wallet
 } from './types';
 
-// export const API_BASE_URL = getApiUrl();
-// export const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
-export const API_BASE_URL = 'https://vtuapp-production.up.railway.app/api';
+// export
+//  const API_BASE_URL = 'http://13.62.46.174/api';
+export const API_BASE_URL = 'https://api.ibdata.com.ng/api';
 
 
 // Log the API URL being used

@@ -81,3 +81,7 @@ export const changeAdminPassword = (data: { currentPassword: string; newPassword
 // Support Content
 export const getSupportContent = () => api.get('/support-content');
 export const updateSupportContent = (data: any) => api.put('/support-content', data);
+
+// Notifications
+export const sendBroadcastNotification = (data: { title: string; message: string; type: string; action_link?: string }) =>
+  api.post('/notifications/broadcast', data);

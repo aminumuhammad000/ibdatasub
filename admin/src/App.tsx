@@ -6,6 +6,7 @@ import AuditLogs from './pages/AuditLogs';
 import Dashboard from './pages/Dashboard';
 import Funding from './pages/Funding';
 import Login from './pages/Login';
+import Notifications from './pages/Notifications';
 import PricingPlans from './pages/PricingPlans';
 import Profile from './pages/Profile';
 import Providers from './pages/Providers';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/providers" element={<Providers />} />
           <Route path="/wallet-credit" element={<WalletCredit />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
 

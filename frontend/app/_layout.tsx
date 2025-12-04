@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
+import { AppUpdateChecker } from '@/components/AppUpdateChecker';
 
 // Keep splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -66,6 +67,7 @@ function AuthLayout() {
       <Stack.Screen name="payment-methods" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="admin-users" />
+      <Stack.Screen name="admin-notifications" />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
     </Stack>
   );
@@ -98,6 +100,7 @@ export default function RootLayout() {
           <AuthProvider>
             <StatusBar style="light" />
             <AuthLayout />
+            <AppUpdateChecker />
           </AuthProvider>
         </ProfileProvider>
       </AlertProvider>

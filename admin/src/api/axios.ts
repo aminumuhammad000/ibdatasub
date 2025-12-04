@@ -6,8 +6,14 @@ import axios from 'axios';
 //     : 'http://localhost:5000/api/admin';
 
 
-// const BASE_URL = "https://vtuapp-production.up.railway.app/api/admin";
-const BASE_URL = "http://localhost:5000/api/admin";
+// const BASE_URL = "http://localhost:5000/api/admin";
+// const BASE_URL = "http://13.62.46.174/api/admin";
+const BASE_URL = "https://api.ibdata.com.ng/api/admin";
+
+
+
+
+
 
 console.log('API Base URL:', BASE_URL);
 
@@ -43,8 +49,8 @@ api.interceptors.response.use(
 );
 
 // General API instance for non-admin endpoints
-const API_BASE = "https://vtuapp-production.up.railway.app/api";
-// const API_BASE = "http://localhost:5000/api";
+// const API_BASE = "http://13.62.46.174/api/";
+const API_BASE = "https://api.ibdata.com.ng/api/";
 
 export const generalApi = axios.create({
   baseURL: API_BASE,

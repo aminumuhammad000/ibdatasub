@@ -1,21 +1,37 @@
 import { useTheme } from "@/components/ThemeContext";
+import { SupportContent, supportService } from "@/services/support.service";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  Linking,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Linking,
-  Alert,
 } from "react-native";
 
 export default function SupportScreen() {
   const { isDark } = useTheme();
-    const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
+  const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
+  const [supportContent, setSupportContent] = useState<SupportContent | null>(null);
+
+  useEffect(() => {
+    fetchSupportContent();
+  }, []);
+
+  const fetchSupportContent = async () => {
+    try {
+      const response = await supportService.getSupportContent();
+      if (response.success) {
+        setSupportContent(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch support content:', error);
+    }
+  };
 
   const theme = {
     primary: "#0A2540",
@@ -40,21 +56,21 @@ export default function SupportScreen() {
     {
       icon: "call-outline",
       label: "Call Us",
-      description: "+234 81000 15498",
+      description: supportContent?.phoneNumber || "Loading...",
     },
     {
       icon: "mail-outline",
       label: "Email Support",
-      description: "aminuamee@yahoo.com",
+      description: supportContent?.email || "Loading...",
     },
-  {
-  icon: "logo-whatsapp",
-  label: "WhatsApp",
-  description: "+234 81000 15498",
-},
+    {
+      icon: "logo-whatsapp",
+      label: "WhatsApp",
+      description: supportContent?.whatsappNumber || "Loading...",
+    },
   ];
 
-    const faqData = [
+  const faqData = [
     {
       question: 'How do I buy airtime or data?',
       answer: 'To buy airtime or data, go to the home screen and select either "Buy Airtime" or "Buy Data". Choose your network provider, enter the phone number, select the amount, and confirm your purchase.'
@@ -113,36 +129,35 @@ export default function SupportScreen() {
                 onPress={() => {
                   if (option.label === "Call Us") {
                     // 📞 Open phone dialer
-                    Linking.openURL(
-                      `tel:${option.description.replace(/\s+/g, "")}`
-                    );
+                    if (supportContent?.phoneNumber) {
+                      Linking.openURL(`tel:${supportContent.phoneNumber.replace(/\s+/g, "")}`);
+                    }
                   } else if (option.label === "Email Support") {
                     // 📧 Open default mail app
-                    Linking.openURL(`mailto:${option.description}`);
+                    if (supportContent?.email) {
+                      Linking.openURL(`mailto:${supportContent.email}`);
+                    }
                   } else if (option.label === "Live Chat") {
                     // 💬 Maybe navigate to your chat screen later
-                    console.log("Open chat screen");
-                  } else if (option.label === "FAQs") {
+                    Alert.alert("Live Chat", "Live chat feature coming soon!");
+                  } else if (option.label === "WhatsApp") {
                     // 💚 Open WhatsApp chat
-                    const phoneNumber = "+2348001234567"; // replace with your WhatsApp number
-                    const message =
-                      "Hello! I need some help regarding your app.";
-                    const whatsappURL = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
-                      message
-                    )}`;
+                    if (supportContent?.whatsappNumber) {
+                      const cleanNumber = supportContent.whatsappNumber.replace(/[^0-9]/g, '');
+                      const message = "Hello! I need some help regarding your app.";
+                      const whatsappURL = `whatsapp://send?phone=${cleanNumber}&text=${encodeURIComponent(message)}`;
 
-                    Linking.canOpenURL(whatsappURL)
-                      .then((supported) => {
-                        if (!supported) {
-                          Alert.alert(
-                            "WhatsApp not installed",
-                            "Please install WhatsApp to chat with support."
-                          );
-                        } else {
-                          return Linking.openURL(whatsappURL);
-                        }
-                      })
-                      .catch((err) => console.error("An error occurred", err));
+                      Linking.canOpenURL(whatsappURL)
+                        .then((supported) => {
+                          if (!supported) {
+                            // Fallback to web url if app not installed
+                            return Linking.openURL(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`);
+                          } else {
+                            return Linking.openURL(whatsappURL);
+                          }
+                        })
+                        .catch((err) => console.error("An error occurred", err));
+                    }
                   }
                 }}
               >
@@ -182,30 +197,30 @@ export default function SupportScreen() {
           </Text>
           <View style={styles.faqList}>
             {faqData.map((faq, index) => (
-                     <View key={index} style={styles.faqItem}>
-                       <TouchableOpacity 
-                         style={styles.faqQuestion}
-                         onPress={() => toggleFAQ(index)}
-                       >
-                         <Text style={[styles.faqQuestionText, { color: textColor }]}>
-                           {faq.question}
-                         </Text>
-                         <Ionicons 
-                           name={selectedFAQ === index ? "chevron-up" : "chevron-down"} 
-                           size={20} 
-                           color={textBodyColor} 
-                         />
-                       </TouchableOpacity>
-                       
-                       {selectedFAQ === index && (
-                         <View style={styles.faqAnswer}>
-                           <Text style={[styles.faqAnswerText, { color: textBodyColor }]}>
-                             {faq.answer}
-                           </Text>
-                         </View>
-                       )}
-                     </View>
-                   ))}
+              <View key={index} style={styles.faqItem}>
+                <TouchableOpacity
+                  style={styles.faqQuestion}
+                  onPress={() => toggleFAQ(index)}
+                >
+                  <Text style={[styles.faqQuestionText, { color: textColor }]}>
+                    {faq.question}
+                  </Text>
+                  <Ionicons
+                    name={selectedFAQ === index ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color={textBodyColor}
+                  />
+                </TouchableOpacity>
+
+                {selectedFAQ === index && (
+                  <View style={styles.faqAnswer}>
+                    <Text style={[styles.faqAnswerText, { color: textBodyColor }]}>
+                      {faq.answer}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
           </View>
         </View>
 
@@ -292,13 +307,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     flex: 1,
   },
-    faqQuestionText: {
+  faqQuestionText: {
     fontSize: 16,
     fontWeight: '600',
     flex: 1,
     marginRight: 12,
   },
-    faqAnswer: {
+  faqAnswer: {
     paddingBottom: 16,
     paddingRight: 32,
   },

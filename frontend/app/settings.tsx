@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '@/context/AuthContext';
 
 const theme = {
   primary: '#0A2540',
@@ -27,6 +28,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { themeMode, isDark, setThemeMode } = useTheme();
   const { showSuccess } = useAlert();
+  const { user } = useAuth();
 
   const bgColor = isDark ? theme.backgroundDark : theme.backgroundLight;
   const cardBgColor = isDark ? '#1F2937' : '#FFFFFF';
@@ -61,7 +63,7 @@ export default function SettingsScreen() {
   };
 
   const ThemeOption = ({ option }: { option: typeof themeOptions[0] }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[
         styles.themeOption,
         themeMode === option.id && styles.selectedThemeOption,
@@ -74,10 +76,10 @@ export default function SettingsScreen() {
           styles.themeIconContainer,
           { backgroundColor: themeMode === option.id ? theme.primary : borderColor }
         ]}>
-          <Ionicons 
-            name={option.icon as any} 
-            size={24} 
-            color={themeMode === option.id ? '#FFFFFF' : textBodyColor} 
+          <Ionicons
+            name={option.icon as any}
+            size={24}
+            color={themeMode === option.id ? '#FFFFFF' : textBodyColor}
           />
         </View>
         <View style={styles.themeTextContainer}>
@@ -96,10 +98,10 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
+
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -109,18 +111,18 @@ export default function SettingsScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Theme Settings */}
-        <View style={[styles.section, { backgroundColor: cardBgColor }]}> 
+        <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Appearance</Text>
-          <Text style={[styles.sectionDescription, { color: textBodyColor }]}> 
+          <Text style={[styles.sectionDescription, { color: textBodyColor }]}>
             Choose how the app looks on your device
           </Text>
-          
+
           <View style={styles.themeOptionsContainer}>
             {themeOptions.map((option) => (
               <ThemeOption key={option.id} option={option} />
@@ -128,11 +130,11 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <View style={[styles.section, { backgroundColor: cardBgColor }]}> 
+        <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Security</Text>
           <Text style={[styles.sectionDescription, { color: textBodyColor }]}>Manage your security settings</Text>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
             onPress={() => router.push('/security')}
             activeOpacity={0.7}
@@ -149,6 +151,48 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
           </TouchableOpacity>
         </View>
+
+        {/* Admin Panel Section - Only visible to admins */}
+        {(user?.role === 'admin' || user?.role_id === 'admin') && (
+          <View style={[styles.section, { backgroundColor: cardBgColor }]}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Admin Panel</Text>
+            <Text style={[styles.sectionDescription, { color: textBodyColor }]}>Manage users and system settings</Text>
+
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
+              onPress={() => router.push('/admin-users')}
+              activeOpacity={0.7}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0A254020' : '#0A254015' }}>
+                  <Ionicons name="people-outline" size={20} color={theme.primary} />
+                </View>
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Manage Users</Text>
+                  <Text style={{ color: textBodyColor, fontSize: 13 }}>View and manage user accounts</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#F3F4F6' }}
+              onPress={() => router.push('/admin-notifications')}
+              activeOpacity={0.7}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0A254020' : '#0A254015' }}>
+                  <Ionicons name="notifications-outline" size={20} color={theme.primary} />
+                </View>
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Push Notifications</Text>
+                  <Text style={{ color: textBodyColor, fontSize: 13 }}>Send broadcast messages</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={{ height: 50 }} />
       </ScrollView>

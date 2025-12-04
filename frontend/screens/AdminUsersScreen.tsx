@@ -91,7 +91,7 @@ export default function AdminUsersScreen() {
   }, [page]);
 
   const renderItem = ({ item }: { item: AdminUserItem }) => (
-    <View style={[styles.userCard, { backgroundColor: cardBgColor, borderColor }]}> 
+    <View style={[styles.userCard, { backgroundColor: cardBgColor, borderColor }]}>
       <View style={styles.userAvatar}>
         <Text style={{ color: '#fff', fontWeight: '700' }}>
           {`${(item.first_name || '').charAt(0)}${(item.last_name || '').charAt(0)}`.toUpperCase()}
@@ -103,20 +103,22 @@ export default function AdminUsersScreen() {
         </Text>
         <Text style={{ color: textBodyColor, fontSize: 12 }}>{item.email}</Text>
       </View>
-      <View style={[styles.statusPill, { backgroundColor: statusBg(item.status) }]}> 
+      <View style={[styles.statusPill, { backgroundColor: statusBg(item.status) }]}>
         <Text style={[styles.statusText, { color: statusColor(item.status) }]}>{item.status}</Text>
       </View>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}> 
-      <View style={[styles.header, { backgroundColor: cardBgColor }]}> 
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <View style={[styles.header, { backgroundColor: cardBgColor }]}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={textColor} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: textColor }]}>Users</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/admin-notifications')}>
+          <Ionicons name="notifications-outline" size={24} color={textColor} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchContainer}>
@@ -139,7 +141,7 @@ export default function AdminUsersScreen() {
       </View>
 
       {isLoading && users.length === 0 ? (
-        <View style={styles.centered}> 
+        <View style={styles.centered}>
           <ActivityIndicator color={theme.accent} />
           <Text style={{ color: textBodyColor, marginTop: 8 }}>Loading users...</Text>
         </View>
@@ -154,7 +156,7 @@ export default function AdminUsersScreen() {
           onEndReached={onEndReached}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.accent} />}
           ListEmptyComponent={!isLoading ? (
-            <View style={styles.centered}> 
+            <View style={styles.centered}>
               <Ionicons name="people-outline" size={36} color={textBodyColor} />
               <Text style={{ color: textBodyColor, marginTop: 8 }}>No users found</Text>
             </View>
@@ -168,7 +170,7 @@ export default function AdminUsersScreen() {
       )}
 
       {error && (
-        <View style={[styles.errorBar, { backgroundColor: theme.error + '22', borderColor: theme.error + '55' }]}> 
+        <View style={[styles.errorBar, { backgroundColor: theme.error + '22', borderColor: theme.error + '55' }]}>
           <Ionicons name="alert-circle" size={16} color={theme.error} />
           <Text style={{ color: theme.error, marginLeft: 8 }}>{error}</Text>
           <TouchableOpacity onPress={() => { setError(null); loadUsers(true); }} style={{ marginLeft: 'auto' }}>

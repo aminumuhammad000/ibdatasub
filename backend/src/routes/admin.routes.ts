@@ -74,4 +74,10 @@ router.put('/support-content', authMiddleware, async (req, res, next) => {
     return SupportContentController.updateContent(req, res);
 });
 
+// Broadcast notifications
+router.post('/notifications/broadcast', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.sendBroadcastNotification(req, res);
+});
+
 export default router;

@@ -2,8 +2,8 @@
 import { Response } from 'express';
 import { Notification } from '../models/index.js';
 import { NotificationService } from '../services/notification.service.js';
-import { ApiResponse } from '../utils/response.js';
 import { AuthRequest } from '../types/index.js';
+import { ApiResponse } from '../utils/response.js';
 
 export class NotificationController {
   static async getNotifications(req: AuthRequest, res: Response) {
@@ -98,6 +98,27 @@ export class NotificationController {
     try {
       await Notification.deleteMany({ user_id: req.user?.id });
       return ApiResponse.success(res, null, 'All notifications deleted successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async sendBroadcastNotification(req: AuthRequest, res: Response) {
+    try {
+      const { title, message, type, action_link } = req.body;
+
+      if (!title || !message || !type) {
+        return ApiResponse.error(res, 'Title, message, and type are required', 400);
+      }
+
+      const result = await NotificationService.sendBroadcastNotification({
+        title,
+        message,
+        type,
+        action_link
+      });
+
+      return ApiResponse.success(res, result, result.message);
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

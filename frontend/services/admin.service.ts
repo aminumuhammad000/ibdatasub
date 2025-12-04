@@ -184,4 +184,16 @@ export const adminService = {
       throw error.response?.data || { success: false, message: 'Failed to delete audit log' };
     }
   },
+
+  /**
+   * Send broadcast notification (admin only)
+   */
+  sendBroadcastNotification: async (data: { title: string; message: string; type: string; action_url?: string; priority?: string }): Promise<any> => {
+    try {
+      const response = await api.post('/admin/notifications/broadcast', data);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to send broadcast notification' };
+    }
+  },
 };
