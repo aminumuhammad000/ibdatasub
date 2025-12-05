@@ -22,29 +22,10 @@ dotenv.config();
 
 const app = express();
 
-// CORS Configuration
-const allowedOrigins = [
-  'https://app.ibdata.com.ng',
-  'https://admin.ibdata.com.ng',
-  'http://localhost:3000',
-  'http://localhost:8081',
-  'exp://localhost:8081',
-];
-
+// CORS Configuration - Allow ALL origins
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Check if the origin is in the allowed list
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.') || origin.startsWith('http://localhost')) {
-      callback(null, true);
-    } else {
-      // Reject without error to prevent server crashes
-      callback(null, false);
-    }
-  },
-  credentials: true,
+  origin: '*',  // Allow all origins
+  credentials: false,  // Must be false when origin is '*'
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
   exposedHeaders: ["Content-Length", "X-Request-Id"],
