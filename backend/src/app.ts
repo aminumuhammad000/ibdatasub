@@ -52,9 +52,6 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Handle OPTIONS requests explicitly
-app.options('*', cors());
-
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 
 // Parse JSON for all other routes
