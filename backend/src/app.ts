@@ -40,7 +40,8 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.') || origin.startsWith('http://localhost')) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Reject without error to prevent server crashes
+      callback(null, false);
     }
   },
   credentials: true,
