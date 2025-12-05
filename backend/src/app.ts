@@ -25,12 +25,6 @@ const app = express();
 // CORS Configuration - Allow ALL origins
 app.use(cors({
   origin: '*',  // Allow all origins
-  credentials: false,  // Must be false when origin is '*'
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-  exposedHeaders: ["Content-Length", "X-Request-Id"],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
 }));
 
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
