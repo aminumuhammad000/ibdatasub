@@ -1,9 +1,10 @@
 // controllers/admin.controller.ts
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/bootstrap.js';
-import { AdminUser, AuditLog, Transaction, User } from '../models/index.js';
+import { AdminRole, AdminUser, AuditLog, Plan, Transaction, User } from '../models/index.js';
 import { AdminService } from '../services/admin.service.js';
 import { AuthRequest } from '../types/index.js';
 import { ApiResponse } from '../utils/response.js';
@@ -172,13 +173,26 @@ export class AdminController {
       const limit = parseInt(req.query.limit as string) || 10;
       const skip = (page - 1) * limit;
 
-      const users = await User.find()
+      const search = req.query.search as string;
+      const query: any = {};
+
+      if (search) {
+        const searchRegex = new RegExp(search, 'i');
+        query.$or = [
+          { first_name: searchRegex },
+          { last_name: searchRegex },
+          { email: searchRegex },
+          { phone_number: searchRegex }
+        ];
+      }
+
+      const users = await User.find(query)
         .select('-password_hash')
         .skip(skip)
         .limit(limit)
         .sort({ created_at: -1 });
 
-      const total = await User.countDocuments();
+      const total = await User.countDocuments(query);
 
       return ApiResponse.paginated(res, users, {
         page,
@@ -404,6 +418,20 @@ export class AdminController {
   }
 
   /**
+   * Get all admin roles
+   * @route GET /api/admin/roles
+   * @access Private - Super Admin only
+   */
+  static async getRoles(req: AuthRequest, res: Response) {
+    try {
+      const roles = await AdminRole.find({ status: 'active' });
+      return ApiResponse.success(res, roles, 'Roles retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
    * Update current admin profile (first_name, last_name, email)
    * @route PUT /api/admin/profile
    */
@@ -452,6 +480,119 @@ export class AdminController {
       await admin.save();
 
       return ApiResponse.success(res, null, 'Password changed successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
+   * Generate API key for a user
+   * @route POST /api/admin/users/:id/api-key
+   */
+  static async generateApiKey(req: AuthRequest, res: Response) {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      const apiKey = `sk_live_${crypto.randomBytes(24).toString('hex')}`;
+      user.api_key = apiKey;
+      user.api_key_enabled = true;
+      user.updated_at = new Date();
+      await user.save();
+
+      // Log action
+      await AdminService.logAction({
+        admin_id: req.user?.id as any,
+        action: 'api_key_generated',
+        entity_type: 'User',
+        entity_id: user._id,
+        new_value: { api_key_enabled: true },
+        ip_address: req.ip
+      });
+
+      return ApiResponse.success(res, { apiKey }, 'API key generated successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
+   * Revoke API key for a user
+   * @route DELETE /api/admin/users/:id/api-key
+   */
+  static async revokeApiKey(req: AuthRequest, res: Response) {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      user.api_key = undefined;
+      user.api_key_enabled = false;
+      user.updated_at = new Date();
+      await user.save();
+
+      // Log action
+      await AdminService.logAction({
+        admin_id: req.user?.id as any,
+        action: 'api_key_revoked',
+        entity_type: 'User',
+        entity_id: user._id,
+        new_value: { api_key_enabled: false },
+        ip_address: req.ip
+      });
+
+      return ApiResponse.success(res, null, 'API key revoked successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
+   * Get all plans with operator info
+   * @route GET /api/admin/plans
+   */
+  static async getPlans(req: AuthRequest, res: Response) {
+    try {
+      const plans = await Plan.find().populate('operator_id');
+      return ApiResponse.success(res, plans, 'Plans retrieved successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  /**
+   * Update developer price for a plan
+   * @route PUT /api/admin/plans/:id/developer-price
+   */
+  static async updatePlanDeveloperPrice(req: AuthRequest, res: Response) {
+    try {
+      const { developer_price } = req.body;
+      const plan = await Plan.findById(req.params.id);
+
+      if (!plan) {
+        return ApiResponse.error(res, 'Plan not found', 404);
+      }
+
+      const oldPrice = plan.developer_price;
+      plan.developer_price = developer_price;
+      plan.updated_at = new Date();
+      await plan.save();
+
+      // Log action
+      await AdminService.logAction({
+        admin_id: req.user?.id as any,
+        action: 'plan_developer_price_updated',
+        entity_type: 'Plan',
+        entity_id: plan._id,
+        old_value: { developer_price: oldPrice },
+        new_value: { developer_price },
+        ip_address: req.ip
+      });
+
+      return ApiResponse.success(res, plan, 'Developer price updated successfully');
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

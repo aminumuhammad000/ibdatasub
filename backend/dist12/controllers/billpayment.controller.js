@@ -1,5 +1,6 @@
 import AirtimePlan from '../models/airtime_plan.model.js';
 import { Transaction, User } from '../models/index.js';
+import { Plan } from '../models/plan.model.js';
 import providerRegistry from '../services/providerRegistry.service.js';
 import topupmateService from '../services/topupmate.service.js';
 import { WalletService } from '../services/wallet.service.js';
@@ -98,23 +99,26 @@ export class BillPaymentController {
         try {
             const { network, phone, amount, airtime_type = 'VTU', ported_number = true, pin } = req.body;
             const userId = req.user?.id;
-            // Enforce transaction PIN
-            const user = await User.findById(userId);
-            if (!user)
-                return ApiResponse.error(res, 'User not found', 404);
-            if (!pin || !/^\d{4}$/.test(String(pin))) {
-                return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
-            }
-            if (!user.transaction_pin) {
-                // Allow default PIN for legacy users without a stored PIN
-                if (String(pin) !== '1234') {
-                    return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+            // Enforce transaction PIN (skip for API users)
+            const isApiRequest = !!req.headers['x-api-key'];
+            if (!isApiRequest) {
+                const user = await User.findById(userId);
+                if (!user)
+                    return ApiResponse.error(res, 'User not found', 404);
+                if (!pin || !/^\d{4}$/.test(String(pin))) {
+                    return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
                 }
-            }
-            else {
-                const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
-                if (!pinOk) {
-                    return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                if (!user.transaction_pin) {
+                    // Allow default PIN for legacy users without a stored PIN
+                    if (String(pin) !== '1234') {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
+                }
+                else {
+                    const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
+                    if (!pinOk) {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
                 }
             }
             // Normalize network input to provider ID
@@ -122,9 +126,31 @@ export class BillPaymentController {
             if (!providerId) {
                 return ApiResponse.error(res, 'Invalid network. Must be: mtn, airtel, glo, or 9mobile', 400);
             }
+            // Calculate discount
+            const airtimePlan = await AirtimePlan.findOne({ providerId, type: 'AIRTIME', active: true });
+            let discount = 0;
+            if (airtimePlan) {
+                discount = isApiRequest ? (airtimePlan.api_discount || 0) : (airtimePlan.discount || 0);
+            }
+            const finalAmount = parseFloat(amount) * (1 - discount / 100);
             // Validate user balance
-            const wallet = await WalletService.getWalletByUserId(userId);
-            if (wallet.balance < parseFloat(amount)) {
+            if (!userId) {
+                return ApiResponse.error(res, 'User authentication failed', 401);
+            }
+            let wallet;
+            try {
+                wallet = await WalletService.getWalletByUserId(userId);
+            }
+            catch (err) {
+                return ApiResponse.error(res, `Wallet error: ${err.message}`, 400);
+            }
+            if (!wallet) {
+                return ApiResponse.error(res, 'Wallet not found', 404);
+            }
+            if (wallet.balance <= 0) {
+                return ApiResponse.error(res, 'Wallet is empty. Please fund your wallet.', 400);
+            }
+            if (wallet.balance < finalAmount) {
                 return ApiResponse.error(res, 'Insufficient wallet balance', 400);
             }
             // Generate reference
@@ -132,14 +158,14 @@ export class BillPaymentController {
             // Get wallet for wallet_id
             const walletData = await WalletService.getWalletByUserId(userId);
             // Deduct from wallet
-            await WalletService.debit(userId, parseFloat(amount), 'Airtime purchase');
+            await WalletService.debit(userId, finalAmount, 'Airtime purchase');
             // Create transaction record
             const transaction = await Transaction.create({
                 user_id: userId,
                 wallet_id: walletData._id,
                 type: 'airtime_topup',
                 amount: parseFloat(amount),
-                total_charged: parseFloat(amount),
+                total_charged: finalAmount,
                 reference_number: ref,
                 payment_method: 'wallet',
                 status: 'pending',
@@ -211,19 +237,22 @@ export class BillPaymentController {
         try {
             const { network, phone, plan, ported_number = true, pin } = req.body;
             const userId = req.user?.id;
-            // Enforce transaction PIN
-            const user = await User.findById(userId);
-            if (!user)
-                return ApiResponse.error(res, 'User not found', 404);
-            if (!user.transaction_pin) {
-                return ApiResponse.error(res, 'Please set your 4-digit transaction PIN before making purchases', 400);
-            }
-            if (!pin || !/^\d{4}$/.test(String(pin))) {
-                return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
-            }
-            const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
-            if (!pinOk) {
-                return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+            // Enforce transaction PIN (skip for API users)
+            const isApiRequest = !!req.headers['x-api-key'];
+            if (!isApiRequest) {
+                const user = await User.findById(userId);
+                if (!user)
+                    return ApiResponse.error(res, 'User not found', 404);
+                if (!user.transaction_pin) {
+                    return ApiResponse.error(res, 'Please set your 4-digit transaction PIN before making purchases', 400);
+                }
+                if (!pin || !/^\d{4}$/.test(String(pin))) {
+                    return ApiResponse.error(res, 'Valid 4-digit transaction PIN is required', 400);
+                }
+                const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
+                if (!pinOk) {
+                    return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                }
             }
             // Normalize network input to provider ID
             const providerId = normalizeNetwork(network);
@@ -236,9 +265,27 @@ export class BillPaymentController {
                 return ApiResponse.error(res, 'Invalid plan selected', 400);
             }
             const amount = Number(dbPlan.price);
+            // Calculate discount
+            let discount = isApiRequest ? (dbPlan.api_discount || 0) : (dbPlan.discount || 0);
+            const finalAmount = amount * (1 - discount / 100);
             // Validate user balance
-            const wallet = await WalletService.getWalletByUserId(userId);
-            if (wallet.balance < amount) {
+            if (!userId) {
+                return ApiResponse.error(res, 'User authentication failed', 401);
+            }
+            let wallet;
+            try {
+                wallet = await WalletService.getWalletByUserId(userId);
+            }
+            catch (err) {
+                return ApiResponse.error(res, `Wallet error: ${err.message}`, 400);
+            }
+            if (!wallet) {
+                return ApiResponse.error(res, 'Wallet not found', 404);
+            }
+            if (wallet.balance <= 0) {
+                return ApiResponse.error(res, 'Wallet is empty. Please fund your wallet.', 400);
+            }
+            if (wallet.balance < finalAmount) {
                 return ApiResponse.error(res, 'Insufficient wallet balance', 400);
             }
             // Generate reference
@@ -246,14 +293,14 @@ export class BillPaymentController {
             // Get wallet for wallet_id
             const walletData = await WalletService.getWalletByUserId(userId);
             // Deduct from wallet
-            await WalletService.debit(userId, amount, 'Data purchase');
+            await WalletService.debit(userId, finalAmount, 'Data purchase');
             // Create transaction record
             const transaction = await Transaction.create({
                 user_id: userId,
                 wallet_id: walletData._id,
                 type: 'data_purchase',
                 amount,
-                total_charged: amount,
+                total_charged: finalAmount,
                 reference_number: ref,
                 payment_method: 'wallet',
                 status: 'pending',
@@ -585,6 +632,29 @@ export class BillPaymentController {
             else {
                 return ApiResponse.error(res, 'Failed to retrieve transaction status', 400);
             }
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    /**
+     * Get plans for developers (with developer pricing)
+     * @route GET /api/billpayment/plans
+     */
+    async getDeveloperPlans(req, res, next) {
+        try {
+            const plans = await Plan.find({ status: 'active' }).populate('operator_id');
+            const payload = plans.map(plan => ({
+                id: plan._id,
+                name: plan.name,
+                operator: plan.operator_id?.name,
+                operator_code: plan.operator_id?.code,
+                price: plan.developer_price || plan.price,
+                type: plan.type,
+                validity: plan.validity,
+                data_amount: plan.data_amount
+            }));
+            return ApiResponse.success(res, 'Developer plans retrieved successfully', payload);
         }
         catch (error) {
             next(error);

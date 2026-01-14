@@ -94,6 +94,15 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    to: '/api-management',
+    label: 'API Management',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+    ),
+  },
 ];
 
 interface SidebarProps {
@@ -103,7 +112,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
   const [isDesktopOpen, setIsDesktopOpen] = useState(true);
-  const { logout } = useAuthContext();
+  const { user, logout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -117,6 +126,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
       setIsMobileOpen(false);
     }
   };
+
+  // Filter nav items based on role
+  const filteredNavItems = navItems.filter(item => {
+    if (user?.role?.name === 'API Manager') {
+      return ['/api-management', '/notifications'].includes(item.to);
+    }
+    return true; // Super Admin sees everything
+  });
 
   return (
     <>
@@ -184,8 +201,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-          {navItems.map((item) => (
+        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto scrollbar-hide">
+          {filteredNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

@@ -22,6 +22,8 @@ const userSchema = new Schema<IUser>({
   bvn: { type: String },
   // Store hashed PIN; do not enforce 4-char length on hash
   transaction_pin: { type: String },
+  api_key: { type: String, unique: true, sparse: true },
+  api_key_enabled: { type: Boolean, default: false },
   virtual_account: {
     account_number: { type: String },
     account_name: { type: String },

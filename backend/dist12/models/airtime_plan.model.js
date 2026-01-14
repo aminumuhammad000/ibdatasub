@@ -8,6 +8,7 @@ const AirtimePlanSchema = new Schema({
     price: { type: Number, required: true },
     type: { type: String, enum: ['AIRTIME', 'DATA'], required: true, index: true },
     discount: { type: Number, default: 0 },
+    api_discount: { type: Number, default: 0 },
     meta: { type: Schema.Types.Mixed },
     active: { type: Boolean, default: true },
 }, { timestamps: true });

@@ -104,4 +104,24 @@ export class NotificationController {
             return ApiResponse.error(res, error.message, 500);
         }
     }
+    static async deleteBroadcast(req, res) {
+        try {
+            const { id } = req.params;
+            // Check if user is admin
+            if (!req.user?.role) {
+                return ApiResponse.error(res, 'Unauthorized', 403);
+            }
+            const notification = await Notification.findOneAndDelete({
+                _id: id,
+                type: 'broadcast'
+            });
+            if (!notification) {
+                return ApiResponse.error(res, 'Broadcast notification not found', 404);
+            }
+            return ApiResponse.success(res, null, 'Broadcast notification deleted successfully');
+        }
+        catch (error) {
+            return ApiResponse.error(res, error.message, 500);
+        }
+    }
 }

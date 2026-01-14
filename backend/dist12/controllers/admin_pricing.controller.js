@@ -46,7 +46,7 @@ export class AdminPricingController {
      */
     static async createPlan(req, res) {
         try {
-            const { providerId, providerName, externalPlanId, code, name, price, type, discount, meta, active } = req.body;
+            const { providerId, providerName, externalPlanId, code, name, price, type, discount, api_discount, meta, active } = req.body;
             // Validation
             if (!providerId || !providerName || !name || price === undefined || !type) {
                 ApiResponse.error(res, 'Missing required fields: providerId, providerName, name, price, type', 400);
@@ -69,6 +69,7 @@ export class AdminPricingController {
                 price,
                 type,
                 discount: discount || 0,
+                api_discount: api_discount || 0,
                 meta,
                 active: active !== false,
             });
@@ -87,7 +88,7 @@ export class AdminPricingController {
     static async updatePlan(req, res) {
         try {
             const { id } = req.params;
-            const { providerId, providerName, externalPlanId, code, name, price, type, discount, meta, active } = req.body;
+            const { providerId, providerName, externalPlanId, code, name, price, type, discount, api_discount, meta, active } = req.body;
             const plan = await AirtimePlan.findById(id);
             if (!plan) {
                 ApiResponse.error(res, 'Plan not found', 404);
@@ -110,6 +111,8 @@ export class AdminPricingController {
                 plan.type = type;
             if (discount !== undefined)
                 plan.discount = discount;
+            if (api_discount !== undefined)
+                plan.api_discount = api_discount;
             if (meta !== undefined)
                 plan.meta = meta;
             if (active !== undefined)

@@ -3,6 +3,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface AuthContextType {
   token: string | null;
   admin: any;
+  user: any; // Alias for admin to match usage in components
   login: (token: string, admin: any) => void;
   logout: () => void;
 }
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, admin, login, logout }}>
+    <AuthContext.Provider value={{ token, admin, user: admin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

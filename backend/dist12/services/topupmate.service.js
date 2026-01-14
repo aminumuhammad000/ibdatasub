@@ -1,16 +1,19 @@
 // services/topupmate.service.ts
 import axios from 'axios';
-import { config, logger } from '../config/bootstrap.js';
+import { logger } from '../config/bootstrap.js';
 import ProviderConfig from '../models/provider.model.js';
 class TopupmateService {
     api = null;
     baseURL = 'https://connect.topupmate.com/api';
     async ensureClient() {
-        if (this.api)
-            return this.api;
+        // Always fetch fresh config to handle admin updates immediately
         const cfg = await ProviderConfig.findOne({ code: 'topupmate' });
         const baseURL = cfg?.base_url || this.baseURL;
-        const apiKey = cfg?.api_key || cfg?.metadata?.env?.TOPUPMATE_API_KEY || config.topupmate.apiKey || '';
+        // Only use API key from database configuration
+        const apiKey = cfg?.api_key?.trim();
+        if (!apiKey) {
+            throw new Error('TopupMate API key not found in configuration. Please configure it in the admin panel.');
+        }
         this.api = axios.create({
             baseURL,
             headers: {

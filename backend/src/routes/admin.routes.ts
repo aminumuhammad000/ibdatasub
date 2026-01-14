@@ -16,7 +16,8 @@ router.put('/profile/password', authMiddleware, AdminController.changeAdminPassw
 
 // Admin user management
 router.post('/admins', authMiddleware, AdminController.createAdminUser);
-router.get('/admins', authMiddleware, AdminController.getAllAdmins);
+router.get('/admins', authMiddleware, AdminController.getAllAdmins); // Keeping this as it's not explicitly removed
+router.get('/roles', authMiddleware, AdminController.getRoles);
 
 // User management
 router.get('/users', authMiddleware, AdminController.getAllUsers);
@@ -24,6 +25,12 @@ router.get('/users/:id', authMiddleware, AdminController.getUserById);
 router.put('/users/:id/status', authMiddleware, AdminController.updateUserStatus);
 router.put('/users/:id', authMiddleware, AdminController.updateUser);
 router.delete('/users/:id', authMiddleware, AdminController.deleteUser);
+router.post('/users/:id/api-key', authMiddleware, AdminController.generateApiKey);
+router.delete('/users/:id/api-key', authMiddleware, AdminController.revokeApiKey);
+
+// Pricing Management for Developers
+router.get('/plans', authMiddleware, AdminController.getPlans);
+router.put('/plans/:id/developer-price', authMiddleware, AdminController.updatePlanDeveloperPrice);
 
 // Wallet management
 router.post('/wallet/credit', authMiddleware, AdminController.creditUserWallet);
@@ -74,10 +81,22 @@ router.put('/support-content', authMiddleware, async (req, res, next) => {
     return SupportContentController.updateContent(req, res);
 });
 
-// Broadcast notifications
+// Broadcast Notifications
 router.post('/notifications/broadcast', authMiddleware, async (req, res) => {
     const { NotificationController } = await import('../controllers/notification.controller.js');
     return NotificationController.sendBroadcastNotification(req, res);
+});
+router.delete('/notifications/broadcast/:id', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.deleteBroadcast(req, res);
+});
+router.get('/notifications/broadcast', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.getBroadcasts(req, res);
+});
+router.put('/notifications/broadcast/:id', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.updateBroadcast(req, res);
 });
 
 export default router;

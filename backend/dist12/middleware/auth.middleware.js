@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/bootstrap.js';
 import { ApiResponse } from '../utils/response.js';
 export const authMiddleware = (req, res, next) => {
+    // If user is already authenticated (e.g. via API key), skip token check
+    if (req.user) {
+        return next();
+    }
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {

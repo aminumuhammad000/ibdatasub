@@ -21,6 +21,12 @@ export const updateUser = (id: string, data: any) => api.put(`/users/${id}`, dat
 export const updateUserStatus = (id: string, status: string) =>
   api.put(`/users/${id}/status`, { status });
 export const deleteUser = (id: string) => api.delete(`/users/${id}`);
+export const generateApiKey = (id: string) => api.post(`/users/${id}/api-key`);
+export const revokeApiKey = (id: string) => api.delete(`/users/${id}/api-key`);
+
+// Admin Management
+export const createAdmin = (data: any) => api.post('/admins', data);
+export const getRoles = () => api.get('/roles');
 export const creditUserWallet = (userId: string, amount: number, description: string) =>
   api.post('/wallet/credit', { userId, amount, description });
 
@@ -43,6 +49,11 @@ export const deletePricingPlan = (id: string) =>
   api.delete(`/pricing/${id}`);
 export const bulkImportPricingPlans = (plans: any[]) =>
   api.post('/pricing/bulk-import', { plans });
+
+// Developer Pricing Management
+export const getAdminPlans = () => api.get('/plans');
+export const updatePlanDeveloperPrice = (id: string, developer_price: number) =>
+  api.put(`/plans/${id}/developer-price`, { developer_price });
 
 // Providers (Bill payment API providers)
 export const getProviders = (params?: { active?: boolean }) =>
@@ -83,5 +94,9 @@ export const getSupportContent = () => api.get('/support-content');
 export const updateSupportContent = (data: any) => api.put('/support-content', data);
 
 // Notifications
-export const sendBroadcastNotification = (data: { title: string; message: string; type: string; action_link?: string }) =>
+export const sendBroadcast = (data: { title: string; message: string; type: string; action_link?: string }) =>
   api.post('/notifications/broadcast', data);
+export const deleteBroadcast = (id: string) => api.delete(`/notifications/broadcast/${id}`);
+export const getBroadcasts = () => api.get('/notifications/broadcast');
+export const updateBroadcast = (id: string, data: { title: string; message: string; type: string; action_link?: string }) =>
+  api.put(`/notifications/broadcast/${id}`, data);

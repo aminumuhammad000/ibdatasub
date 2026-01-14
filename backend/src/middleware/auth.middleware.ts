@@ -6,6 +6,11 @@ import { AuthRequest } from '../types/index.js';
 import { ApiResponse } from '../utils/response.js';
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+  // If user is already authenticated (e.g. via API key), skip token check
+  if (req.user) {
+    return next();
+  }
+
   try {
     const token = req.headers.authorization?.split(' ')[1];
 

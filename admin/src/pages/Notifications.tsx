@@ -1,3 +1,5 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Edit2, RefreshCw, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import * as adminApi from '../api/adminApi';
 import Layout from '../components/Layout';
@@ -55,18 +57,70 @@ const notificationTypes: NotificationType[] = [
 
 export default function Notifications() {
     const { showToast } = useToast();
+    const queryClient = useQueryClient();
     const [title, setTitle] = useState('');
     const [message, setMessage] = useState('');
     const [type, setType] = useState('system');
     const [actionLink, setActionLink] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+
+    // Fetch active broadcasts
+    const { data: broadcastsData, isLoading: isLoadingBroadcasts } = useQuery({
+        queryKey: ['broadcasts'],
+        queryFn: () => adminApi.getBroadcasts().then(res => res.data)
+    });
+
+    const broadcasts = broadcastsData?.data || [];
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => adminApi.deleteBroadcast(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['broadcasts'] });
+            showToast('Broadcast deleted successfully', 'success');
+        },
+        onError: (error: any) => {
+            showToast(error?.response?.data?.message || 'Failed to delete broadcast', 'error');
+        }
+    });
+
+    // Update mutation
+    const updateMutation = useMutation({
+        mutationFn: (data: any) => adminApi.updateBroadcast(data.id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['broadcasts'] });
+            showToast('Broadcast updated successfully', 'success');
+            resetForm();
+        },
+        onError: (error: any) => {
+            showToast(error?.response?.data?.message || 'Failed to update broadcast', 'error');
+        }
+    });
 
     const handleTypeSelect = (selectedType: string) => {
         setType(selectedType);
-        if (selectedType === 'app_update') {
+        if (selectedType === 'app_update' && !editingId) {
             setTitle('New App Update Available!');
             setMessage('A new version of the app is available. Please update now for the latest features and improvements.');
         }
+    };
+
+    const resetForm = () => {
+        setTitle('');
+        setMessage('');
+        setActionLink('');
+        setType('system');
+        setEditingId(null);
+    };
+
+    const handleEdit = (broadcast: any) => {
+        setTitle(broadcast.title);
+        setMessage(broadcast.message);
+        setType(broadcast.type);
+        setActionLink(broadcast.action_link || '');
+        setEditingId(broadcast._id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleSend = async (e: React.FormEvent) => {
@@ -79,22 +133,29 @@ export default function Notifications() {
 
         setIsSubmitting(true);
         try {
-            const response = await adminApi.sendBroadcastNotification({
-                title: title.trim(),
-                message: message.trim(),
-                type,
-                action_link: actionLink.trim() || undefined,
-            });
-
-            if (response.data?.success) {
-                showToast(response.data.message || 'Notification sent successfully', 'success');
-                // Reset form
-                setTitle('');
-                setMessage('');
-                setActionLink('');
-                setType('system');
+            if (editingId) {
+                await updateMutation.mutateAsync({
+                    id: editingId,
+                    title: title.trim(),
+                    message: message.trim(),
+                    type,
+                    action_link: actionLink.trim() || undefined,
+                });
             } else {
-                showToast(response.data?.message || 'Failed to send notification', 'error');
+                const response = await adminApi.sendBroadcast({
+                    title: title.trim(),
+                    message: message.trim(),
+                    type,
+                    action_link: actionLink.trim() || undefined,
+                });
+
+                if (response.data?.success) {
+                    showToast(response.data.message || 'Notification sent successfully', 'success');
+                    resetForm();
+                    queryClient.invalidateQueries({ queryKey: ['broadcasts'] });
+                } else {
+                    showToast(response.data?.message || 'Failed to send notification', 'error');
+                }
             }
         } catch (error: any) {
             showToast(error?.response?.data?.message || 'Failed to send notification', 'error');
@@ -114,9 +175,19 @@ export default function Notifications() {
                     </div>
 
                     {/* Main Form Card */}
-                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                            <h2 className="text-xl font-semibold text-white">Create Notification</h2>
+                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-8">
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-white">
+                                {editingId ? 'Edit Notification' : 'Create Notification'}
+                            </h2>
+                            {editingId && (
+                                <button
+                                    onClick={resetForm}
+                                    className="text-white/80 hover:text-white text-sm bg-white/10 px-3 py-1 rounded-lg transition"
+                                >
+                                    Cancel Edit
+                                </button>
+                            )}
                         </div>
 
                         <form onSubmit={handleSend} className="p-6 space-y-6">
@@ -242,12 +313,7 @@ export default function Notifications() {
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setTitle('');
-                                        setMessage('');
-                                        setActionLink('');
-                                        setType('system');
-                                    }}
+                                    onClick={resetForm}
                                     className="px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
                                     disabled={isSubmitting}
                                 >
@@ -260,23 +326,88 @@ export default function Notifications() {
                                 >
                                     {isSubmitting ? (
                                         <span className="flex items-center justify-center gap-2">
-                                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            Sending...
+                                            <RefreshCw className="animate-spin h-5 w-5" />
+                                            {editingId ? 'Update Notification' : 'Send Broadcast Notification'}
                                         </span>
                                     ) : (
                                         <span className="flex items-center justify-center gap-2">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                             </svg>
-                                            Send Broadcast Notification
+                                            {editingId ? 'Update Notification' : 'Send Broadcast Notification'}
                                         </span>
                                     )}
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    {/* Active Broadcasts List */}
+                    <div className="mt-8">
+                        <h2 className="text-xl font-bold text-slate-900 mb-4">Active Broadcasts</h2>
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            {isLoadingBroadcasts ? (
+                                <div className="p-8 text-center text-slate-500">
+                                    <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
+                                    Loading broadcasts...
+                                </div>
+                            ) : broadcasts.length === 0 ? (
+                                <div className="p-8 text-center text-slate-500">
+                                    No active broadcast notifications found.
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-slate-200">
+                                    {broadcasts.map((broadcast: any) => (
+                                        <div key={broadcast._id} className="p-4 hover:bg-slate-50 transition-colors">
+                                            <div className="flex items-start gap-4">
+                                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                                    {notificationTypes.find(t => t.id === broadcast.type)?.icon}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h3 className="font-semibold text-slate-900">{broadcast.title}</h3>
+                                                        <span className="text-xs text-slate-500">
+                                                            {new Date(broadcast.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 mb-2">{broadcast.message}</p>
+                                                    {broadcast.action_link && (
+                                                        <a
+                                                            href={broadcast.action_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                                                        >
+                                                            Link: {broadcast.action_link}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleEdit(broadcast)}
+                                                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm('Are you sure you want to delete this broadcast?')) {
+                                                                deleteMutation.mutate(broadcast._id);
+                                                            }
+                                                        }}
+                                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Info Card */}

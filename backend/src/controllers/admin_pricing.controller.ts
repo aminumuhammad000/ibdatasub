@@ -50,7 +50,7 @@ export class AdminPricingController {
    */
   static async createPlan(req: Request, res: Response): Promise<void> {
     try {
-      const { providerId, providerName, externalPlanId, code, name, price, type, discount, meta, active } = req.body;
+      const { providerId, providerName, externalPlanId, code, name, price, type, discount, api_discount, meta, active } = req.body;
 
       // Validation
       if (!providerId || !providerName || !name || price === undefined || !type) {
@@ -77,6 +77,7 @@ export class AdminPricingController {
         price,
         type,
         discount: discount || 0,
+        api_discount: api_discount || 0,
         meta,
         active: active !== false,
       });
@@ -97,7 +98,7 @@ export class AdminPricingController {
   static async updatePlan(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { providerId, providerName, externalPlanId, code, name, price, type, discount, meta, active } = req.body;
+      const { providerId, providerName, externalPlanId, code, name, price, type, discount, api_discount, meta, active } = req.body;
 
       const plan = await AirtimePlan.findById(id);
       if (!plan) {
@@ -114,6 +115,7 @@ export class AdminPricingController {
       if (price !== undefined) plan.price = price;
       if (type !== undefined) plan.type = type;
       if (discount !== undefined) plan.discount = discount;
+      if (api_discount !== undefined) plan.api_discount = api_discount;
       if (meta !== undefined) plan.meta = meta;
       if (active !== undefined) plan.active = active;
 

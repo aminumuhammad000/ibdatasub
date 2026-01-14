@@ -2,6 +2,8 @@
 
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute';
+import AdminManagement from './pages/AdminManagement';
+import ApiManagement from './pages/ApiManagement';
 import AuditLogs from './pages/AuditLogs';
 import Dashboard from './pages/Dashboard';
 import Funding from './pages/Funding';
@@ -34,6 +36,8 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/api-management" element={<ApiManagement />} />
+          <Route path="/admin-management" element={<AdminManagement />} />
 
         </Route>
         <Route path="/" element={<Navigate to="/login" replace />} />

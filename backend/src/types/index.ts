@@ -40,6 +40,8 @@ export interface IUser extends Document {
   nin?: string;
   bvn?: string;
   transaction_pin?: string;
+  api_key?: string;
+  api_key_enabled?: boolean;
 }
 
 export interface IWallet extends Document {
@@ -94,6 +96,7 @@ export interface IPlan extends Document {
   operator_id: Types.ObjectId;
   name: string;
   price: number;
+  developer_price?: number;
   validity: string;
   data_amount?: string;
   type: 'data' | 'airtime';
