@@ -7,6 +7,17 @@ const router = Router();
 // All routes require authentication (either JWT or API Key)
 router.use(apiKeyMiddleware);
 router.use(authMiddleware);
+// Test endpoint to verify authentication
+router.get('/test-auth', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Authentication successful',
+        user: {
+            id: req.user?.id,
+            email: req.user?.email
+        }
+    });
+});
 // Get service data
 router.get('/networks', billPaymentController.getNetworks);
 router.get('/data-plans', billPaymentController.getDataPlans);

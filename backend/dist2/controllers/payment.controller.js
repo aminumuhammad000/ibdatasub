@@ -277,9 +277,18 @@ export class PaymentController {
                 }, 'Virtual account already exists');
             }
             // Use phone number as NIN (Payrant requires a document number)
-            const documentNumber = user.phone_number;
+            let documentNumber = user.phone_number;
             if (!documentNumber) {
                 return ApiResponse.error(res, 'Phone number is required to create virtual account', 400);
+            }
+            // Normalize phone number: if it's 10 digits, prepend '0' to make it 11 digits
+            documentNumber = documentNumber.replace(/\D/g, ''); // Remove non-digits
+            if (documentNumber.length === 10) {
+                documentNumber = '0' + documentNumber;
+                console.log(`📱 Normalized 10-digit phone to 11 digits: ${documentNumber}`);
+            }
+            else if (documentNumber.length !== 11) {
+                return ApiResponse.error(res, 'Phone number must be 10 or 11 digits', 400);
             }
             // Import Payrant service
             const { PayrantService } = await import('../services/payrant.service.js');
