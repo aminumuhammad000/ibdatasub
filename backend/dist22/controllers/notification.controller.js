@@ -124,4 +124,35 @@ export class NotificationController {
             return ApiResponse.error(res, error.message, 500);
         }
     }
+    static async getBroadcasts(req, res) {
+        try {
+            // Check if user is admin
+            if (!req.user?.role) {
+                return ApiResponse.error(res, 'Unauthorized', 403);
+            }
+            const broadcasts = await Notification.find({ type: 'broadcast' }).sort({ created_at: -1 });
+            return ApiResponse.success(res, broadcasts, 'Broadcast notifications retrieved successfully');
+        }
+        catch (error) {
+            return ApiResponse.error(res, error.message, 500);
+        }
+    }
+    static async updateBroadcast(req, res) {
+        try {
+            const { id } = req.params;
+            const { title, message, type, action_link } = req.body;
+            // Check if user is admin
+            if (!req.user?.role) {
+                return ApiResponse.error(res, 'Unauthorized', 403);
+            }
+            const notification = await Notification.findOneAndUpdate({ _id: id, type: 'broadcast' }, { title, message, type, action_link, updated_at: new Date() }, { new: true });
+            if (!notification) {
+                return ApiResponse.error(res, 'Broadcast notification not found', 404);
+            }
+            return ApiResponse.success(res, notification, 'Broadcast notification updated successfully');
+        }
+        catch (error) {
+            return ApiResponse.error(res, error.message, 500);
+        }
+    }
 }

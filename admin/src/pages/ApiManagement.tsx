@@ -418,11 +418,11 @@ const ApiManagement: React.FC = () => {
 
                                     <section className="mb-8">
                                         <h3 className="text-lg font-semibold text-slate-800 mb-3">Fetch Data Plans</h3>
-                                        <p className="text-slate-600 mb-4">Retrieve available data plans. You can filter by network (1=MTN, 2=Airtel, etc).</p>
+                                        <p className="text-slate-600 mb-4">Retrieve available data plans. Pass `network` query param to filter, or omit it to fetch <strong>all plans at once</strong>.</p>
                                         <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
                                             <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
                                                 <span className="text-xs font-bold text-blue-700">GET</span>
-                                                <span className="text-xs font-mono text-slate-600">/billpayment/data-plans?network=1</span>
+                                                <span className="text-xs font-mono text-slate-600">/billpayment/data-plans</span>
                                             </div>
                                             <div className="p-4">
                                                 <p className="text-sm font-semibold mb-2">Sample Response:</p>
@@ -436,6 +436,12 @@ const ApiManagement: React.FC = () => {
     "price": 250,
     "validity": "30 Days",
     "data_value": "1GB"
+  },
+  {
+    "plan_id": "65b...",
+    "network": "2",
+    "plan_name": "Airtel 1GB",
+    ...
   }
 ]`}
                                                 </pre>

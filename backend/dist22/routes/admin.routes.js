@@ -76,4 +76,12 @@ router.delete('/notifications/broadcast/:id', authMiddleware, async (req, res) =
     const { NotificationController } = await import('../controllers/notification.controller.js');
     return NotificationController.deleteBroadcast(req, res);
 });
+router.get('/notifications/broadcast', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.getBroadcasts(req, res);
+});
+router.put('/notifications/broadcast/:id', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.updateBroadcast(req, res);
+});
 export default router;

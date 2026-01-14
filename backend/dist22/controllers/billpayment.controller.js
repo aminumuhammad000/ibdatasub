@@ -38,17 +38,23 @@ export class BillPaymentController {
             if (providerId)
                 filter.providerId = providerId;
             const dbPlans = await AirtimePlan.find(filter).sort({ providerId: 1, price: 1, name: 1 });
+            // Check if API request
+            const isApiRequest = !!req.headers['x-api-key'];
             // Map to frontend expected shape
-            const payload = dbPlans.map((p) => ({
-                plan_id: String(p._id),
-                network: String(p.providerId),
-                plan_name: p.name,
-                plan_type: 'DATA',
-                validity: p.meta?.validity || '',
-                price: Number(p.price),
-                data_value: p.meta?.data_value || p.code || '',
-                providerName: p.providerName,
-            }));
+            const payload = dbPlans.map((p) => {
+                const discount = isApiRequest ? (p.api_discount || 0) : (p.discount || 0);
+                const finalPrice = Number(p.price) * (1 - discount / 100);
+                return {
+                    plan_id: String(p._id),
+                    network: String(p.providerId),
+                    plan_name: p.name,
+                    plan_type: 'DATA',
+                    validity: p.meta?.validity || '',
+                    price: Number(finalPrice.toFixed(2)),
+                    data_value: p.meta?.data_value || p.code || '',
+                    providerName: p.providerName,
+                };
+            });
             return ApiResponse.success(res, 'Data plans retrieved successfully', payload);
         }
         catch (error) {
