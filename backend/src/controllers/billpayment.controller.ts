@@ -225,8 +225,10 @@ export class BillPaymentController {
             status: 'successful',
             updated_at: new Date()
           });
+          const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Airtime purchase successful', {
             transaction,
+            balance: updatedWallet?.balance,
             provider_response: result,
           });
         } else {
@@ -371,8 +373,10 @@ export class BillPaymentController {
             status: 'successful',
             updated_at: new Date()
           });
+          const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Data purchase successful', {
             transaction,
+            balance: updatedWallet?.balance,
             provider_response: result,
           });
         } else {
@@ -474,8 +478,10 @@ export class BillPaymentController {
             status: 'completed',
             response: result
           });
+          const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Cable TV purchase successful', {
             transaction,
+            balance: updatedWallet?.balance,
             provider_response: result,
           });
         } else {
@@ -565,8 +571,10 @@ export class BillPaymentController {
             status: 'completed',
             response: result
           });
+          const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Electricity purchase successful', {
             transaction,
+            balance: updatedWallet?.balance,
             token: result.token,
             provider_response: result,
           });
@@ -644,8 +652,10 @@ export class BillPaymentController {
             status: 'completed',
             response: result
           });
+          const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Exam pin purchase successful', {
             transaction,
+            balance: updatedWallet?.balance,
             pins: result.pins || result.pin,
             provider_response: result,
           });
@@ -713,6 +723,31 @@ export class BillPaymentController {
       }));
 
       return ApiResponse.success(res, 'Developer plans retrieved successfully', payload);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get wallet balance
+   * @route GET /api/billpayment/balance
+   */
+  async getBalance(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return ApiResponse.error(res, 'User authentication failed', 401);
+      }
+
+      const wallet = await WalletService.getWalletByUserId(userId);
+      if (!wallet) {
+        return ApiResponse.error(res, 'Wallet not found', 404);
+      }
+
+      return ApiResponse.success(res, 'Wallet balance retrieved successfully', {
+        balance: wallet.balance,
+        currency: wallet.currency || 'NGN'
+      });
     } catch (error) {
       next(error);
     }

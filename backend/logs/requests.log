@@ -187,3 +187,14 @@
 {"headers":{},"ip":"127.0.0.1","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/test-topupmate","query":{},"timestamp":"2026-01-14 16:04:39","url":"/api/test-topupmate","userAgent":"curl/8.5.0","userId":"anonymous"}
 {"level":"info","message":"TopupMate API Request: GET /services/","timestamp":"2026-01-14 16:04:39"}
 {"level":"info","message":"127.0.0.1 - anonymous [14/Jan/2026:15:04:41 +0000] \"GET /api/test-topupmate HTTP/1.1\" - - \"-\" \"curl/8.5.0\" - ms","timestamp":"2026-01-14 16:04:41"}
+{"level":"info","message":"TopupMate API Response: 200","msg":"Network Retrieved","response":[{"id":"1","network":"MTN","status":"On"},{"id":"2","network":"AIRTEL","status":"On"},{"id":"3","network":"GLO","status":"On"},{"id":"4","network":"9MOBILE","status":"On"}],"status":"success","timestamp":"2026-01-14 16:04:45"}
+{"duration":"6360ms","ip":"127.0.0.1","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2026-01-14 16:04:45","url":"/api/test-topupmate","userId":"anonymous"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-01-14 16:07:49"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-01-14 16:07:49"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-01-14 16:08:02"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-01-14 16:08:02"}
+{"headers":{"authorization":"Bearer ***","origin":"http://localhost:5173"},"ip":"127.0.0.1","level":"info","message":"📥 Incoming Request","method":"GET","path":"/api/admin/users","query":{"limit":"20","page":"1","search":""},"timestamp":"2026-01-14 16:08:22","url":"/api/admin/users?page=1&limit=20&search=","userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36","userId":"anonymous"}
+{"duration":"66ms","ip":"127.0.0.1","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2026-01-14 16:08:22","url":"/api/admin/users?page=1&limit=20&search=","userId":"6913575adc7e471b13d32a9e"}
+{"level":"info","message":"127.0.0.1 - 6913575adc7e471b13d32a9e [14/Jan/2026:15:08:22 +0000] \"GET /api/admin/users?page=1&limit=20&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\" 67.890 ms","timestamp":"2026-01-14 16:08:22"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-01-14 16:15:39"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-01-14 16:15:39"}

@@ -22,6 +22,9 @@ router.get('/test-auth', (req: any, res) => {
     });
 });
 
+// Balance
+router.get('/balance', billPaymentController.getBalance);
+
 // Get service data
 router.get('/networks', billPaymentController.getNetworks);
 router.get('/data-plans', billPaymentController.getDataPlans);
