@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/bootstrap.js';
 import { User } from '../models/index.js';
+import { EmailService } from '../services/email.service.js';
 import { OTPService } from '../services/otp.service.js';
 import { WalletService } from '../services/wallet.service.js';
 import { ApiResponse } from '../utils/response.js';
@@ -43,6 +44,7 @@ export class AuthController {
         referral_code: user_referral_code,
         referred_by,
         country: 'Nigeria',
+        profile_picture: `https://api.dicebear.com/7.x/initials/svg?seed=${first_name}+${last_name}`,
         kyc_status: 'pending',
         status: 'active',
         transaction_pin: pin ? await bcrypt.hash(String(pin), 10) : undefined
@@ -109,22 +111,73 @@ export class AuthController {
     try {
       const { phone_number, email } = req.body;
 
-      if (!phone_number) {
-        return ApiResponse.error(res, 'Phone number is required', 400);
+      let identifier = phone_number || email;
+      if (!identifier) {
+        return ApiResponse.error(res, 'Phone number or email is required', 400);
       }
 
-      // Try to find the user to get their email if not provided
       let userEmail = email;
-      if (!userEmail) {
+      if (phone_number && !userEmail) {
         const user = await User.findOne({ phone_number });
         if (user) {
           userEmail = user.email;
         }
       }
 
-      const otp_code = await OTPService.createOTP(phone_number, userEmail);
+      const otp_code = await OTPService.createOTP(identifier, userEmail);
 
       return ApiResponse.success(res, null, 'OTP sent successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async forgotPassword(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) {
+        return ApiResponse.error(res, 'User not found', 404);
+      }
+
+      // Generate OTP for email (using email as identifier)
+      const otp = await OTPService.createOTP(email, email, user._id.toString());
+
+      // Send OTP via Email
+      await EmailService.sendOtpEmail(email, otp);
+
+      return ApiResponse.success(res, null, 'OTP sent to your email');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async verifyEmailOTP(req: Request, res: Response) {
+    try {
+      const { email, otp_code } = req.body;
+      const isValid = await OTPService.verifyOTP(email, otp_code);
+      if (!isValid) {
+        return ApiResponse.error(res, 'Invalid or expired OTP', 400);
+      }
+      return ApiResponse.success(res, null, 'OTP verified successfully');
+    } catch (error: any) {
+      return ApiResponse.error(res, error.message, 500);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, otp_code, new_password } = req.body;
+
+      const isValid = await OTPService.verifyOTP(email, otp_code);
+      if (!isValid) {
+        return ApiResponse.error(res, 'Invalid or expired OTP', 400);
+      }
+
+      const hash = await bcrypt.hash(new_password, 10);
+      await User.findOneAndUpdate({ email }, { password_hash: hash });
+
+      return ApiResponse.success(res, null, 'Password reset successfully');
     } catch (error: any) {
       return ApiResponse.error(res, error.message, 500);
     }

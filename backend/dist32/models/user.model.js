@@ -10,6 +10,7 @@ const userSchema = new Schema({
     city: { type: String },
     state: { type: String },
     country: { type: String, default: 'Nigeria' },
+    profile_picture: { type: String },
     kyc_status: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
     kyc_document_id_front_url: { type: String },
     kyc_document_id_back_url: { type: String },

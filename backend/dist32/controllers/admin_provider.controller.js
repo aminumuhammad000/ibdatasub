@@ -237,5 +237,41 @@ export class AdminProviderController {
             return ApiResponse.error(res, error.response?.data?.message || error.message || 'Failed to get provider data', 500);
         }
     }
+    // Test provider purchase (Airtime, Data, etc.)
+    static async testPurchase(req, res) {
+        try {
+            const { code } = req.params;
+            const { service, payload } = req.body; // service: 'airtime' | 'data', payload: { ... }
+            const provider = await ProviderConfig.findOne({ code: code.toLowerCase() });
+            if (!provider)
+                return ApiResponse.error(res, 'Provider not found', 404);
+            const client = providerRegistry.getClient(code.toLowerCase());
+            if (!client)
+                return ApiResponse.error(res, 'Provider client not available', 404);
+            // We need to generate a reference for testing
+            const ref = `TEST_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            const testPayload = { ...payload, ref };
+            let result;
+            if (service === 'airtime') {
+                if (!client.purchaseAirtime)
+                    return ApiResponse.error(res, 'Airtime purchase not supported by this provider', 400);
+                result = await client.purchaseAirtime(testPayload);
+            }
+            else if (service === 'data') {
+                if (!client.purchaseData)
+                    return ApiResponse.error(res, 'Data purchase not supported by this provider', 400);
+                result = await client.purchaseData(testPayload);
+            }
+            else {
+                return ApiResponse.error(res, 'Invalid service type for testing', 400);
+            }
+            logger.info(`Provider test purchase: ${code} - ${service}`, result);
+            return ApiResponse.success(res, 'Test purchase completed', { result });
+        }
+        catch (error) {
+            logger.error('Error testing provider purchase:', error);
+            return ApiResponse.error(res, error.response?.data?.message || error.message || 'Failed to test purchase', 500);
+        }
+    }
 }
 export default AdminProviderController;

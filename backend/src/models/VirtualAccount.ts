@@ -21,58 +21,58 @@ export interface IVirtualAccount extends Document {
 
 const VirtualAccountSchema = new Schema<IVirtualAccount>(
   {
-    user: { 
-      type: Schema.Types.ObjectId, 
+    user: {
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
       index: true
     },
-    accountNumber: { 
-      type: String, 
+    accountNumber: {
+      type: String,
       required: true,
       unique: true,
       index: true
     },
-    accountName: { 
-      type: String, 
-      required: true 
+    accountName: {
+      type: String,
+      required: true
     },
-    bankName: { 
-      type: String, 
+    bankName: {
+      type: String,
       default: 'PalmPay',
-      required: true 
+      required: true
     },
-    provider: { 
-      type: String, 
+    provider: {
+      type: String,
       default: 'payrant',
-      enum: ['payrant', 'monnify', 'flutterwave'],
-      required: true 
+      enum: ['payrant', 'monnify', 'flutterwave', 'vtpay'],
+      required: true
     },
-    reference: { 
-      type: String, 
+    reference: {
+      type: String,
       required: true,
       unique: true,
       index: true
     },
-    status: { 
-      type: String, 
+    status: {
+      type: String,
       default: 'active',
       enum: ['active', 'inactive', 'suspended'],
-      required: true 
+      required: true
     },
     metadata: {
       type: Schema.Types.Mixed,
       default: {}
     },
-    isActive: { 
-      type: Boolean, 
-      default: true 
+    isActive: {
+      type: Boolean,
+      default: true
     }
   },
   {
     timestamps: true,
     toJSON: {
-      transform: function(doc: any, ret: any) {
+      transform: function (doc: any, ret: any) {
         ret.id = ret._id;
         delete ret._id;
         delete ret.__v;

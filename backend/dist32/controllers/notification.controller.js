@@ -155,4 +155,21 @@ export class NotificationController {
             return ApiResponse.error(res, error.message, 500);
         }
     }
+    static async sendEmailNotification(req, res) {
+        try {
+            const { subject, message, recipients } = req.body;
+            if (!subject || !message || !recipients || recipients.length === 0) {
+                return ApiResponse.error(res, 'Subject, message, and recipients are required', 400);
+            }
+            // TODO: Integrate actual email service (e.g., Nodemailer, SendGrid, etc.)
+            console.log(`[Email Service] Sending email to ${recipients.length} recipients...`);
+            console.log(`[Email Service] Subject: ${subject}`);
+            // Simulate some processing time
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return ApiResponse.success(res, { count: recipients.length }, `Email queued for ${recipients.length} recipients`);
+        }
+        catch (error) {
+            return ApiResponse.error(res, error.message, 500);
+        }
+    }
 }

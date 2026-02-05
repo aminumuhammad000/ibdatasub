@@ -27,6 +27,7 @@ export interface IUser extends Document {
   city?: string;
   state?: string;
   country: string;
+  profile_picture?: string;
   kyc_status: 'pending' | 'verified' | 'rejected';
   kyc_document_id_front_url?: string;
   kyc_document_id_back_url?: string;

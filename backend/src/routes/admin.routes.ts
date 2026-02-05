@@ -53,6 +53,7 @@ router.get('/providers/balances', authMiddleware, AdminFundingController.getProv
 
 // Provider testing routes (place BEFORE parameterized provider routes)
 router.post('/providers/test/:code', authMiddleware, AdminProviderController.testConnection);
+router.post('/providers/test-purchase/:code', authMiddleware, AdminProviderController.testPurchase);
 router.get('/providers/data/:code', authMiddleware, AdminProviderController.getProviderData);
 
 // Provider management
@@ -97,6 +98,41 @@ router.get('/notifications/broadcast', authMiddleware, async (req, res) => {
 router.put('/notifications/broadcast/:id', authMiddleware, async (req, res) => {
     const { NotificationController } = await import('../controllers/notification.controller.js');
     return NotificationController.updateBroadcast(req, res);
+});
+router.post('/notifications/email', authMiddleware, async (req, res) => {
+    const { NotificationController } = await import('../controllers/notification.controller.js');
+    return NotificationController.sendEmailNotification(req, res);
+});
+// System Settings (Payment Gateway, Notification Email, etc.)
+router.get('/settings', authMiddleware, async (req, res) => {
+    const { SystemSettingsController } = await import('../controllers/system_settings.controller.js');
+    return SystemSettingsController.getSettings(req, res);
+});
+router.put('/settings', authMiddleware, async (req, res) => {
+    const { SystemSettingsController } = await import('../controllers/system_settings.controller.js');
+    return SystemSettingsController.updateSettings(req, res);
+});
+
+// Airtime to Cash
+router.get('/airtime-to-cash/requests', authMiddleware, async (req, res) => {
+    const { AdminAirtimeToCashController } = await import('../controllers/admin_airtime_to_cash.controller.js');
+    return AdminAirtimeToCashController.getRequests(req, res);
+});
+router.put('/airtime-to-cash/requests/:id', authMiddleware, async (req, res) => {
+    const { AdminAirtimeToCashController } = await import('../controllers/admin_airtime_to_cash.controller.js');
+    return AdminAirtimeToCashController.updateRequestStatus(req, res);
+});
+router.get('/airtime-to-cash/settings', authMiddleware, async (req, res) => {
+    const { AdminAirtimeToCashController } = await import('../controllers/admin_airtime_to_cash.controller.js');
+    return AdminAirtimeToCashController.getSettings(req, res);
+});
+router.post('/airtime-to-cash/settings', authMiddleware, async (req, res) => {
+    const { AdminAirtimeToCashController } = await import('../controllers/admin_airtime_to_cash.controller.js');
+    return AdminAirtimeToCashController.createSetting(req, res);
+});
+router.put('/airtime-to-cash/settings/:id', authMiddleware, async (req, res) => {
+    const { AdminAirtimeToCashController } = await import('../controllers/admin_airtime_to_cash.controller.js');
+    return AdminAirtimeToCashController.updateSetting(req, res);
 });
 
 export default router;

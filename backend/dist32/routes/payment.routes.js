@@ -1,6 +1,7 @@
 // routes/payment.routes.ts
 import { Router } from 'express';
 import { PaymentController } from '../controllers/payment.controller.js';
+import { VTPayController } from '../controllers/vtpay.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import payrantRouter from './payrant.routes.js';
 import virtualAccountRouter from './virtualAccount.routes.js';
@@ -86,5 +87,37 @@ router.get('/payrant/virtual-account', authenticate, PaymentController.getVirtua
  */
 router.post('/webhook/payrant', (req, res) => {
     return PaymentController.handlePayrantWebhook(req, res);
+});
+/**
+ * @route   POST /api/payment/vtpay/create-virtual-account
+ * @desc    Create VTPay virtual account for user
+ * @access  Private
+ */
+router.post('/vtpay/create-virtual-account', authenticate, VTPayController.createAccount);
+/**
+ * @route   GET /api/payment/vtpay/virtual-account
+ * @desc    Get user's VTPay virtual accounts
+ * @access  Private
+ */
+router.get('/vtpay/virtual-account', authenticate, VTPayController.getMyAccounts);
+/**
+ * @route   GET /api/payment/vtpay/virtual-account/:accountNumber/balance
+ * @desc    Get VTPay virtual account balance
+ * @access  Private
+ */
+router.get('/vtpay/virtual-account/:accountNumber/balance', authenticate, VTPayController.getAccountBalance);
+/**
+ * @route   GET /api/payment/vtpay/virtual-account/:accountNumber/transactions
+ * @desc    Get VTPay virtual account transactions
+ * @access  Private
+ */
+router.get('/vtpay/virtual-account/:accountNumber/transactions', authenticate, VTPayController.getAccountTransactions);
+/**
+ * @route   POST /api/payment/webhook/vtpay
+ * @desc    Handle VTPay webhook for virtual account deposits
+ * @access  Public (Webhook from VTPay)
+ */
+router.post('/webhook/vtpay', (req, res) => {
+    return VTPayController.webhook(req, res);
 });
 export default router;

@@ -202,3 +202,25 @@
 {"level":"info","message":"127.0.0.1 - 6913575adc7e471b13d32a9e [14/Jan/2026:15:08:22 +0000] \"GET /api/admin/users?page=1&limit=20&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\" 67.890 ms","timestamp":"2026-01-14 16:08:22"}
 {"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-01-14 16:15:39"}
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2026-01-14 16:15:39"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:00:44"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:00:44"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:17:48"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:17:48"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:22:43"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:22:43"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:23:01"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:23:01"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:24:34"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:24:34"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:24:46"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:24:46"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:24:59"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:24:59"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:25:06"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:25:06"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:35:47"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:35:47"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:35:52"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:35:53"}
+{"environment":"development","level":"info","message":"🚀 VTU App Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-02-05 03:38:10"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-02-05 03:38:10"}
