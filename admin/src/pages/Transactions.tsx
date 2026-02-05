@@ -1,24 +1,38 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
-import TransactionViewModal from '../components/TransactionViewModal';
+import React, { useEffect, useRef, useState } from 'react';
 import { getTransactions } from '../api/adminApi';
+import Layout from '../components/Layout';
+import TransactionViewModal from '../components/TransactionViewModal';
 
 const Transactions: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [viewTransaction, setViewTransaction] = useState<any | null>(null);
   const limit = 20;
+
+  // Debounce search
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current as any);
+    searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(1);
+    }, 400);
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current as any);
+    };
+  }, [searchTerm]);
 
   const params: any = { page, limit };
   if (statusFilter) params.status = statusFilter;
   if (typeFilter) params.type = typeFilter;
+  if (debouncedSearch) params.search = debouncedSearch;
 
-  const { data, status } = useQuery({
-    queryKey: ['transactions', page, statusFilter, typeFilter],
+  const { data, status, isLoading } = useQuery({
+    queryKey: ['transactions', page, statusFilter, typeFilter, debouncedSearch],
     queryFn: () => getTransactions(params).then((res: any) => res.data),
   });
 
@@ -29,233 +43,259 @@ const Transactions: React.FC = () => {
     switch (status?.toLowerCase()) {
       case 'success':
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return 'bg-slate-100 text-slate-800';
+        return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'airtime':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'data':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'electricity':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-100 text-amber-800 border-amber-200';
       case 'cable':
-        return 'bg-pink-100 text-pink-800';
+        return 'bg-pink-100 text-pink-800 border-pink-200';
       default:
-        return 'bg-slate-100 text-slate-800';
+        return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar onMenuClick={() => setIsMobileOpen(true)} />
-        <main className="flex-1 overflow-auto p-8">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h1 className="text-4xl font-bold text-slate-900 mb-2">Transactions</h1>
-                  <p className="text-slate-600">Monitor all platform transactions</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-3xl font-bold text-green-600">{pagination.total}</p>
-                  <p className="text-sm text-slate-600">Total Transactions</p>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => {
-                        setStatusFilter(e.target.value);
-                        setPage(1);
-                      }}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 font-medium"
-                    >
-                      <option value="">All Status</option>
-                      <option value="success">Success</option>
-                      <option value="pending">Pending</option>
-                      <option value="failed">Failed</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Type</label>
-                    <select
-                      value={typeFilter}
-                      onChange={(e) => {
-                        setTypeFilter(e.target.value);
-                        setPage(1);
-                      }}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 font-medium"
-                    >
-                      <option value="">All Types</option>
-                      <option value="airtime">Airtime</option>
-                      <option value="data">Data</option>
-                      <option value="electricity">Electricity</option>
-                      <option value="cable">Cable TV</option>
-                    </select>
-                  </div>
-                  <div className="flex items-end">
-                    <button
-                      onClick={() => {
-                        setStatusFilter('');
-                        setTypeFilter('');
-                        setPage(1);
-                      }}
-                      className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-lg transition font-medium"
-                    >
-                      Clear Filters
-                    </button>
-                  </div>
-                </div>
-              </div>
+    <Layout>
+      <div className="min-h-screen bg-slate-50/50">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+          {/* Header */}
+          <div className="mb-6 lg:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Transactions</h1>
+              <p className="text-sm sm:text-base text-slate-500 mt-1">Monitor payments, top-ups, and service logs</p>
             </div>
-
-            {/* Transactions Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-              {status === 'pending' && (
-                <div className="p-12 text-center">
-                  <div className="inline-block animate-spin">
-                    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </div>
-                  <p className="mt-4 text-slate-600">Loading transactions...</p>
-                </div>
-              )}
-              {status === 'error' && (
-                <div className="p-12 text-center bg-red-50">
-                  <svg className="w-12 h-12 text-red-600 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-red-700 font-medium">Failed to load transactions</p>
-                </div>
-              )}
-              {status === 'success' && (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Transaction ID</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">User</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Type</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Amount</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Status</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Date</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {transactions.length === 0 && (
-                          <tr>
-                            <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
-                              <svg className="w-12 h-12 mx-auto mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                              <p className="font-medium">No transactions found</p>
-                            </td>
-                          </tr>
-                        )}
-                        {transactions.map((txn: any) => (
-                          <tr key={txn._id || txn.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4">
-                              <p className="font-mono text-sm text-slate-900">{txn.reference || txn._id}</p>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div>
-                                <p className="font-medium text-slate-900">{txn.user?.first_name} {txn.user?.last_name}</p>
-                                <p className="text-xs text-slate-500">{txn.user?.email}</p>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(txn.type)}`}>
-                                {txn.type?.toUpperCase()}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <p className="font-bold text-slate-900">₦{txn.amount?.toLocaleString()}</p>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(txn.status)}`}>
-                                <span className="w-2 h-2 rounded-full bg-current"></span>
-                                {txn.status?.toUpperCase()}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-slate-700">
-                              {txn.created_at ? new Date(txn.created_at).toLocaleString() : '—'}
-                            </td>
-                            <td className="px-6 py-4">
-                              <button
-                                onClick={() => setViewTransaction(txn)}
-                                className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition"
-                                title="View Details"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Pagination */}
-                  <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-between items-center">
-                    <p className="text-sm text-slate-600">
-                      Showing page <span className="font-semibold">{pagination.page}</span> of <span className="font-semibold">{pagination.pages}</span>
-                      {' '}({pagination.total} total)
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                      >
-                        ← Previous
-                      </button>
-                      <button
-                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium"
-                        onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
-                        disabled={page === pagination.pages}
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
+              <span className="text-sm text-slate-500">Total Transactions:</span>
+              <span className="text-lg font-bold text-green-600">{pagination.total || 0}</span>
             </div>
           </div>
 
-          {/* Transaction View Modal */}
-          {viewTransaction && (
-            <TransactionViewModal
-              transaction={viewTransaction}
-              onClose={() => setViewTransaction(null)}
-            />
-          )}
-        </main>
+          {/* Controls: Search & Filters */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-6 sticky top-0 md:static z-10 transition-all">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search by user, reference, or amount..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm font-medium"
+                />
+              </div>
+
+              <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-sm font-medium text-slate-700 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-50"
+                >
+                  <option value="">All Status</option>
+                  <option value="success">Success</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+
+                <select
+                  value={typeFilter}
+                  onChange={(e) => {
+                    setTypeFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-sm font-medium text-slate-700 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-50"
+                >
+                  <option value="">All Types</option>
+                  <option value="airtime">Airtime</option>
+                  <option value="data">Data</option>
+                  <option value="electricity">Electricity</option>
+                  <option value="cable">Cable TV</option>
+                </select>
+
+                {(statusFilter || typeFilter || searchTerm) && (
+                  <button
+                    onClick={() => {
+                      setStatusFilter('');
+                      setTypeFilter('');
+                      setSearchTerm('');
+                      setPage(1);
+                    }}
+                    className="px-4 py-2.5 border border-slate-300 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 whitespace-nowrap transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64 flex-col">
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p className="text-slate-500 font-medium">Loading transactions...</p>
+              </div>
+            ) : status === 'error' ? (
+              <div className="p-12 text-center">
+                <div className="bg-red-50 text-red-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Failed to load data</h3>
+                <p className="text-slate-500">Something went wrong while fetching transactions.</p>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="bg-slate-50 text-slate-400 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">No transactions found</h3>
+                <p className="text-slate-500">Try adjusting your filters or search terms.</p>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold">
+                      <tr>
+                        <th className="px-6 py-4">Ref & User</th>
+                        <th className="px-6 py-4">Type</th>
+                        <th className="px-6 py-4">Amount</th>
+                        <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4">Date</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {transactions.map((txn: any) => (
+                        <tr key={txn._id || txn.id} className="hover:bg-slate-50/80 transition-colors group">
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="font-mono text-xs text-slate-500 mb-0.5">{txn.reference || txn._id}</p>
+                              <p className="font-medium text-slate-900 text-sm">{txn.user?.first_name} {txn.user?.last_name}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getTypeColor(txn.type)}`}>
+                              {txn.type?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="font-bold text-slate-900">₦{txn.amount?.toLocaleString()}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(txn.status)}`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                              {txn.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">
+                            {txn.created_at ? new Date(txn.created_at).toLocaleString() : '—'}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => setViewTransaction(txn)}
+                              className="text-slate-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-50 transition"
+                              title="View Details"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden p-4 space-y-4">
+                  {transactions.map((txn: any) => (
+                    <div key={txn._id || txn.id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-slate-900 text-sm">{txn.user?.first_name} {txn.user?.last_name}</p>
+                          <p className="text-xs text-slate-400 font-mono mt-0.5">{txn.reference || txn._id}</p>
+                        </div>
+                        <span className="font-bold text-slate-900">₦{txn.amount?.toLocaleString()}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getTypeColor(txn.type)}`}>
+                          {txn.type?.toUpperCase()}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(txn.status)}`}>
+                          {txn.status?.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center border-t border-slate-100 pt-3 mt-1">
+                        <span className="text-xs text-slate-500">{txn.created_at ? new Date(txn.created_at).toLocaleString() : '—'}</span>
+                        <button
+                          onClick={() => setViewTransaction(txn)}
+                          className="text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="bg-white border-t border-slate-200 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <p className="text-sm text-slate-600 order-2 sm:order-1 text-center sm:text-left">
+                    Page <span className="font-semibold">{pagination.page}</span> of <span className="font-semibold">{pagination.pages}</span>
+                  </p>
+                  <div className="flex gap-2 order-1 sm:order-2">
+                    <button
+                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-slate-700 bg-white"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-slate-700 bg-white"
+                      onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+                      disabled={page === pagination.pages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Transaction View Modal */}
+        {viewTransaction && (
+          <TransactionViewModal
+            transaction={viewTransaction}
+            onClose={() => setViewTransaction(null)}
+          />
+        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

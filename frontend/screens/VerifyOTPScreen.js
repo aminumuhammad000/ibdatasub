@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -12,8 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useTheme } from "../components/ThemeContext";
 import CustomAlert from "../components/CustomAlert";
+import { useTheme } from "../components/ThemeContext";
 import { authService } from "../services/auth.service";
 
 export default function VerifyOTPScreen() {
@@ -21,6 +21,7 @@ export default function VerifyOTPScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const emailParam = useMemo(() => (typeof params.email === 'string' ? params.email : ''), [params.email]);
+  const typeParam = useMemo(() => (typeof params.type === 'string' ? params.type : 'verify'), [params.type]);
 
   const [email] = useState(emailParam);
   const [otp, setOtp] = useState("");
@@ -66,7 +67,11 @@ export default function VerifyOTPScreen() {
       if (res?.success) {
         showAlert("OTP verified successfully.", "success");
         setTimeout(() => {
-          router.replace("/login");
+          if (typeParam === 'reset') {
+            router.replace({ pathname: "/reset-password", params: { email: email.trim().toLowerCase(), otp: otp.trim() } });
+          } else {
+            router.replace("/login");
+          }
         }, 700);
       } else {
         showAlert(res?.message || "Invalid OTP. Please try again.", "error");
@@ -82,7 +87,10 @@ export default function VerifyOTPScreen() {
   const onResend = async () => {
     if (!email) return;
     try {
-      const res = await authService.resendOTP('', email.trim().toLowerCase());
+      // Check if it's password reset flow or normal flow
+      const method = typeParam === 'reset' ? authService.requestPasswordReset({ email }) : authService.resendOTP('', email.trim().toLowerCase());
+      const res = await method;
+
       if (res?.success) {
         showAlert("A new OTP has been sent to your email.", "success");
       } else {

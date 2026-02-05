@@ -99,10 +99,10 @@ export default function AboutScreen() {
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
+
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -112,7 +112,7 @@ export default function AboutScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -122,10 +122,10 @@ export default function AboutScreen() {
           <View style={styles.appInfoContainer}>
             <View style={styles.logoContainer}>
               <View style={[styles.logo, { backgroundColor: theme.primary }]}>
-                <Text style={styles.logoText}>VTU</Text>
+                <Text style={styles.logoText}>ID</Text>
               </View>
             </View>
-            <Text style={[styles.appName, { color: textColor }]}>VTU App</Text>
+            <Text style={[styles.appName, { color: textColor }]}>InData</Text>
             <Text style={[styles.appTagline, { color: textBodyColor }]}>
               Your trusted partner for seamless mobile transactions
             </Text>
@@ -142,10 +142,10 @@ export default function AboutScreen() {
 
         {/* About Description */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>About VTU App</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>About InData</Text>
           <Text style={[styles.descriptionText, { color: textBodyColor }]}>
-            VTU App is Nigeria's leading mobile application for quick and secure virtual top-up services. 
-            We provide instant airtime, data bundles, and bill payment services across all major networks 
+            InData is Nigeria's leading mobile application for quick and secure virtual top-up services.
+            We provide instant airtime, data bundles, and bill payment services across all major networks
             in Nigeria. Our mission is to make mobile transactions simple, fast, and secure for everyone.
           </Text>
         </View>
@@ -164,12 +164,12 @@ export default function AboutScreen() {
         {/* Developer Info */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Developer Information</Text>
-          
+
           <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { color: textBodyColor }]}>Developed by:</Text>
             <Text style={[styles.infoValue, { color: textColor }]}>{appInfo.developer}</Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { color: textBodyColor }]}>Contact:</Text>
             <TouchableOpacity onPress={() => Linking.openURL('mailto:aminuamee@yahoo.com')}>
@@ -178,7 +178,7 @@ export default function AboutScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { color: textBodyColor }]}>Website:</Text>
             <TouchableOpacity onPress={() => Linking.openURL('https://www.ameetech.org.ng')}>
@@ -192,9 +192,9 @@ export default function AboutScreen() {
         {/* Legal Information */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Legal</Text>
-          
+
           {legalLinks.map((link, index) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={index}
               style={styles.legalItem}
               onPress={link.action}
@@ -216,9 +216,9 @@ export default function AboutScreen() {
         {/* Social Media */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Follow Us</Text>
-          
+
           {socialLinks.map((social, index) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={index}
               style={styles.socialItem}
               onPress={social.action}
@@ -233,7 +233,7 @@ export default function AboutScreen() {
         {/* Copyright */}
         <View style={styles.copyrightContainer}>
           <Text style={[styles.copyrightText, { color: textBodyColor }]}>
-            © 2024 VTU App. All rights reserved.
+            © 2024 InData. All rights reserved.
           </Text>
           <Text style={[styles.copyrightText, { color: textBodyColor }]}>
             Made with ❤️ in Nigeria

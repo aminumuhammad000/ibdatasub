@@ -47,13 +47,13 @@ export const authService = {
       console.log('📤 Sending registration request to backend:', data);
       const response = await api.post<AuthResponse>('/auth/register', data);
       console.log('✅ Registration response:', response.data);
-      
+
       // Save token and user data
       if (response.data.success && response.data.data.token) {
         await AsyncStorage.setItem('authToken', response.data.data.token);
         await AsyncStorage.setItem('user', JSON.stringify(response.data.data.user));
       }
-      
+
       return response.data;
     } catch (error: any) {
       console.error('❌ Registration error:', error.response?.data || error.message);
@@ -68,13 +68,13 @@ export const authService = {
   login: async (data: LoginData): Promise<AuthResponse> => {
     try {
       const response = await api.post<AuthResponse>('/auth/login', data);
-      
+
       // Save token and user data
       if (response.data.success && response.data.data.token) {
         await AsyncStorage.setItem('authToken', response.data.data.token);
         await AsyncStorage.setItem('user', JSON.stringify(response.data.data.user));
       }
-      
+
       return response.data;
     } catch (error: any) {
       throw error.response?.data || { success: false, message: 'Login failed' };
@@ -136,17 +136,29 @@ export const authService = {
   },
 
   /**
+   * Reset password with OTP
+   */
+  resetPassword: async (data: { email: string; otp_code: string; new_password: string }): Promise<any> => {
+    try {
+      const response = await api.post('/auth/reset-password', data);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Password reset failed' };
+    }
+  },
+
+  /**
    * Logout user
    */
   logout: async (): Promise<void> => {
     // Clear tokens and user data from storage
     await AsyncStorage.multiRemove(['authToken', 'user']);
-    
+
     // Clear any API authorization headers
     if (api.defaults.headers.common['Authorization']) {
       delete api.defaults.headers.common['Authorization'];
     }
-    
+
     // Clear any other cached data if needed
     await AsyncStorage.multiRemove(['walletData', 'transactions', 'profileData']);
   },

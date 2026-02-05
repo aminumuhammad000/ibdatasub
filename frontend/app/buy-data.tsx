@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  useColorScheme,
-  Modal,
-  Animated,
-  ActivityIndicator,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { billPaymentService } from '@/services/billpayment.service';
 import { useAlert } from '@/components/AlertContext';
+import TransactionPinModal from '@/components/TransactionPinModal';
+import { billPaymentService } from '@/services/billpayment.service';
+import { Ionicons } from '@expo/vector-icons';
+import * as Contacts from 'expo-contacts';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
 
 const theme = {
   primary: '#0A2540',
@@ -34,17 +35,17 @@ export default function BuyDataScreen() {
   const textBodyColor = isDark ? '#D1D5DB' : '#6B7280';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
 
-  const { showSuccess, showError } = useAlert();
+  const { showSuccess, showError, showInfo } = useAlert();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null); // for UI highlight
   const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [plans, setPlans] = useState<Array<{ id: string; data: string; validity: string; price: number }>>([]);
+  const [plans, setPlans] = useState<Array<{ id: string; data: string; validity: string; price: number, category?: string }>>([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState<string | null>(null);
-  const [pin, setPin] = useState('');
+  const [isPinModalVisible, setIsPinModalVisible] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('All');
 
   const networks = [
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -52,6 +53,8 @@ export default function BuyDataScreen() {
     { id: 'airtel', name: 'Airtel', color: '#FF0000', icon: 'phone-portrait' },
     { id: '9mobile', name: '9mobile', color: '#00693E', icon: 'phone-portrait' },
   ];
+
+  const filters = ['All', 'Small', 'Medium', 'Large', 'Mega'];
 
   // Load plans when network changes
   useEffect(() => {
@@ -62,12 +65,44 @@ export default function BuyDataScreen() {
         setPlansError(null);
         const res = await billPaymentService.getDataPlans(selectedNetwork);
         if (res?.success && Array.isArray(res.data)) {
-          const mapped = res.data.map((p: any, i: number) => ({
-            id: String(p.planid || p.plan_id || p.id || p.plan || `plan-${i}`),
-            data: p.plan_name || p.data_value || p.name || 'Plan',
-            validity: p.validity || p.duration || '',
-            price: Number(p.price || p.amount || 0),
-          }));
+          const mapped = res.data.map((p: any, i: number) => {
+            const name = p.plan_name || p.data_value || p.name || 'Plan';
+            let category = 'Medium';
+
+            // Logic to determine category based on data size in name
+            const norm = name.toLowerCase().replace(/\s/g, '');
+            let sizeMB = 0;
+
+            if (norm.includes('tb')) {
+              sizeMB = parseFloat(norm) * 1024 * 1024;
+            } else if (norm.includes('gb')) {
+              sizeMB = parseFloat(norm) * 1024;
+            } else if (norm.includes('mb')) {
+              sizeMB = parseFloat(norm);
+            }
+
+            if (sizeMB > 0) {
+              if (sizeMB < 1024) category = 'Small'; // < 1GB
+              else if (sizeMB <= 5 * 1024) category = 'Medium'; // 1-5GB
+              else if (sizeMB <= 20 * 1024) category = 'Large'; // 5-20GB
+              else category = 'Mega'; // > 20GB
+            } else {
+              // Fallback
+              const price = Number(p.price || p.amount || 0);
+              if (price < 500) category = 'Small';
+              else if (price < 2000) category = 'Medium';
+              else if (price < 10000) category = 'Large';
+              else category = 'Mega';
+            }
+
+            return {
+              id: String(p.planid || p.plan_id || p.id || p.plan || `plan-${i}`),
+              data: name,
+              validity: p.validity || p.duration || '30 Days',
+              price: Number(p.price || p.amount || 0),
+              category
+            };
+          });
           setPlans(mapped);
         } else {
           setPlans([]);
@@ -82,132 +117,139 @@ export default function BuyDataScreen() {
     loadPlans();
   }, [selectedNetwork]);
 
-  const handleBuyData = async () => {
-    // Validation
+  const filteredPlans = useMemo(() => {
+    if (selectedFilter === 'All') return plans;
+    return plans.filter(p => p.category === selectedFilter);
+  }, [plans, selectedFilter]);
+
+  const selectContact = async () => {
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status === 'granted') {
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers],
+      });
+      if (data.length > 0) {
+        try {
+          const contact = await Contacts.presentContactPickerAsync();
+          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+            let number = contact.phoneNumbers[0].number;
+            if (number) {
+              number = number.replace(/\D/g, '');
+              if (number.startsWith('234')) number = '0' + number.slice(3);
+              if (number.length === 13 && number.startsWith('234')) number = '0' + number.slice(3);
+              setPhoneNumber(number);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+          showInfo('Could not open contacts');
+        }
+      } else {
+        showInfo('No contacts found');
+      }
+    } else {
+      showError('Permission to access contacts was denied');
+    }
+  };
+
+  const initiatePurchase = () => {
     if (!phoneNumber || !selectedNetwork || !selectedPlan) {
       showError('Please fill all required fields');
       return;
     }
-
-    // Validate phone number format
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     if (cleanPhone.length !== 11) {
       showError('Phone number must be exactly 11 digits');
       return;
     }
-
-    // Validate PIN
-    if (!/^\d{4}$/.test(pin)) {
-      showError('Enter your 4-digit transaction PIN');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await billPaymentService.purchaseData({
-        network: selectedNetwork,
-        phone: cleanPhone,
-        plan: selectedPlan.id.toString(),
-        ported_number: true,
-        pin,
-      });
-
-      if (response.success) {
-        showSuccess(`Data purchase successful! ${selectedPlan.data} sent to ${phoneNumber}`);
-        // Reset form
-        setPhoneNumber('');
-        setSelectedPlan(null);
-        setSelectedNetwork(null);
-        setPin('');
-        // Navigate back after short delay
-        setTimeout(() => {
-          router.back();
-        }, 2000);
-      } else {
-        showError(response.message || 'Failed to purchase data');
-      }
-    } catch (error: any) {
-      showError(error.message || 'Failed to purchase data. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    setIsPinModalVisible(true);
   };
 
-  const currentPlans = selectedNetwork ? plans : [];
+  const handleBuyData = async (pin: string) => {
+    setIsPinModalVisible(false);
+
+    setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const cleanPhone = phoneNumber.replace(/\D/g, '');
+        const response = await billPaymentService.purchaseData({
+          network: selectedNetwork!,
+          phone: cleanPhone,
+          plan: selectedPlan.id.toString(),
+          ported_number: true,
+          pin,
+        });
+
+        if (response.success) {
+          setShowSuccessModal(true);
+        } else {
+          showError(response.message || 'Failed to purchase data');
+        }
+      } catch (error: any) {
+        showError(error.message || 'Failed to purchase data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300);
+  };
+
+  const closeSuccess = () => {
+    setShowSuccessModal(false);
+    setPhoneNumber('');
+    setSelectedPlan(null);
+    setSelectedNetwork(null);
+    router.back();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: cardBgColor }]}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={textColor} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: textColor }]}>Buy Data</Text>
-        <View style={styles.placeholder} />
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Transaction PIN removed */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Network Selection */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Select Network</Text>
-          <View style={styles.networksGrid}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
             {networks.map((network) => (
               <TouchableOpacity
                 key={network.id}
                 style={[
                   styles.networkCard,
-                  { 
+                  {
                     backgroundColor: cardBgColor,
                     borderColor: selectedNetwork === network.id ? network.color : borderColor,
-                    borderWidth: 2,
+                    borderWidth: selectedNetwork === network.id ? 2 : 1,
                   },
                 ]}
                 onPress={() => {
                   setSelectedNetwork(network.id);
-                  setSelectedPlan(null); // Reset plan when network changes
+                  setSelectedPlan(null);
                 }}
-                activeOpacity={0.7}
               >
-                <View
-                  style={[
-                    styles.networkIcon,
-                    {
-                      backgroundColor: `${network.color}20`,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={network.icon as any}
-                    size={24}
-                    color={network.color}
-                  />
+                <View style={[styles.networkIcon, { backgroundColor: `${network.color}20` }]}>
+                  <Ionicons name={network.icon as any} size={20} color={network.color} />
                 </View>
-                <Text style={[styles.networkName, { color: textColor }]}>
-                  {network.name}
-                </Text>
+                <Text style={[styles.networkName, { color: textColor }]}>{network.name}</Text>
                 {selectedNetwork === network.id && (
                   <View style={[styles.checkMark, { backgroundColor: network.color }]}>
-                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                    <Ionicons name="checkmark" size={10} color="#FFF" />
                   </View>
                 )}
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         </View>
 
-        {/* Phone Number Input */}
+        {/* Phone Number with Improved Contact Button */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Phone Number</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}>
             <Ionicons name="call-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
             <TextInput
               style={[styles.input, { color: textColor }]}
@@ -219,134 +261,73 @@ export default function BuyDataScreen() {
               maxLength={11}
             />
           </View>
+          {/* Contact Button Outside */}
+          <TouchableOpacity
+            onPress={selectContact}
+            style={[
+              styles.contactBtnFull,
+              { borderColor: theme.accent, backgroundColor: isDark ? 'rgba(255, 159, 67, 0.1)' : '#FFF7ED' }
+            ]}
+          >
+            <Ionicons name="people" size={20} color={theme.accent} />
+            <Text style={{ color: theme.accent, fontWeight: '600', marginLeft: 8 }}>Select from Contacts</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Transaction PIN Input */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Transaction PIN</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
-            <Ionicons name="lock-closed-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: textColor }]}
-              placeholder="Enter 4-digit PIN"
-              placeholderTextColor={textBodyColor}
-              value={pin}
-              onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0,4))}
-              keyboardType="number-pad"
-              secureTextEntry
-              maxLength={4}
-            />
-          </View>
-        </View>
-
-        {/* Data Plans Selection */}
+        {/* Data Plans with Improved Filter Layout */}
         {selectedNetwork && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Select Data Plan</Text>
-            {plansLoading && <Text style={{ color: textBodyColor, marginBottom: 8 }}>Loading plans...</Text>}
-            {plansError && <Text style={{ color: theme.error, marginBottom: 8 }}>{plansError}</Text>}
-            <View style={styles.plansGrid}>
-              {currentPlans.map((plan, index) => (
-                <TouchableOpacity
-                  key={plan.id || index}
-                  style={[
-                    styles.planCard,
-                    {
-                      backgroundColor: selectedPlanIndex === index 
-                        ? (isDark ? theme.primary : theme.primary)
-                        : cardBgColor,
-                      borderColor: selectedPlanIndex === index 
-                        ? theme.accent 
-                        : borderColor,
-                    },
-                  ]}
-                  onPress={() => { setSelectedPlan(plan); setSelectedPlanIndex(index); }}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.planHeader}>
-                    <Ionicons 
-                      name="wifi" 
-                      size={20} 
-                      color={selectedPlanIndex === index ? '#FFFFFF' : theme.accent} 
-                    />
-                    <Text
-                      style={[
-                        styles.planData,
-                        {
-                          color: selectedPlanIndex === index ? '#FFFFFF' : textColor,
-                        },
-                      ]}
-                    >
+            <View style={styles.plansHeaderContainer}>
+              <Text style={[styles.sectionTitle, { color: textColor }]}>Data Plans</Text>
+
+              {/* Filters pushed to next line/block */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 4 }}>
+                {filters.map(filter => (
+                  <TouchableOpacity
+                    key={filter}
+                    style={[
+                      styles.filterChip,
+                      { backgroundColor: selectedFilter === filter ? theme.primary : 'transparent', borderWidth: 1, borderColor: selectedFilter === filter ? theme.primary : borderColor }
+                    ]}
+                    onPress={() => setSelectedFilter(filter)}
+                  >
+                    <Text style={{ color: selectedFilter === filter ? '#FFF' : textBodyColor, fontSize: 12, fontWeight: '600' }}>{filter}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {plansLoading ? (
+              <ActivityIndicator color={theme.primary} style={{ marginTop: 20 }} />
+            ) : plansError ? (
+              <Text style={{ color: theme.error }}>{plansError}</Text>
+            ) : (
+              <View style={styles.plansGrid}>
+                {filteredPlans.map((plan, index) => (
+                  <TouchableOpacity
+                    key={plan.id}
+                    style={[
+                      styles.planCard,
+                      {
+                        backgroundColor: selectedPlan?.id === plan.id ? theme.primary : cardBgColor,
+                        borderColor: selectedPlan?.id === plan.id ? theme.accent : borderColor,
+                      },
+                    ]}
+                    onPress={() => setSelectedPlan(plan)}
+                  >
+                    <Text style={[styles.planData, { color: selectedPlan?.id === plan.id ? '#FFF' : textColor }]}>
                       {plan.data}
                     </Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.planValidity,
-                      {
-                        color: selectedPlanIndex === index ? '#E5E7EB' : textBodyColor,
-                      },
-                    ]}
-                  >
-                    {plan.validity}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.planPrice,
-                      {
-                        color: selectedPlanIndex === index ? '#FFFFFF' : theme.accent,
-                      },
-                    ]}
-                  >
-                    ₦{plan.price.toLocaleString()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Transaction Summary */}
-        {selectedPlan && phoneNumber && selectedNetwork && (
-          <View style={[styles.summaryCard, { backgroundColor: cardBgColor }]}> 
-            <Text style={[styles.summaryTitle, { color: textColor }]}>Transaction Summary</Text>
-            
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Network:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}>
-                {networks.find(n => n.id === selectedNetwork)?.name}
-              </Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Phone Number:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}>{phoneNumber}</Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Data Plan:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}>
-                {selectedPlan.data}
-              </Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Validity:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}>
-                {selectedPlan.validity}
-              </Text>
-            </View>
-
-            <View style={[styles.divider, { backgroundColor: borderColor }]} />
-
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textColor, fontWeight: '600' }]}>
-                Total:
-              </Text>
-              <Text style={[styles.totalAmount, { color: theme.accent }]}>
-                ₦{selectedPlan.price.toLocaleString()}
-              </Text>
-            </View>
+                    <Text style={[styles.planValidity, { color: selectedPlan?.id === plan.id ? '#D1D5DB' : textBodyColor }]}>
+                      {plan.validity}
+                    </Text>
+                    <Text style={[styles.planPrice, { color: selectedPlan?.id === plan.id ? theme.accent : theme.primary }]}>
+                      ₦{plan.price.toLocaleString()}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
@@ -355,108 +336,53 @@ export default function BuyDataScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || !selectedPlan || isLoading)
+              backgroundColor: (!phoneNumber || !selectedNetwork || !selectedPlan || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
-          onPress={handleBuyData}
-          disabled={!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || !selectedPlan || isLoading}
-          activeOpacity={0.8}
+          onPress={initiatePurchase}
+          disabled={!phoneNumber || !selectedNetwork || !selectedPlan || isLoading}
         >
           {isLoading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.buyButtonText}>
-              Buy Data
-            </Text>
+            <Text style={styles.buyButtonText}>Buy Data</Text>
           )}
         </TouchableOpacity>
 
-        {/* Info Card */}
-        <View style={[styles.infoCard, { backgroundColor: isDark ? '#1C1C1E' : '#EFF6FF' }]}>
-          <Ionicons 
-            name="information-circle-outline" 
-            size={24} 
-            color={isDark ? theme.accent : '#3B82F6'} 
-          />
-          <Text style={[styles.infoText, { color: isDark ? textBodyColor : '#1E40AF' }]}>
-            Data will be delivered instantly to the phone number provided
-          </Text>
-        </View>
       </ScrollView>
 
-      {/* Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        transparent={true}
-        animationType="fade"
-      >
-        <View style={styles.successModalBackdrop}>
-          <View style={[styles.successModalCard, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
-            <View style={styles.successIconContainer}>
-              <Ionicons name="checkmark-circle" size={80} color={theme.success} />
-            </View>
-            
-            <Text style={[styles.successTitle, { color: isDark ? '#FFFFFF' : theme.primary }]}>
-              Data Purchase Successful!
-            </Text>
-            
-            <View style={styles.successDetails}>
-              <View style={styles.successDetailRow}>
-                <Text style={[styles.successLabel, { color: textBodyColor }]}>
-                  Network:
-                </Text>
-                <Text style={[styles.successValue, { color: isDark ? '#FFFFFF' : theme.primary }]}>
-                  {selectedNetwork?.toUpperCase()}
-                </Text>
-              </View>
-              
-              <View style={styles.successDetailRow}>
-                <Text style={[styles.successLabel, { color: textBodyColor }]}>
-                  Phone Number:
-                </Text>
-                <Text style={[styles.successValue, { color: isDark ? '#FFFFFF' : theme.primary }]}>
-                  {phoneNumber}
-                </Text>
-              </View>
-              
-              <View style={styles.successDetailRow}>
-                <Text style={[styles.successLabel, { color: textBodyColor }]}>
-                  Data Plan:
-                </Text>
-                <Text style={[styles.successValue, { color: isDark ? '#FFFFFF' : theme.primary }]}>
-                  {selectedPlan?.name}
-                </Text>
-              </View>
-              
-              <View style={styles.successDetailRow}>
-                <Text style={[styles.successLabel, { color: textBodyColor }]}>
-                  Amount:
-                </Text>
-                <Text style={[styles.successValue, { color: theme.success }]}>
-                  ₦{selectedPlan?.price.toLocaleString()}
-                </Text>
-              </View>
-            </View>
+      <TransactionPinModal
+        visible={isPinModalVisible}
+        onClose={() => setIsPinModalVisible(false)}
+        onSuccess={handleBuyData}
+        amount={selectedPlan?.price || 0}
+        transactionType={`Data - ${selectedNetwork?.toUpperCase()} ${selectedPlan?.data}`}
+      />
 
-            <View style={[styles.successCheckmark, { backgroundColor: theme.success + '20' }]}>
-              <Ionicons name="checkmark" size={20} color={theme.success} />
-              <Text style={[styles.successMessage, { color: theme.success }]}>
-                Data delivered instantly
-              </Text>
-            </View>
+      {/* Success Modal */}
+      <Modal visible={showSuccessModal} transparent animationType="fade">
+        <View style={styles.successModalBackdrop}>
+          <View style={[styles.successModalCard, { backgroundColor: cardBgColor }]}>
+            <Ionicons name="checkmark-circle" size={80} color={theme.success} style={{ marginBottom: 20 }} />
+            <Text style={[styles.successTitle, { color: textColor }]}>Successful!</Text>
+            <Text style={[styles.successMessage, { color: textBodyColor, textAlign: 'center', marginBottom: 24 }]}>
+              You have successfully purchased {selectedPlan?.data} for {phoneNumber}
+            </Text>
+            <TouchableOpacity style={styles.closeSuccessBtn} onPress={closeSuccess}>
+              <Text style={styles.closeSuccessText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -464,230 +390,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.05)'
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  placeholder: {
-    width: 40,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  networksGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
+  headerTitle: { fontSize: 18, fontWeight: '700' },
+  backButton: { padding: 8 },
+  scrollContent: { padding: 20 },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  networksGrid: { flexDirection: 'row', gap: 12 },
   networkCard: {
-    width: '47%',
-    padding: 16,
+    width: 100,
+    padding: 12,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
     position: 'relative',
   },
   networkIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+    width: 40, height: 40, borderRadius: 20,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 8
   },
-  networkName: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  networkName: { fontSize: 13, fontWeight: '600' },
   checkMark: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'absolute', top: 6, right: 6, width: 16, height: 16, borderRadius: 8, alignItems: 'center', justifyContent: 'center'
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    height: 56,
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: 12, borderWidth: 1,
+    paddingHorizontal: 16, height: 56,
   },
-  inputIcon: {
-    marginRight: 12,
+  inputIcon: { marginRight: 12 },
+  input: { flex: 1, fontSize: 16 },
+  contactBtnFull: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    marginTop: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed'
   },
-  input: {
-    flex: 1,
-    fontSize: 16,
-  },
-  plansGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
+  plansHeaderContainer: { marginBottom: 12 },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
+  plansGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   planCard: {
     width: '47%',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 2,
   },
-  planHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  planData: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  planValidity: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  planPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  summaryCard: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  summaryLabel: {
-    fontSize: 14,
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    marginVertical: 12,
-  },
-  totalAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
+  planData: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  planValidity: { fontSize: 12, marginBottom: 8 },
+  planPrice: { fontSize: 15, fontWeight: '600' },
   buyButton: {
-    paddingVertical: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
+    paddingVertical: 18, borderRadius: 12, alignItems: 'center', marginBottom: 40
   },
-  buyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  infoCard: {
-    flexDirection: 'row',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 20,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  successModalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  successModalCard: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 24,
-    padding: 32,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  successIconContainer: {
-    marginBottom: 20,
-  },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  successDetails: {
-    width: '100%',
-    gap: 16,
-    marginBottom: 24,
-  },
-  successDetailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  successLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  successValue: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  successCheckmark: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-  },
-  successMessage: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  buyButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  successModalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  successModalCard: { width: '100%', borderRadius: 24, padding: 32, alignItems: 'center' },
+  successTitle: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
+  successMessage: { fontSize: 14 },
+  closeSuccessBtn: { paddingVertical: 12, paddingHorizontal: 40, backgroundColor: '#F3F4F6', borderRadius: 12 },
+  closeSuccessText: { color: '#374151', fontWeight: '600' }
 });

@@ -50,8 +50,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Transactions',
+          title: 'History',
           tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="referrals"
+        options={{
+          title: 'Referrals',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={24} color={color} />,
         }}
       />
 
@@ -62,13 +70,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={24} color={color} />,
         }}
       />
+
       <Tabs.Screen
         name="support"
         options={{
-          title: 'Support',
-          tabBarIcon: ({ color, size }) => <Ionicons name="headset-outline" size={24} color={color} />,
+          href: null,
         }}
       />
+
       <Tabs.Screen
         name="explore"
         options={{

@@ -14,7 +14,7 @@ export const getAllAdmins = (params?: { page?: number; limit?: number }) =>
   api.get('/admins', { params });
 
 // Users
-export const getUsers = (params?: { page?: number; limit?: number; search?: string }) =>
+export const getUsers = (params?: { page?: number; limit?: number; search?: string; status?: string; kyc_status?: string }) =>
   api.get('/users', { params });
 export const getUser = (id: string) => api.get(`/users/${id}`);
 export const updateUser = (id: string, data: any) => api.put(`/users/${id}`, data);
@@ -65,6 +65,8 @@ export const deleteProvider = (id: string) => api.delete(`/providers/${id}`);
 export const getProviderEnv = (id: string) => api.get(`/providers/${id}/env`);
 export const updateProviderEnv = (id: string, env: Record<string, string>) => api.put(`/providers/${id}/env`, { env });
 export const testProviderConnection = (code: string) => api.post(`/providers/test/${code}`);
+export const testProviderPurchase = (code: string, data: { service: string; payload: any }) =>
+  api.post(`/providers/test-purchase/${code}`, data);
 export const getProviderData = (code: string, type: 'balance' | 'networks' | 'plans') =>
   api.get(`/providers/data/${code}`, { params: { type } });
 
@@ -79,7 +81,7 @@ export const updateFundingAccount = (id: string, data: Partial<{ bankName: strin
 export const deleteFundingAccount = (id: string) => api.delete(`/funding/accounts/${id}`);
 
 // Transactions
-export const getTransactions = (params?: { page?: number; limit?: number; status?: string; type?: string }) =>
+export const getTransactions = (params?: { page?: number; limit?: number; status?: string; type?: string; search?: string }) =>
   generalApi.get('/transactions/all', { params });
 export const getTransactionById = (id: string) => generalApi.get(`/transactions/${id}`);
 
@@ -100,3 +102,24 @@ export const deleteBroadcast = (id: string) => api.delete(`/notifications/broadc
 export const getBroadcasts = () => api.get('/notifications/broadcast');
 export const updateBroadcast = (id: string, data: { title: string; message: string; type: string; action_link?: string }) =>
   api.put(`/notifications/broadcast/${id}`, data);
+
+// Email Notifications
+export const sendEmail = (data: { subject: string; message: string; recipients: string[] }) =>
+  api.post('/notifications/email', data);
+
+// System Settings
+export const getSystemSettings = () => api.get('/settings');
+export const updateSystemSettings = (data: any) => api.put('/settings', data);
+
+// Referral Management
+export const getReferralStats = () => generalApi.get('/referrals/admin/stats');
+export const getReferralSettings = () => generalApi.get('/referrals/settings');
+export const updateReferralSettings = (data: any) => generalApi.put('/referrals/admin/settings', data);
+
+// Airtime to Cash Management
+export const getA2CRequests = () => api.get('/airtime-to-cash/requests');
+export const updateA2CRequest = (id: string, data: { status: string; admin_note?: string }) =>
+  api.put(`/airtime-to-cash/requests/${id}`, data);
+export const getA2CSettings = () => api.get('/airtime-to-cash/settings');
+export const createA2CSetting = (data: any) => api.post('/airtime-to-cash/settings', data);
+export const updateA2CSetting = (id: string, data: any) => api.put(`/airtime-to-cash/settings/${id}`, data);

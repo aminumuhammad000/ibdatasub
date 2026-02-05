@@ -1,6 +1,8 @@
 import { useAlert } from '@/components/AlertContext';
+import TransactionPinModal from '@/components/TransactionPinModal';
 import { billPaymentService } from '@/services/billpayment.service';
 import { Ionicons } from '@expo/vector-icons';
+import * as Contacts from 'expo-contacts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -42,7 +44,7 @@ export default function BuyAirtimeScreen() {
   const [selectedNetworkIndex, setSelectedNetworkIndex] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [pin, setPin] = useState('');
+  const [isPinModalVisible, setIsPinModalVisible] = useState(false);
 
   const [networks, setNetworks] = useState<Array<{ id: string; name: string; color: string; icon: string }>>([
     { id: 'mtn', name: 'MTN', color: '#FFCC00', icon: 'phone-portrait' },
@@ -81,7 +83,7 @@ export default function BuyAirtimeScreen() {
               .toLowerCase()
               .replace(/\s+/g, '-');
             const id = baseId || `net-${i}`;
-            
+
             // Map network colors to match Buy Data screen
             let color = '#0A2540'; // default
             const networkName = (n.name || n.network || n.network_code || '').toLowerCase();
@@ -89,7 +91,7 @@ export default function BuyAirtimeScreen() {
             else if (networkName.includes('glo')) color = '#00A95C';
             else if (networkName.includes('airtel')) color = '#FF0000';
             else if (networkName.includes('9mobile') || networkName.includes('etisalat')) color = '#00693E';
-            
+
             return {
               id,
               name: n.name || n.network || n.network_code || 'Network',
@@ -108,7 +110,44 @@ export default function BuyAirtimeScreen() {
     loadNetworks();
   }, []);
 
-  const handleBuyAirtime = async () => {
+  const selectContact = async () => {
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status === 'granted') {
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers],
+      });
+      if (data.length > 0) {
+        try {
+          const contact = await Contacts.presentContactPickerAsync();
+          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+            let number = contact.phoneNumbers[0].number;
+            // Clean number
+            if (number) {
+              number = number.replace(/\D/g, '');
+              // Handle +234
+              if (number.startsWith('234')) {
+                number = '0' + number.slice(3);
+              }
+              // Handle 234 without +
+              if (number.length === 13 && number.startsWith('234')) {
+                number = '0' + number.slice(3);
+              }
+              setPhoneNumber(number);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+          showInfo('Could not open contacts');
+        }
+      } else {
+        showInfo('No contacts found');
+      }
+    } else {
+      showError('Permission to access contacts was denied');
+    }
+  };
+
+  const initiatePurchase = () => {
     if (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount)) {
       showError('Please fill all required fields');
       return;
@@ -117,11 +156,6 @@ export default function BuyAirtimeScreen() {
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     if (cleanPhone.length !== 11) {
       showError('Phone number must be exactly 11 digits');
-      return;
-    }
-
-    if (!/^\d{4}$/.test(pin)) {
-      showError('Enter your 4-digit transaction PIN');
       return;
     }
 
@@ -136,49 +170,66 @@ export default function BuyAirtimeScreen() {
       return;
     }
 
-    setIsLoading(true);
+    setIsPinModalVisible(true);
+  };
 
-    try {
-      const response = await billPaymentService.purchaseAirtime({
-        network: selectedNetwork,
-        phone: cleanPhone,
-        amount: amount,
-        airtime_type: 'VTU',
-        ported_number: true,
-        pin,
-      });
+  const handleBuyAirtime = async (pin: string) => {
+    setIsPinModalVisible(false);
 
-      if (response.success) {
-        showSuccess(`Airtime purchase successful! ₦${amount} sent to ${phoneNumber}`);
-        setPhoneNumber('');
-        setSelectedAmount(null);
-        setCustomAmount('');
-        setSelectedNetwork(null);
-        setPin('');
-        setTimeout(() => {
-          router.back();
-        }, 2000);
-      } else {
-        showError(response.message || 'Failed to purchase airtime');
+    // Slight delay to allow modal to close smoothly
+    setTimeout(async () => {
+      setIsLoading(true);
+
+      try {
+        const cleanPhone = phoneNumber.replace(/\D/g, '');
+        const amount = selectedAmount || parseFloat(customAmount);
+
+        const response = await billPaymentService.purchaseAirtime({
+          network: selectedNetwork!,
+          phone: cleanPhone,
+          amount: amount,
+          airtime_type: 'VTU',
+          ported_number: true,
+          pin,
+        });
+
+        if (response.success) {
+          setShowSuccessModal(true);
+        } else {
+          showError(response.message || 'Failed to purchase airtime');
+        }
+      } catch (error: any) {
+        showError(error.message || 'Failed to purchase airtime. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      showError(error.message || 'Failed to purchase airtime. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    }, 300);
+  };
+
+  const closeSuccess = () => {
+    setShowSuccessModal(false);
+    setPhoneNumber('');
+    setSelectedAmount(null);
+    setCustomAmount('');
+    setSelectedNetwork(null);
+    setTimeout(() => {
+      router.back();
+    }, 500);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <View style={[styles.header, { backgroundColor: cardBgColor }]}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color={textColor} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: textColor }]}>Buy Airtime</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={selectContact}>
+          <Ionicons name="people" size={24} color={theme.accent} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -196,7 +247,7 @@ export default function BuyAirtimeScreen() {
                 key={network.id || idx}
                 style={[
                   styles.networkCard,
-                  { 
+                  {
                     backgroundColor: cardBgColor,
                     borderColor: selectedNetworkIndex === idx ? network.color : borderColor,
                     borderWidth: 2,
@@ -234,7 +285,7 @@ export default function BuyAirtimeScreen() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Phone Number</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
+          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}>
             <Ionicons name="call-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
             <TextInput
               style={[styles.input, { color: textColor }]}
@@ -245,23 +296,9 @@ export default function BuyAirtimeScreen() {
               keyboardType="phone-pad"
               maxLength={11}
             />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Transaction PIN</Text>
-          <View style={[styles.inputContainer, { backgroundColor: cardBgColor, borderColor }]}> 
-            <Ionicons name="lock-closed-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: textColor }]}
-              placeholder="Enter 4-digit PIN"
-              placeholderTextColor={textBodyColor}
-              value={pin}
-              onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0,4))}
-              keyboardType="number-pad"
-              secureTextEntry
-              maxLength={4}
-            />
+            <TouchableOpacity onPress={selectContact} style={styles.contactBtn}>
+              <Ionicons name="book-outline" size={22} color={theme.accent} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -322,10 +359,10 @@ export default function BuyAirtimeScreen() {
         {(selectedAmount || customAmount) && phoneNumber && selectedNetwork && (
           <View style={[styles.summaryCard, { backgroundColor: cardBgColor }]}>
             <Text style={[styles.summaryTitle, { color: textColor }]}>Transaction Summary</Text>
-            
+
             <View style={styles.summaryRow}>
               <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Network:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}> 
+              <Text style={[styles.summaryValue, { color: textColor }]}>
                 {networks.find(n => n.id === selectedNetwork)?.name}
               </Text>
             </View>
@@ -337,7 +374,7 @@ export default function BuyAirtimeScreen() {
 
             <View style={styles.summaryRow}>
               <Text style={[styles.summaryLabel, { color: textBodyColor }]}>Amount:</Text>
-              <Text style={[styles.summaryValue, { color: textColor }]}> 
+              <Text style={[styles.summaryValue, { color: textColor }]}>
                 ₦{selectedAmount || customAmount}
               </Text>
             </View>
@@ -345,10 +382,10 @@ export default function BuyAirtimeScreen() {
             <View style={[styles.divider, { backgroundColor: borderColor }]} />
 
             <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: textColor, fontWeight: '600' }]}> 
+              <Text style={[styles.summaryLabel, { color: textColor, fontWeight: '600' }]}>
                 Total:
               </Text>
-              <Text style={[styles.totalAmount, { color: theme.accent }]}> 
+              <Text style={[styles.totalAmount, { color: theme.accent }]}>
                 ₦{selectedAmount || customAmount}
               </Text>
             </View>
@@ -359,13 +396,13 @@ export default function BuyAirtimeScreen() {
           style={[
             styles.buyButton,
             {
-              backgroundColor: (!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading)
+              backgroundColor: (!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
                 : theme.accent,
             },
           ]}
-          onPress={handleBuyAirtime}
-          disabled={!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || pin.length !== 4 || isLoading}
+          onPress={initiatePurchase}
+          disabled={!phoneNumber || phoneNumber.replace(/\D/g, '').length !== 11 || !selectedNetwork || (!selectedAmount && !customAmount) || isLoading}
           activeOpacity={0.8}
         >
           {isLoading ? (
@@ -377,11 +414,11 @@ export default function BuyAirtimeScreen() {
           )}
         </TouchableOpacity>
 
-        <View style={[styles.infoCard, { backgroundColor: isDark ? '#1C1C1E' : '#EFF6FF' }]}> 
-          <Ionicons 
-            name="information-circle-outline" 
-            size={24} 
-            color={isDark ? theme.accent : '#3B82F6'} 
+        <View style={[styles.infoCard, { backgroundColor: isDark ? '#1C1C1E' : '#EFF6FF' }]}>
+          <Ionicons
+            name="information-circle-outline"
+            size={24}
+            color={isDark ? theme.accent : '#3B82F6'}
           />
           <Text style={[styles.infoText, { color: isDark ? textBodyColor : '#1E40AF' }]}>
             Airtime will be delivered instantly to the phone number provided
@@ -389,6 +426,16 @@ export default function BuyAirtimeScreen() {
         </View>
       </ScrollView>
 
+      {/* Transaction PIN Modal */}
+      <TransactionPinModal
+        visible={isPinModalVisible}
+        onClose={() => setIsPinModalVisible(false)}
+        onSuccess={handleBuyAirtime}
+        amount={selectedAmount || customAmount || 0}
+        transactionType="Airtime Purchase"
+      />
+
+      {/* Success Modal */}
       <Modal
         visible={showSuccessModal}
         transparent={true}
@@ -399,11 +446,11 @@ export default function BuyAirtimeScreen() {
             <View style={styles.successIconContainer}>
               <Ionicons name="checkmark-circle" size={80} color={theme.success} />
             </View>
-            
+
             <Text style={[styles.successTitle, { color: isDark ? '#FFFFFF' : theme.primary }]}>
               Airtime Purchase Successful!
             </Text>
-            
+
             <View style={styles.successDetails}>
               <View style={styles.successDetailRow}>
                 <Text style={[styles.successLabel, { color: textBodyColor }]}>
@@ -413,7 +460,7 @@ export default function BuyAirtimeScreen() {
                   {networks.find(n => n.id === selectedNetwork)?.name || ''}
                 </Text>
               </View>
-              
+
               <View style={styles.successDetailRow}>
                 <Text style={[styles.successLabel, { color: textBodyColor }]}>
                   Phone Number:
@@ -422,7 +469,7 @@ export default function BuyAirtimeScreen() {
                   {phoneNumber}
                 </Text>
               </View>
-              
+
               <View style={styles.successDetailRow}>
                 <Text style={[styles.successLabel, { color: textBodyColor }]}>
                   Amount:
@@ -439,6 +486,13 @@ export default function BuyAirtimeScreen() {
                 Airtime delivered instantly
               </Text>
             </View>
+
+            <TouchableOpacity
+              style={styles.closeSuccessBtn}
+              onPress={closeSuccess}
+            >
+              <Text style={styles.closeSuccessText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -535,6 +589,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+  },
+  contactBtn: {
+    padding: 8,
   },
   currencySymbol: {
     fontSize: 16,
@@ -674,9 +731,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
+    marginBottom: 24,
   },
   successMessage: {
     fontSize: 14,
     fontWeight: '600',
   },
+  closeSuccessBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  closeSuccessText: {
+    fontWeight: '600',
+    color: '#374151',
+  }
 });

@@ -3,6 +3,7 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute';
 import AdminManagement from './pages/AdminManagement';
+import AirtimeToCash from './pages/AirtimeToCash';
 import ApiManagement from './pages/ApiManagement';
 import AuditLogs from './pages/AuditLogs';
 import Dashboard from './pages/Dashboard';
@@ -12,6 +13,7 @@ import Notifications from './pages/Notifications';
 import PricingPlans from './pages/PricingPlans';
 import Profile from './pages/Profile';
 import Providers from './pages/Providers';
+import Referrals from './pages/Referrals';
 import Settings from './pages/Settings';
 import Transactions from './pages/Transactions';
 import Users from './pages/Users';
@@ -29,6 +31,8 @@ function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/pricing" element={<PricingPlans />} />
+          <Route path="/referrals" element={<Referrals />} />
+          <Route path="/airtime-to-cash" element={<AirtimeToCash />} />
           <Route path="/funding" element={<Funding />} />
           <Route path="/providers" element={<Providers />} />
           <Route path="/wallet-credit" element={<WalletCredit />} />

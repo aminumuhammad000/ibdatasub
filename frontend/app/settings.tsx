@@ -1,5 +1,6 @@
 import { useAlert } from '@/components/AlertContext';
 import { ThemeMode, useTheme } from '@/components/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -11,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useAuth } from '@/context/AuthContext';
 
 const theme = {
   primary: '#0A2540',
@@ -136,6 +136,25 @@ export default function SettingsScreen() {
 
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
+            onPress={() => router.push('/change-password')}
+            activeOpacity={0.7}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0A254020' : '#0A254015' }}>
+                <Ionicons name="key-outline" size={20} color={theme.primary} />
+              </View>
+              <View style={{ marginLeft: 12 }}>
+                <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Change Password</Text>
+                <Text style={{ color: textBodyColor, fontSize: 13 }}>Update your login password</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
+          </TouchableOpacity>
+
+          <View style={{ height: 1, backgroundColor: isDark ? '#374151' : '#F3F4F6', marginVertical: 4 }} />
+
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
             onPress={() => router.push('/security')}
             activeOpacity={0.7}
           >
@@ -146,6 +165,28 @@ export default function SettingsScreen() {
               <View style={{ marginLeft: 12 }}>
                 <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Transaction PIN</Text>
                 <Text style={{ color: textBodyColor, fontSize: 13 }}>Set or update your 4-digit PIN</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.section, { backgroundColor: cardBgColor }]}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Support</Text>
+          <Text style={[styles.sectionDescription, { color: textBodyColor }]}>Get help and contact us</Text>
+
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
+            onPress={() => router.push('/help-support' as any)}
+            activeOpacity={0.7}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0A254020' : '#06B6D415' }}>
+                <Ionicons name="help-circle-outline" size={20} color="#06B6D4" />
+              </View>
+              <View style={{ marginLeft: 12 }}>
+                <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Help & Support</Text>
+                <Text style={{ color: textBodyColor, fontSize: 13 }}>FAQs and contact information</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={18} color={textBodyColor} />

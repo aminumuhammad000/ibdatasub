@@ -1,14 +1,13 @@
 import { AlertProvider } from '@/components/AlertContext';
 import { ProfileProvider } from '@/components/ProfileContext';
 import { ThemeProvider } from '@/components/ThemeContext';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
-import { AppUpdateChecker } from '@/components/AppUpdateChecker';
+import { useFonts } from 'expo-font';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 // Keep splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -100,7 +99,6 @@ export default function RootLayout() {
           <AuthProvider>
             <StatusBar style="light" />
             <AuthLayout />
-            <AppUpdateChecker />
           </AuthProvider>
         </ProfileProvider>
       </AlertProvider>

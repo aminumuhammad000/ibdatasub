@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Linking,
   ScrollView,
   StatusBar,
@@ -13,7 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from 'react-native';
 
 const theme = {
@@ -88,12 +87,6 @@ export default function HelpSupportScreen() {
   ];
 
   const contactOptions = [
-    {
-      title: 'Live Chat',
-      description: 'Chat with our support team',
-      icon: 'chatbubbles',
-      action: () => Alert.alert('Live Chat', 'Live chat feature coming soon!')
-    },
     {
       title: 'Call Support',
       description: supportContent?.phoneNumber || 'Loading...',
@@ -263,56 +256,7 @@ export default function HelpSupportScreen() {
           ))}
         </View>
 
-        {/* Additional Resources */}
-        <View style={[styles.section, { backgroundColor: cardBgColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Additional Resources</Text>
 
-          <TouchableOpacity style={styles.resourceItem}>
-            <View style={styles.resourceInfo}>
-              <Ionicons name="document-text" size={24} color={theme.primary} />
-              <View style={styles.resourceTextContainer}>
-                <Text style={[styles.resourceTitle, { color: textColor }]}>User Guide</Text>
-                <Text style={[styles.resourceDescription, { color: textBodyColor }]}>
-                  Step-by-step guide to using the app
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={textBodyColor} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.resourceItem}>
-            <View style={styles.resourceInfo}>
-              <Ionicons name="videocam" size={24} color={theme.primary} />
-              <View style={styles.resourceTextContainer}>
-                <Text style={[styles.resourceTitle, { color: textColor }]}>Video Tutorials</Text>
-                <Text style={[styles.resourceDescription, { color: textBodyColor }]}>
-                  Watch how-to videos
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={textBodyColor} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.resourceItem}
-            onPress={() => {
-              if (supportContent?.websiteUrl) {
-                Linking.openURL(supportContent.websiteUrl);
-              }
-            }}
-          >
-            <View style={styles.resourceInfo}>
-              <Ionicons name="globe" size={24} color={theme.primary} />
-              <View style={styles.resourceTextContainer}>
-                <Text style={[styles.resourceTitle, { color: textColor }]}>Visit Website</Text>
-                <Text style={[styles.resourceDescription, { color: textBodyColor }]}>
-                  {supportContent?.websiteUrl || 'www.vtuapp.com'}
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={textBodyColor} />
-          </TouchableOpacity>
-        </View>
 
         <View style={{ height: 50 }} />
       </ScrollView>

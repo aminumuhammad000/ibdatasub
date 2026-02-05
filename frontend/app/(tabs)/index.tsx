@@ -1,6 +1,7 @@
 import { useTheme } from '@/components/ThemeContext';
 import { authService } from '@/services/auth.service';
 import { billPaymentService } from '@/services/billpayment.service';
+import * as Contacts from 'expo-contacts';
 
 import { userService } from '@/services/user.service';
 import { WalletData, walletService } from '@/services/wallet.service';
@@ -190,7 +191,35 @@ export default function HomeScreen() {
     }
   };
 
-
+  const selectContact = async () => {
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status === 'granted') {
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers],
+      });
+      if (data.length > 0) {
+        try {
+          const contact = await Contacts.presentContactPickerAsync();
+          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+            let number = contact.phoneNumbers[0].number;
+            if (number) {
+              number = number.replace(/\D/g, '');
+              if (number.startsWith('234')) number = '0' + number.slice(3);
+              if (number.length === 13 && number.startsWith('234')) number = '0' + number.slice(3);
+              setPhoneNumber(number);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+          // Silent fail or simple log
+        }
+      } else {
+        Alert.alert('Info', 'No contacts found');
+      }
+    } else {
+      Alert.alert('Permission Denied', 'Permission to access contacts was denied');
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -222,13 +251,19 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor }]}>
         <View style={styles.headerLeft}>
-          <View style={styles.profilePic}>
+          <TouchableOpacity
+            style={styles.profilePic}
+            onPress={() => router.push('/profile')}
+          >
             <Image
-              source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+              source={{ uri: user?.profile_picture || 'https://i.pravatar.cc/150?img=12' }}
               style={styles.profileImage}
             />
+          </TouchableOpacity>
+          <View>
+            <Text style={[styles.welcomeLabel, { color: textBodyColor }]}>Good Morning 👋</Text>
+            <Text style={[styles.welcomeText, { color: textColor }]}>{user?.first_name || 'Guest'}</Text>
           </View>
-          <Text style={[styles.welcomeText, { color: textColor }]}>Welcome, {user?.first_name || 'Guest'}</Text>
         </View>
         <TouchableOpacity
           style={styles.notificationBtn}
@@ -292,8 +327,8 @@ export default function HomeScreen() {
               style={styles.actionItem}
               onPress={() => router.push('/buy-airtime')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
-                <Ionicons name="phone-portrait-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
+              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(79, 70, 229, 0.2)' : '#EEF2FF' }]}>
+                <Ionicons name="phone-portrait" size={24} color="#4F46E5" />
               </View>
               <Text style={[styles.actionText, { color: textBodyColor }]}>Buy Airtime</Text>
             </TouchableOpacity>
@@ -301,60 +336,62 @@ export default function HomeScreen() {
               style={styles.actionItem}
               onPress={() => router.push('/buy-data')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
-                <Ionicons name="wifi-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
+              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ECFDF5' }]}>
+                <Ionicons name="wifi" size={24} color="#10B981" />
               </View>
               <Text style={[styles.actionText, { color: textBodyColor }]}>Buy Data</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={() => router.push('/pay-bills')}
+              onPress={() => router.push('/airtime-to-cash')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
-                <Ionicons name="receipt-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
+              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(236, 72, 153, 0.2)' : '#FCE7F3' }]}>
+                <Ionicons name="cash-outline" size={24} color="#EC4899" />
               </View>
-              <Text style={[styles.actionText, { color: textBodyColor }]}>Pay Bills</Text>
+              <Text style={[styles.actionText, { color: textBodyColor }]}>Airtime 2 Cash</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionItem}
               onPress={() => router.push('/more')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
-                <Ionicons name="grid-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
+              <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#EBF5FF' }]}>
+                <Ionicons name="grid-outline" size={24} color="#2563EB" />
               </View>
               <Text style={[styles.actionText, { color: textBodyColor }]}>More</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Quick Top-up Form */}
-          <View style={styles.topupSection}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Quick Top-up</Text>
+          {/* Quick Top-up Form - Enclosed in Card */}
+          <View style={[styles.topupCard, { backgroundColor: cardBg }]}>
+            <Text style={[styles.sectionTitle, { color: textColor, marginBottom: 16 }]}>Quick Top-up ⚡</Text>
 
             {/* Tabs */}
-            <View style={[styles.tabs, { borderBottomColor: isDark ? '#374151' : '#E5E7EB' }]}>
+            <View style={[styles.segmentContainer, { backgroundColor: isDark ? '#111827' : '#F3F4F6' }]}>
               <TouchableOpacity
                 style={[
-                  styles.tab,
-                  selectedTab === 'airtime' && {
-                    borderBottomColor: isDark ? theme.accent : theme.primary
-                  }
+                  styles.segmentBtn,
+                  selectedTab === 'airtime' && { backgroundColor: theme.primary }
                 ]}
                 onPress={() => setSelectedTab('airtime')}
               >
-                <Text style={[styles.tabText, selectedTab === 'airtime' && { color: isDark ? '#FFFFFF' : theme.primary }]}>
+                <Text style={[
+                  styles.segmentText,
+                  { color: selectedTab === 'airtime' ? '#FFF' : textBodyColor }
+                ]}>
                   Airtime
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
-                  styles.tab,
-                  selectedTab === 'data' && {
-                    borderBottomColor: isDark ? theme.accent : theme.primary
-                  }
+                  styles.segmentBtn,
+                  selectedTab === 'data' && { backgroundColor: theme.primary }
                 ]}
                 onPress={() => setSelectedTab('data')}
               >
-                <Text style={[styles.tabText, selectedTab === 'data' && { color: isDark ? '#FFFFFF' : theme.primary }]}>
+                <Text style={[
+                  styles.segmentText,
+                  { color: selectedTab === 'data' ? '#FFF' : textBodyColor }
+                ]}>
                   Data
                 </Text>
               </TouchableOpacity>
@@ -362,19 +399,23 @@ export default function HomeScreen() {
 
             {/* Phone Input */}
             <View style={styles.formContainer}>
-              <View style={[styles.inputContainer, { backgroundColor: cardBg }]}>
+              <Text style={[styles.inputLabel, { color: textBodyColor }]}>Phone Number</Text>
+              <View style={[styles.inputContainer, { backgroundColor: isDark ? '#374151' : '#F9FAFB', borderColor: isDark ? '#4B5563' : '#E5E7EB', borderWidth: 1 }]}>
                 <TextInput
                   style={[styles.input, { color: textColor }]}
-                  placeholder="Phone Number"
+                  placeholder="080 1234 5678"
                   placeholderTextColor={textBodyColor}
                   value={phoneNumber}
                   onChangeText={setPhoneNumber}
                   keyboardType="phone-pad"
                 />
-                <Ionicons name="call-outline" size={20} color={textBodyColor} style={styles.inputIcon} />
+                <TouchableOpacity onPress={selectContact}>
+                  <Ionicons name="people" size={20} color={theme.accent} style={styles.inputIcon} />
+                </TouchableOpacity>
               </View>
 
               {/* Amount Buttons */}
+              <Text style={[styles.inputLabel, { color: textBodyColor, marginTop: 8 }]}>Select Amount</Text>
               <View style={styles.amountGrid}>
                 {selectedTab === 'airtime' ? (
                   airtimeAmounts.map((amount, index) => (
@@ -383,10 +424,11 @@ export default function HomeScreen() {
                       style={[
                         styles.amountBtn,
                         {
-                          borderColor: isDark ? '#374151' : '#E5E7EB',
                           backgroundColor: selectedAirtimeIndex === index
-                            ? (isDark ? theme.accent : theme.primary)
-                            : 'transparent'
+                            ? theme.primary
+                            : (isDark ? '#374151' : '#fff'),
+                          borderColor: selectedAirtimeIndex === index ? theme.primary : (isDark ? '#4B5563' : '#E5E7EB'),
+                          borderWidth: 1
                         }
                       ]}
                       onPress={() => setSelectedAirtimeIndex(index)}
@@ -396,7 +438,8 @@ export default function HomeScreen() {
                         {
                           color: selectedAirtimeIndex === index
                             ? '#FFFFFF'
-                            : textColor
+                            : textColor,
+                          fontSize: 14
                         }
                       ]}>
                         {amount}
@@ -410,10 +453,11 @@ export default function HomeScreen() {
                       style={[
                         styles.dataPlanBtn,
                         {
-                          borderColor: isDark ? '#374151' : '#E5E7EB',
                           backgroundColor: selectedDataIndex === index
-                            ? (isDark ? theme.accent : theme.primary)
-                            : 'transparent'
+                            ? theme.primary
+                            : (isDark ? '#374151' : '#fff'),
+                          borderColor: selectedDataIndex === index ? theme.primary : (isDark ? '#4B5563' : '#E5E7EB'),
+                          borderWidth: 1
                         }
                       ]}
                       onPress={() => setSelectedDataIndex(index)}
@@ -438,16 +482,6 @@ export default function HomeScreen() {
                       ]}>
                         ₦{Number(plan.price || 0).toLocaleString()}
                       </Text>
-                      <Text style={[
-                        styles.planDuration,
-                        {
-                          color: selectedDataIndex === index
-                            ? '#F3F4F6'
-                            : textBodyColor
-                        }
-                      ]}>
-                        {plan.duration}
-                      </Text>
                     </TouchableOpacity>
                   ))
                 )}
@@ -455,15 +489,14 @@ export default function HomeScreen() {
 
               {/* Proceed Button */}
               <TouchableOpacity
-                style={[styles.proceedBtn, { backgroundColor: theme.primary }]}
+                style={[styles.proceedBtn, { backgroundColor: theme.primary, marginTop: 16 }]}
                 onPress={handleQuickProceed}
               >
-                <Text style={styles.proceedText}>Proceed</Text>
+                <Text style={styles.proceedText}>Continue</Text>
+                <Ionicons name="arrow-forward" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
           </View>
-
-
 
           {/* Bottom Spacing */}
           <View style={{ height: 100 }} />
@@ -474,6 +507,85 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  topupCard: {
+    marginHorizontal: 16,
+    marginTop: 32,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  segmentContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  welcomeLabel: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  amountBtn: {
+    width: '30%',
+    height: 44,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dataPlanBtn: {
+    width: '30%',
+    minHeight: 70,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    marginBottom: 8,
+  },
+  proceedBtn: {
+    height: 52,
+    borderRadius: 12,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  // Keep original styles for others
   container: {
     flex: 1,
   },
@@ -497,34 +609,38 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   profilePic: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 45,
+    height: 45,
+    borderRadius: 25,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#FFF',
   },
   profileImage: {
     width: '100%',
     height: '100%',
   },
   welcomeText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
   notificationBtn: {
     padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 20,
   },
   balanceCardContainer: {
     paddingHorizontal: 16,
     marginTop: 8,
   },
   balanceCard: {
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowColor: '#0A2540',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   balanceHeader: {
     flexDirection: 'row',
@@ -533,7 +649,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   balanceLabel: {
-    color: '#D1D5DB',
+    color: 'rgba(255,255,255,0.7)',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -541,31 +657,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   hideText: {
-    color: '#D1D5DB',
-    fontSize: 14,
+    color: '#FFF',
+    fontSize: 12,
     fontWeight: '500',
   },
   balanceAmount: {
     color: '#FFFFFF',
-    fontSize: 36,
-    fontWeight: '700',
-    marginBottom: 16,
+    fontSize: 32,
+    fontWeight: '800',
+    marginBottom: 20,
+    letterSpacing: 0.5,
   },
   addMoneyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignSelf: 'flex-start',
     gap: 8,
   },
   addMoneyText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
   },
   quickActions: {
@@ -580,59 +701,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 4,
   },
   actionText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'center',
-  },
-  topupSection: {
-    paddingHorizontal: 16,
-    marginTop: 32,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 12,
-  },
-  tabs: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    gap: 32,
-    marginBottom: 16,
-  },
-  tab: {
-    paddingVertical: 12,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: '#0A2540',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#6B7280',
   },
   formContainer: {
-    gap: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    height: 48,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
+    gap: 12,
   },
   inputIcon: {
     marginLeft: 8,
@@ -640,74 +726,32 @@ const styles = StyleSheet.create({
   amountGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-  },
-  amountBtn: {
-    width: '30%',
-    height: 48,
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 10,
+    justifyContent: 'space-between',
   },
   amountText: {
     fontSize: 16,
     fontWeight: '600',
   },
-  dataPlanBtn: {
-    width: '30%',
-    minHeight: 80,
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-  },
   planLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     marginBottom: 4,
+    textAlign: 'center',
   },
   planPrice: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     marginBottom: 2,
+    textAlign: 'center',
   },
   planDuration: {
-    fontSize: 11,
-  },
-  proceedBtn: {
-    height: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
+    fontSize: 10,
   },
   proceedText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
-  },
-
-  operatorsSection: {
-    marginTop: 32,
-  },
-  operatorsList: {
-    paddingHorizontal: 16,
-    marginTop: 12,
-  },
-  operatorItem: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  operatorText: {
-    fontSize: 12,
-    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
@@ -716,16 +760,6 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  emptyStateText: {
     marginTop: 12,
     fontSize: 16,
     fontWeight: '500',
