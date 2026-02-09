@@ -3,15 +3,18 @@ import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 
 import adminRoutes from "./routes/admin.routes.js";
+import airtimeToCashRoutes from "./routes/airtime_to_cash.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import billpaymentRoutes from "./routes/billpayment.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import promotionsRoutes from "./routes/promotions.routes.js";
+import referralRoutes from "./routes/referral.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 import supportContentRoutes from "./routes/support_content.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import virtualAccountRoutes from "./routes/virtualAccount.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
 
 // Import logging middleware
@@ -56,6 +59,9 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/billpayment", billpaymentRoutes);
 app.use("/api/support-content", supportContentRoutes);
+app.use("/api/referrals", referralRoutes);
+app.use("/api/virtual-accounts", virtualAccountRoutes);
+app.use("/api/airtime-to-cash", airtimeToCashRoutes);
 
 
 // Root route

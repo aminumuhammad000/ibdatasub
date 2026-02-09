@@ -153,9 +153,14 @@ export default function ProfileScreen() {
         <View style={[styles.profileHeader, { backgroundColor: theme_colors.primary }]}>
           <View style={styles.headerTop}>
             <Text style={styles.headerTitle}>Profile</Text>
-            <TouchableOpacity onPress={() => router.push('/settings')}>
-              <Ionicons name="settings-outline" size={24} color="#FFF" />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 16 }}>
+              <TouchableOpacity onPress={() => router.push('/settings')}>
+                <Ionicons name="settings-outline" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleLogout}>
+                <Ionicons name="log-out-outline" size={24} color="#FF6B6B" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.userInfoContainer}>
@@ -255,6 +260,19 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 16 },
   iconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
   menuLabel: { flex: 1, fontSize: 15, fontWeight: '600' },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 32, gap: 10 },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 32,
+    marginHorizontal: 20,
+    padding: 15,
+    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 75, 75, 0.3)',
+    gap: 10,
+    marginBottom: 20
+  },
   logoutText: { color: '#FF4B4B', fontSize: 16, fontWeight: '700' }
 });

@@ -25,9 +25,10 @@ const AirtimeToCash: React.FC = () => {
 
     const updateStatusMutation = useMutation({
         mutationFn: ({ id, status, note }: any) => updateA2CRequest(id, { status, admin_note: note }),
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['a2cRequests'] });
-            setToast({ id: 'a2c-status', message: 'Request status updated', type: 'success' });
+            const actionText = variables.status === 'approved' ? 'approved' : 'rejected';
+            setToast({ id: 'a2c-status', message: `Request ${actionText} successfully`, type: 'success' });
             setSelectedRequest(null);
             setAdminNote('');
         },

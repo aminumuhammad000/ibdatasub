@@ -70,7 +70,7 @@ export default function ReferralsScreen() {
     const onShare = async () => {
         try {
             const result = await Share.share({
-                message: `Join me on VTPay and get amazing discounts on airtime and data! Use my referral code: ${stats?.referral_code}. Download Now: https://vtfree.com.ng`,
+                message: `Join me on VTPay and earn ₦${settings?.referrer_bonus_amount || '...'} bonus! Use my referral code: ${stats?.referral_code}. Download Now: https://vtfree.com.ng`,
             });
         } catch (error: any) {
             showError(error.message);
@@ -98,9 +98,9 @@ export default function ReferralsScreen() {
                 {/* Banner Card */}
                 <View style={[styles.bannerCard, { backgroundColor: theme.primary }]}>
                     <View style={styles.bannerInfo}>
-                        <Text style={styles.bannerTitle}>Earn ₦{settings?.referrer_bonus_amount || 500} per friend</Text>
+                        <Text style={styles.bannerTitle}>Earn ₦{settings?.referrer_bonus_amount ?? '...'} per friend</Text>
                         <Text style={styles.bannerSubtitle}>
-                            Invite your friends to VTPay and earn a bonus when they make their first transaction of ₦{settings?.min_transaction_for_bonus || 2000} or more.
+                            Invite your friends to VTPay and earn a bonus when they make their first transaction of ₦{settings?.min_transaction_for_bonus ?? '...'} or more.
                         </Text>
                     </View>
                     <View style={styles.bannerIconContainer}>
