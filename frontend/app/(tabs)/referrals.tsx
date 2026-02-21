@@ -70,7 +70,7 @@ export default function ReferralsScreen() {
     const onShare = async () => {
         try {
             const result = await Share.share({
-                message: `Join me on VTPay and earn ₦${settings?.referrer_bonus_amount || '...'} bonus! Use my referral code: ${stats?.referral_code}. Download Now: https://vtfree.com.ng`,
+                message: `Join me on ibdata and earn ₦${settings?.referrer_bonus_amount || '...'} bonus! Use my referral code: ${stats?.referral_code}. Download Now: https://app.ibdata.com.ng`,
             });
         } catch (error: any) {
             showError(error.message);
@@ -100,7 +100,7 @@ export default function ReferralsScreen() {
                     <View style={styles.bannerInfo}>
                         <Text style={styles.bannerTitle}>Earn ₦{settings?.referrer_bonus_amount ?? '...'} per friend</Text>
                         <Text style={styles.bannerSubtitle}>
-                            Invite your friends to VTPay and earn a bonus when they make their first transaction of ₦{settings?.min_transaction_for_bonus ?? '...'} or more.
+                            Invite your friends to ibdata and earn a bonus when they make their first transaction of ₦{settings?.min_transaction_for_bonus ?? '...'} or more.
                         </Text>
                     </View>
                     <View style={styles.bannerIconContainer}>

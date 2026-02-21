@@ -7,6 +7,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Linking,
   Modal,
   ScrollView,
   StyleSheet,
@@ -14,7 +16,7 @@ import {
   TextInput,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from 'react-native';
 
 const theme = {
@@ -143,7 +145,19 @@ export default function BuyAirtimeScreen() {
         showInfo('No contacts found');
       }
     } else {
-      showError('Permission to access contacts was denied');
+      const { status: currentStatus, canAskAgain } = await Contacts.getPermissionsAsync();
+      if (!canAskAgain && currentStatus !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'You have denied contact access. Please enable it in your phone settings to use this feature.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
+      } else {
+        showError('Permission to access contacts was denied. We need this to help you select phone numbers easily.');
+      }
     }
   };
 

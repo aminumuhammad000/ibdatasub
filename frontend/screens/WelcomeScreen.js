@@ -50,7 +50,7 @@ const WelcomeScreen = () => {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <MaterialIcons name="bolt" size={48} color="#fff" />
-          <Text style={styles.logoText}>IB Data Sub</Text>
+          <Text style={styles.logoText}>ibdata</Text>
         </View>
       </View>
 
@@ -93,15 +93,15 @@ const WelcomeScreen = () => {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.trustText}>Trusted & Secure with Minimal Fees.</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => router.push('/signup')}
         >
           <Text style={styles.primaryButtonText}>Get Started</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.secondaryButton}
           onPress={() => router.push('/login')}
         >

@@ -122,10 +122,10 @@ export default function AboutScreen() {
           <View style={styles.appInfoContainer}>
             <View style={styles.logoContainer}>
               <View style={[styles.logo, { backgroundColor: theme.primary }]}>
-                <Text style={styles.logoText}>ID</Text>
+                <Text style={styles.logoText}>IB</Text>
               </View>
             </View>
-            <Text style={[styles.appName, { color: textColor }]}>InData</Text>
+            <Text style={[styles.appName, { color: textColor }]}>ibdata</Text>
             <Text style={[styles.appTagline, { color: textBodyColor }]}>
               Your trusted partner for seamless mobile transactions
             </Text>
@@ -142,9 +142,9 @@ export default function AboutScreen() {
 
         {/* About Description */}
         <View style={[styles.section, { backgroundColor: cardBgColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>About InData</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>About ibdata</Text>
           <Text style={[styles.descriptionText, { color: textBodyColor }]}>
-            InData is Nigeria's leading mobile application for quick and secure virtual top-up services.
+            ibdata is Nigeria's leading mobile application for quick and secure virtual top-up services.
             We provide instant airtime, data bundles, and bill payment services across all major networks
             in Nigeria. Our mission is to make mobile transactions simple, fast, and secure for everyone.
           </Text>
@@ -233,7 +233,7 @@ export default function AboutScreen() {
         {/* Copyright */}
         <View style={styles.copyrightContainer}>
           <Text style={[styles.copyrightText, { color: textBodyColor }]}>
-            © 2024 InData. All rights reserved.
+            © 2024 ibdata. All rights reserved.
           </Text>
           <Text style={[styles.copyrightText, { color: textBodyColor }]}>
             Made with ❤️ in Nigeria

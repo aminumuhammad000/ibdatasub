@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -217,7 +218,19 @@ export default function HomeScreen() {
         Alert.alert('Info', 'No contacts found');
       }
     } else {
-      Alert.alert('Permission Denied', 'Permission to access contacts was denied');
+      const { status: currentStatus, canAskAgain } = await Contacts.getPermissionsAsync();
+      if (!canAskAgain && currentStatus !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'You have denied contact access. Please enable it in your phone settings to use this feature.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
+      } else {
+        Alert.alert('Permission Denied', 'Permission to access contacts was denied. We need this to help you select phone numbers easily.');
+      }
     }
   };
 

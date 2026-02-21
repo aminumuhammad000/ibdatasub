@@ -128,7 +128,7 @@ export default function ProfileScreen() {
       items: [
         { icon: 'help-circle-outline', label: 'Help & Support', route: '/help-support', color: '#06B6D4' },
         { icon: 'notifications-outline', label: 'Notifications', route: '/notifications', color: '#F43F5E' },
-        { icon: 'information-circle-outline', label: 'About VTPay', route: '/about', color: '#64748B' },
+        { icon: 'information-circle-outline', label: 'About ibdata', route: '/about', color: '#64748B' },
       ],
     },
   ];
