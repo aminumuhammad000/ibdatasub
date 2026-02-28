@@ -1,15 +1,15 @@
 server {
     listen 80;
-    server_name api.ibdata.com.ng;
+    server_name api.marabusdata.com.ng;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name api.ibdata.com.ng;
+    server_name api.marabusdata.com.ng;
 
-    ssl_certificate /etc/letsencrypt/live/api.ibdata.com.ng/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.ibdata.com.ng/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/api.marabusdata.com.ng/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.marabusdata.com.ng/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 

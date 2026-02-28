@@ -1,17 +1,16 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Animated,
-  Platform,
-  SafeAreaView
-} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -71,10 +70,10 @@ const OnboardingScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/images/logo.png')} // Replace with your logo
+            source={require('../assets/images/marabuslogo.png')} // Replace with your logo
             style={styles.logo}
           />
-          <Text style={styles.logoText}>Connecta VTU</Text>
+          <Text style={styles.logoText}>Marabusdata</Text>
         </View>
       </View>
 
@@ -112,8 +111,8 @@ const OnboardingScreen = ({ navigation }) => {
 
       <View style={styles.footer}>
         <Text style={styles.trustText}>Trusted & Secure with Minimal Fees.</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.primaryButton}
           onPress={scrollTo}
         >
@@ -122,7 +121,7 @@ const OnboardingScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.secondaryButton}
           onPress={() => navigation.navigate('Login')}
         >

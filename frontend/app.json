@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "ibdata",
-    "slug": "vtu-app",
+    "name": "Marabusdata",
+    "slug": "marabusdata",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ibdatalogo.png",
+    "icon": "./assets/images/marabuslogo.png",
     "scheme": "vtuapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

@@ -190,7 +190,7 @@ const LoginScreen = () => {
         >
           <View style={styles.logoContainer}>
             <Image
-              source={require("../assets/images/ibdatalogo.png")}
+              source={require("../assets/images/marabuslogo.png")}
               style={styles.logo}
             />
             <Text style={[styles.title, { color: textColor }]}>Welcome Back!</Text>

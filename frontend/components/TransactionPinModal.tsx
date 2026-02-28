@@ -130,13 +130,6 @@ export default function TransactionPinModal({
             if (index !== -1) {
                 newPin[index] = key;
                 setPin(newPin);
-
-                // Auto submit on 4th digit
-                if (index === 3) {
-                    setTimeout(() => {
-                        onSuccess(newPin.join('') + key); // This logic slightly flawed for state update, fixing below
-                    }, 100);
-                }
             }
         }
     };

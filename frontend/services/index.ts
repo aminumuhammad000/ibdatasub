@@ -1,68 +1,61 @@
 // services/index.ts
 // Central export for all API services
 
+export { adminService } from './admin.service';
 export { authService } from './auth.service';
-export { userService } from './user.service';
-export { walletService } from './wallet.service';
-export { transactionService } from './transaction.service';
-export { paymentService } from './payment.service';
 export { notificationsService } from './notifications.service';
+export { paymentService } from './payment.service';
 export { promotionsService } from './promotions.service';
 export { supportService } from './support.service';
-export { adminService } from './admin.service';
+export { transactionService } from './transaction.service';
+export { userService } from './user.service';
+export { vtstackService } from './vtstack.service';
+export { walletService } from './wallet.service';
 
 // Re-export types
 export type {
-  RegisterData,
-  LoginData,
-  AuthResponse,
+  AuthResponse, LoginData, RegisterData
 } from './auth.service';
 
 export type {
-  UserUpdateData,
+  UserUpdateData
 } from './user.service';
 
 export type {
   WalletData,
-  WalletResponse,
+  WalletResponse
 } from './wallet.service';
 
 export type {
-  Transaction,
-  TransactionResponse,
   AirtimePurchaseData,
-  DataPurchaseData,
+  DataPurchaseData, Transaction,
+  TransactionResponse
 } from './transaction.service';
 
 export type {
   PaymentInitiateData,
   PaymentInitiateResponse,
-  PaymentVerifyResponse,
+  PaymentVerifyResponse
 } from './payment.service';
 
 export type {
   Notification,
-  NotificationResponse,
+  NotificationResponse
 } from './notifications.service';
 
 export type {
   Promotion,
-  PromotionResponse,
+  PromotionResponse
 } from './promotions.service';
 
 export type {
-  SupportTicket,
-  CreateTicketData,
-  TicketResponse,
+  CreateTicketData, SupportTicket, TicketResponse
 } from './support.service';
 
 export type {
-  AdminUser,
-  DashboardStats,
-  AuditLog,
-  AdminLoginData,
-  AdminAuthResponse,
+  AdminAuthResponse, AdminLoginData, AdminUser, AuditLog, DashboardStats
 } from './admin.service';
 
 // Export API instance and base URL
-export { default as api, API_BASE_URL } from './api';
+export { API_BASE_URL, default as api } from './api';
+

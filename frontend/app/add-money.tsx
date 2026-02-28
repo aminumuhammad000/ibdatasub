@@ -1,6 +1,6 @@
 import { useAlert } from '@/components/AlertContext';
-import { authService } from '@/services/auth.service';
 import { payrantService, VirtualAccountResponse } from '@/services/payrant.service';
+import { vtstackService } from '@/services/vtstack.service';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
@@ -11,8 +11,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
+  Text, TextInput, TouchableOpacity,
   useColorScheme,
   View
 } from 'react-native';
@@ -49,6 +48,8 @@ export default function AddMoneyScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [creatingAccount, setCreatingAccount] = useState(false);
+  const [bvn, setBvn] = useState('');
+  const [showBvnInput, setShowBvnInput] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -77,22 +78,21 @@ export default function AddMoneyScreen() {
   };
 
   const handleCreateAccount = async () => {
+    if (!bvn && !showBvnInput) {
+      setShowBvnInput(true);
+      return;
+    }
+
+    if (bvn.length !== 11) {
+      showError('Please enter a valid 11-digit BVN');
+      return;
+    }
+
     try {
       setCreatingAccount(true);
-      const user = await authService.getCurrentUser();
-
-      const accountData = {
-        documentType: 'nin',
-        documentNumber: user?.phone_number || '',
-        virtualAccountName: `${user?.first_name} ${user?.last_name}`,
-        customerName: `${user?.first_name} ${user?.last_name}`,
-        email: user?.email || '',
-        accountReference: `REF-${Date.now()}`
-      };
-
-      const res = await payrantService.createVirtualAccount(accountData);
-      if (res) {
-        setAccount(res);
+      const res = await vtstackService.createAccount(bvn);
+      if (res.success) {
+        setAccount(res.data as any);
         showSuccess('Virtual account created successfully');
         onRefresh();
       }
@@ -172,6 +172,20 @@ export default function AddMoneyScreen() {
                 <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
                   <Ionicons name="wallet-outline" size={48} color={theme.textMuted} />
                   <Text style={[styles.emptyText, { color: theme.text }]}>No virtual account found</Text>
+                  {showBvnInput && (
+                    <View style={{ width: '100%', marginBottom: 16 }}>
+                      <Text style={[styles.inputLabel, { color: theme.text }]}>Enter 11-digit BVN</Text>
+                      <TextInput
+                        style={[styles.input, { backgroundColor: isDark ? '#2C2C2E' : '#F3F4F6', color: theme.text, borderColor: theme.border }]}
+                        placeholder="BVN Number"
+                        placeholderTextColor={theme.textMuted}
+                        value={bvn}
+                        onChangeText={setBvn}
+                        keyboardType="numeric"
+                        maxLength={11}
+                      />
+                    </View>
+                  )}
                   <TouchableOpacity
                     style={[styles.createBtn, { backgroundColor: THEME.primary }]}
                     onPress={handleCreateAccount}
@@ -180,7 +194,7 @@ export default function AddMoneyScreen() {
                     {creatingAccount ? (
                       <ActivityIndicator color="#FFF" />
                     ) : (
-                      <Text style={styles.createBtnText}>Generate Account</Text>
+                      <Text style={styles.createBtnText}>{showBvnInput ? 'Verify & Generate' : 'Generate Account'}</Text>
                     )}
                   </TouchableOpacity>
                 </View>

@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -49,8 +49,11 @@ const WelcomeScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <MaterialIcons name="bolt" size={48} color="#fff" />
-          <Text style={styles.logoText}>ibdata</Text>
+          <Image
+            source={require('../assets/images/marabuslogo.png')}
+            style={{ width: 64, height: 64, marginBottom: 10 }}
+          />
+          <Text style={styles.logoText}>marabusdata</Text>
         </View>
       </View>
 

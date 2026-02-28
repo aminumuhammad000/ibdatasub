@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Image, StyleSheet, View } from 'react-native';
 
-export const Logo = ({ size = 48, color = 'white' }) => (
+export const Logo = ({ size = 48 }) => (
   <View style={[styles.container, { width: size, height: size }]}>
-    <MaterialIcons name="phone-iphone" size={size * 0.7} color={color} />
+    <Image
+      source={require('../assets/images/marabuslogo.png')}
+      style={{ width: size, height: size }}
+    />
   </View>
 );
 

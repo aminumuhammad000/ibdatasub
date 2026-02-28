@@ -50,7 +50,7 @@ async function createAdmin() {
     // Step 1: Create or get Super Admin role
     console.log('\n🎭 Setting up admin role...');
     let superAdminRole = await AdminRole.findOne({ name: 'super_admin' });
-    
+
     if (!superAdminRole) {
       superAdminRole = await AdminRole.create({
         name: 'super_admin',
@@ -69,7 +69,7 @@ async function createAdmin() {
       console.log('⚠️  Admin user already exists!');
       console.log('📧 Email:', existingAdmin.email);
       console.log('👤 Name:', `${existingAdmin.first_name} ${existingAdmin.last_name}`);
-      
+
       const readline = await import('readline');
       const rl = readline.createInterface({
         input: process.stdin,
@@ -82,7 +82,7 @@ async function createAdmin() {
           const password_hash = await bcrypt.hash(password, 10);
           await AdminUser.updateOne(
             { email: 'admin@connectavtu.com' },
-            { 
+            {
               password_hash,
               role_id: superAdminRole!._id,
               updated_at: new Date()
@@ -98,11 +98,11 @@ async function createAdmin() {
       });
     } else {
       console.log('\n🔐 Creating admin user...');
-      
+
       // Hash the password
       const password = 'Admin@123456';
       const password_hash = await bcrypt.hash(password, 10);
-      
+
       // Create admin user with role_id
       const admin = await AdminUser.create({
         email: 'admin@connectavtu.com',
@@ -125,7 +125,7 @@ async function createAdmin() {
       console.log('═══════════════════════════════════════');
       console.log('\n⚠️  IMPORTANT: Change the password after first login!');
       console.log('\n🚀 You can now login at: POST http://localhost:5000/api/admin/login');
-      
+
       await mongoose.disconnect();
       process.exit(0);
     }

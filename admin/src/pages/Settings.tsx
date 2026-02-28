@@ -16,7 +16,7 @@ interface SupportContent {
 }
 
 interface SystemSettings {
-    payment_gateway: 'vtpay' | 'payrant';
+    payment_gateway: 'vtstack' | 'payrant';
     notification_email: string;
     email_config: {
         smtp_host: string;
@@ -46,7 +46,7 @@ const Settings = () => {
 
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSettings>({
-        payment_gateway: 'vtpay',
+        payment_gateway: 'vtstack',
         notification_email: '',
         email_config: {
             smtp_host: '',
@@ -184,18 +184,18 @@ const Settings = () => {
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Payment Gateway</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${systemSettings.payment_gateway === 'vtpay' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${systemSettings.payment_gateway === 'vtstack' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:bg-slate-50'}`}>
                                         <input
                                             type="radio"
                                             name="payment_gateway"
-                                            value="vtpay"
-                                            checked={systemSettings.payment_gateway === 'vtpay'}
+                                            value="vtstack"
+                                            checked={systemSettings.payment_gateway === 'vtstack'}
                                             onChange={handleSystemChange}
                                             className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                         />
                                         <div className="ml-3">
-                                            <span className="block text-sm font-medium text-slate-900">VTPay (Recommended)</span>
-                                            <span className="block text-xs text-slate-500">Fast, secure, and reliable payments.</span>
+                                            <span className="block text-sm font-medium text-slate-900">VTStack (Recommended)</span>
+                                            <span className="block text-xs text-slate-500">Fast, secure, and reliable payments via PalmPay.</span>
                                         </div>
                                     </label>
 

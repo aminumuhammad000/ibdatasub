@@ -135,10 +135,7 @@ class SMEPlugService {
         amount: payload.amount,
         reference: res.data?.data?.reference
       });
-      return {
-        status: 'success',
-        ...res.data
-      };
+      return res.data;
     } catch (error: any) {
       logger.error('SMEPlug purchaseAirtime error:', error.response?.data || error.message);
       throw error;
@@ -168,10 +165,7 @@ class SMEPlugService {
         plan_id: payload.plan_id,
         reference: res.data?.data?.reference
       });
-      return {
-        status: 'success',
-        ...res.data
-      };
+      return res.data;
     } catch (error: any) {
       logger.error('SMEPlug purchaseData error:', error.response?.data || error.message);
       throw error;

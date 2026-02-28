@@ -42,7 +42,7 @@ app.use(detailedRequestLogger);
 // Morgan logger for standard HTTP request logging
 app.use(requestLogger);
 
-logger.info('🚀 VTU App Backend Starting...', {
+logger.info('🚀 Marabusdata Backend Starting...', {
   environment: process.env.NODE_ENV || 'development',
   nodeVersion: process.version
 });
@@ -66,7 +66,7 @@ app.use("/api/airtime-to-cash", airtimeToCashRoutes);
 
 // Root route
 app.get("/", (req: Request, res: Response) => {
-  res.send("✅ Connecta Backend (MongoDB) is running...");
+  res.send("✅ Marabusdata Backend is running...");
 });
 
 // Health check

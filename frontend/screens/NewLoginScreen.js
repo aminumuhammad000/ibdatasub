@@ -1,19 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Image, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform,
-  Dimensions,
-  SafeAreaView
-} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
+import {
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -33,7 +33,7 @@ export default function LoginScreen() {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    
+
     // Auto focus to next input
     if (value && index < 4) {
       otpInputs.current[index + 1]?.focus();
@@ -51,11 +51,11 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={handleBackToLogin} style={styles.backButton}>
             <MaterialIcons name="arrow-back" size={24} color="#3B82F6" />
           </TouchableOpacity>
-          
+
           <View style={styles.otpContent}>
             <Text style={styles.otpTitle}>Verify Your Identity</Text>
             <Text style={styles.otpSubtitle}>We've sent a code to your phone. Please enter it below.</Text>
-            
+
             <View style={styles.otpInputsContainer}>
               {[0, 1, 2, 3, 4].map((index) => (
                 <TextInput
@@ -76,7 +76,7 @@ export default function LoginScreen() {
                 />
               ))}
             </View>
-            
+
             <Text style={styles.resendText}>
               Didn't receive a code?{' '}
               <Text style={styles.resendLink}>Resend OTP</Text>
@@ -88,20 +88,20 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.logoContainer}>
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCNmLt70vBl51N44lPp2_PhjggOAG8xKje7lYXmWc8X24jwhToxdayIVXORUOtpNLKUAckLXftXWI7ofIthz26meu2eTrKWvy6P5nHxlHRt8dTiEojOQYtZozWxl3HGOXPv3QlJO5NxLyS6bc5TZnW6A8cbhEj0M23nYWfDMEdtgGLqE-jv1F_9GaGc_gYRxq_gWYGl1aJCWaN-YpIfYxAkjigmOMsGiHgtUlWOLR3V2ynPCxJWg50VYJ_i179vEcrEekVRiL_O3oE' }} 
-            style={styles.logo} 
+          <Image
+            source={require('../assets/images/marabuslogo.png')}
+            style={styles.logo}
           />
-          <Text style={styles.title}>Welcome to Connecta</Text>
+          <Text style={styles.title}>Welcome to Marabusdata</Text>
           <Text style={styles.subtitle}>Enter your email or phone number to get started.</Text>
         </View>
 
@@ -124,7 +124,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.button, styles.primaryButton]}
               onPress={handleContinue}
             >
@@ -143,17 +143,17 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#FFFFFF' }]}>
-              <Image 
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-LBgmwH2QdH0SMXnLSqgIzuC4R-0W0RvWdTNEr_NpllN6NV6rCHU_urzGTET9ukQggSllwcntrBKYQVjrGy6faoX8uS7vMBRmj0MiDrwzQTD-97DXh-l4_fFuLdxeafoJtGGTZjvDSFe-Tugarxj95ecQrLItSiak6VEG-9Pqy0iohz03Fe4YsS2boiowmrtRdqaEmWb_nGbE4XQ7PMnEtyIWbNQZVKOkerrQijPeUgoC9hU4LIZhja9XBx2__jIaqbHK7v8GfLs' }} 
-                style={styles.socialIcon} 
+              <Image
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-LBgmwH2QdH0SMXnLSqgIzuC4R-0W0RvWdTNEr_NpllN6NV6rCHU_urzGTET9ukQggSllwcntrBKYQVjrGy6faoX8uS7vMBRmj0MiDrwzQTD-97DXh-l4_fFuLdxeafoJtGGTZjvDSFe-Tugarxj95ecQrLItSiak6VEG-9Pqy0iohz03Fe4YsS2boiowmrtRdqaEmWb_nGbE4XQ7PMnEtyIWbNQZVKOkerrQijPeUgoC9hU4LIZhja9XBx2__jIaqbHK7v8GfLs' }}
+                style={styles.socialIcon}
               />
               <Text style={[styles.socialButtonText, { color: '#111921' }]}>Continue with Google</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.button, styles.socialButton, { backgroundColor: '#000000' }]}>
-              <Image 
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBmzEF8JMM9NDAf9oj1zKEI0KwqP4hZG4VTwaApPexK9L1_rwmqnvXuKJlhgkreSD-iNyFk17kJdRAjl9EwrnTSIuTVXTrtxlhA-95OTv2fdWMxTqm9-3J-zE_EcVsQn7Kq8vKwYnZ0-GynAsisF9cihvbvPu5mbfPLqFHZiZt7tRvc4bF9KrB3a04CcTB2cEDRy3D3jJTU80LXIqGIBmJYoIyFsABv8BaX35UJXMnOYzvI88HfG6SxUMEbkf5NE9P93VUnCr6Dn8c' }} 
-                style={styles.socialIcon} 
+              <Image
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBmzEF8JMM9NDAf9oj1zKEI0KwqP4hZG4VTwaApPexK9L1_rwmqnvXuKJlhgkreSD-iNyFk17kJdRAjl9EwrnTSIuTVXTrtxlhA-95OTv2fdWMxTqm9-3J-zE_EcVsQn7Kq8vKwYnZ0-GynAsisF9cihvbvPu5mbfPLqFHZiZt7tRvc4bF9KrB3a04CcTB2cEDRy3D3jJTU80LXIqGIBmJYoIyFsABv8BaX35UJXMnOYzvI88HfG6SxUMEbkf5NE9P93VUnCr6Dn8c' }}
+                style={styles.socialIcon}
               />
               <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>Continue with Apple</Text>
             </TouchableOpacity>

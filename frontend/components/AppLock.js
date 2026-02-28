@@ -21,7 +21,7 @@ const AppLock = ({ visible }) => {
         setError(null);
         try {
             const result = await LocalAuthentication.authenticateAsync({
-                promptMessage: 'Unlock ibdata',
+                promptMessage: 'Unlock Marabusdata',
                 fallbackLabel: 'Use Password',
             });
 

@@ -220,7 +220,10 @@ export class BillPaymentController {
           }));
 
         // Update transaction status
-        if (result.status === 'success' || result.status === true || result.status === 'true') {
+        const isSuccess = (result.status === 'success' || result.status === true || result.status === 'true');
+        const hasErrorMsg = result.msg || result.error || result.message;
+
+        if (isSuccess && !hasErrorMsg) {
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'successful',
             updated_at: new Date()
@@ -233,18 +236,20 @@ export class BillPaymentController {
           });
         } else {
           // Refund user if failed
-          await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
+          const refundAmount = finalAmount;
+          await WalletService.credit(userId, refundAmount, 'Airtime purchase refund');
+          const errorMsg = hasErrorMsg || (result.status === 'fail' ? 'Provider failed the request' : 'Unknown provider error');
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'failed',
-            error_message: result.msg || 'Unknown error',
+            error_message: errorMsg,
             updated_at: new Date()
           });
-          console.error('❌ Airtime purchase failed - TopUpMate Response:', JSON.stringify(result, null, 2));
-          return ApiResponse.error(res, `Airtime purchase failed: ${result.msg || 'Unknown error'}`, 400);
+          console.error('❌ Airtime purchase failed - Provider Response:', JSON.stringify(result, null, 2));
+          return ApiResponse.error(res, `Airtime purchase failed: ${errorMsg}`, 400);
         }
       } catch (error: any) {
         // Refund user on error
-        await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
+        await WalletService.credit(userId, finalAmount, 'Airtime purchase refund');
         await Transaction.findByIdAndUpdate(transaction._id, {
           status: 'failed',
           error_message: error.message,
@@ -368,7 +373,10 @@ export class BillPaymentController {
           }));
 
         // Update transaction status
-        if (result.status === 'success' || result.status === true || result.status === 'true') {
+        const isSuccess = (result.status === 'success' || result.status === true || result.status === 'true');
+        const hasErrorMsg = result.msg || result.error || result.message;
+
+        if (isSuccess && !hasErrorMsg) {
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'successful',
             updated_at: new Date()
@@ -381,17 +389,20 @@ export class BillPaymentController {
           });
         } else {
           // Refund user if failed
-          await WalletService.credit(userId, amount, 'Data purchase refund');
+          const refundAmount = finalAmount;
+          await WalletService.credit(userId, refundAmount, 'Data purchase refund');
+          const errorMsg = hasErrorMsg || (result.status === 'fail' ? 'Provider failed the request' : 'Unknown provider error');
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'failed',
-            error_message: result.msg || 'Unknown error',
+            error_message: errorMsg,
             updated_at: new Date()
           });
-          return ApiResponse.error(res, 'Data purchase failed', 400);
+          console.error('❌ Data purchase failed - Provider Response:', JSON.stringify(result, null, 2));
+          return ApiResponse.error(res, `Data purchase failed: ${errorMsg}`, 400);
         }
       } catch (error: any) {
         // Refund user on error
-        await WalletService.credit(userId, amount, 'Data purchase refund');
+        await WalletService.credit(userId, finalAmount, 'Data purchase refund');
         await Transaction.findByIdAndUpdate(transaction._id, {
           status: 'failed',
           error_message: error.message,

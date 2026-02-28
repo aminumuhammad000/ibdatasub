@@ -24,7 +24,7 @@
 
 | Field | Value |
 |-------|-------|
-| 📧 **Email** | `admin@connectavtu.com` |
+| 📧 **Email** | `admin@ibdata.com.ng` |
 | 🔑 **Password** | `Admin@123456` |
 | 👤 **Name** | Super Admin |
 | 🎭 **Role** | super_admin |
@@ -84,7 +84,7 @@ POST /api/admin/login
 Content-Type: application/json
 
 {
-  "email": "admin@connectavtu.com",
+  "email": "admin@ibdata.com.ng",
   "password": "Admin@123456"
 }
 
@@ -95,7 +95,7 @@ Response (200 OK):
   "data": {
     "admin": {
       "_id": "...",
-      "email": "admin@connectavtu.com",
+      "email": "admin@ibdata.com.ng",
       "first_name": "Super",
       "last_name": "Admin",
       "status": "active",
@@ -622,7 +622,7 @@ npx tsx scripts/create-admin.ts
 
 ✅ Admin user created successfully!
 ═══════════════════════════════════════
-📧 Email: admin@connectavtu.com
+📧 Email: admin@ibdata.com.ng
 🔑 Password: Admin@123456
 👤 Name: Super Admin
 🎭 Role: super_admin
@@ -788,7 +788,7 @@ admin/
 2. **Create Admin**: `npx tsx scripts/create-admin.ts` in `/backend`
 3. **Test APIs**: `./test-api.sh` in `/admin`
 4. **Start Admin UI**: `npm run dev` in `/admin`
-5. **Login**: admin@connectavtu.com / Admin@123456
+5. **Login**: admin@ibdata.com.ng / Admin@123456
 6. **Access**: http://localhost:5173
 
 ---

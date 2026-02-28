@@ -84,7 +84,7 @@ export default function ForgotPasswordScreen() {
       <KeyboardAvoidingView style={styles.keyboardView} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <View style={styles.logoContainer}>
-            <Image source={require("../assets/images/ibdatalogo.png")} style={styles.logo} />
+            <Image source={require("../assets/images/marabuslogo.png")} style={styles.logo} />
             <Text style={[styles.title, { color: textColor }]}>Forgot Password</Text>
             <Text style={[styles.subtitle, { color: textBodyColor }]}>Enter your email to receive an OTP</Text>
           </View>

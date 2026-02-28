@@ -21,7 +21,7 @@ export interface ISystemSetting extends Document {
 const SystemSettingSchema: Schema = new Schema({
     type: { type: String, required: true, unique: true, default: 'global_config' },
     config: {
-        payment_gateway: { type: String, default: 'vtpay', enum: ['vtpay', 'payrant'] },
+        payment_gateway: { type: String, default: 'vtstack', enum: ['vtpay', 'payrant', 'vtstack'] },
         notification_email: { type: String, default: 'noreply@example.com' },
         email_config: {
             smtp_host: { type: String, default: '' },

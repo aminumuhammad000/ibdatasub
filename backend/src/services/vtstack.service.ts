@@ -1,16 +1,18 @@
 import axios, { AxiosInstance } from 'axios';
 
-interface VTPayConfig {
+interface VTStackConfig {
     apiKey: string;
     baseUrl: string;
 }
 
 interface CreateVirtualAccountData {
-    bankType: 'fcmb' | 'fidelity' | 'moniepoint';
-    accountName: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    reference: string;
     phone: string;
+    bvn: string;
+    identityType: 'INDIVIDUAL' | 'BUSINESS';
+    reference: string;
 }
 
 interface VirtualAccountClientResponse {
@@ -20,37 +22,27 @@ interface VirtualAccountClientResponse {
     alias: string;
     reference: string;
     bankName: string;
-    bankType: string;
     status: string;
 }
 
 interface VirtualAccountBalanceResponse {
-    balance: number;
+    balanceAmount: number;
+    availableBalance: number;
     currency: string;
-    accountNumber: string;
 }
 
-interface VirtualAccountTransaction {
-    reference: string;
-    amount: number;
-    type: 'credit' | 'debit';
-    description: string;
-    date: string;
-    status: string;
-}
-
-export class VTPayService {
-    private config: VTPayConfig;
+export class VTStackService {
+    private config: VTStackConfig;
     private axiosInstance: AxiosInstance;
 
     constructor() {
         this.config = {
-            apiKey: process.env.VTPAY_API_KEY || '',
-            baseUrl: process.env.VTPAY_BASE_URL || 'https://vtpayapi.vtfree.com.ng/api',
+            apiKey: process.env.VTSTACK_API_KEY || 'sk_test_e23b5f55e47ad8e8a7ca30c7ddadbf6539b44fefab6ac6d9',
+            baseUrl: process.env.VTSTACK_BASE_URL || 'https://vtpayapi.vtfree.com.ng/api',
         };
 
-        if (!process.env.VTPAY_API_KEY) {
-            console.warn('⚠️ VTPAY_API_KEY is not set in environment variables');
+        if (!process.env.VTSTACK_API_KEY && !this.config.apiKey) {
+            console.warn('⚠️ VTSTACK_API_KEY is not set in environment variables');
         }
 
         this.axiosInstance = axios.create({
@@ -67,7 +59,7 @@ export class VTPayService {
      */
     async createVirtualAccount(data: CreateVirtualAccountData): Promise<VirtualAccountClientResponse> {
         try {
-            console.log('🏦 Creating VTPay virtual account:', data.reference);
+            console.log('🏦 Creating VTStack virtual account:', data.reference);
 
             const response = await this.axiosInstance.post<{
                 success: boolean;
@@ -82,7 +74,7 @@ export class VTPayService {
 
             throw new Error(response.data.message || 'Failed to create virtual account');
         } catch (error: any) {
-            console.error('❌ VTPay create account error:', error.response?.data || error.message);
+            console.error('❌ VTStack create account error:', error.response?.data || error.message);
             throw new Error(error.response?.data?.message || 'Failed to create virtual account');
         }
     }
@@ -103,7 +95,7 @@ export class VTPayService {
 
             throw new Error('Failed to fetch virtual accounts');
         } catch (error: any) {
-            console.error('❌ VTPay fetch accounts error:', error.response?.data || error.message);
+            console.error('❌ VTStack fetch accounts error:', error.response?.data || error.message);
             throw new Error(error.response?.data?.message || 'Failed to fetch virtual accounts');
         }
     }
@@ -124,29 +116,8 @@ export class VTPayService {
 
             throw new Error('Failed to fetch account balance');
         } catch (error: any) {
-            console.error('❌ VTPay fetch balance error:', error.response?.data || error.message);
+            console.error('❌ VTStack fetch balance error:', error.response?.data || error.message);
             throw new Error(error.response?.data?.message || 'Failed to fetch account balance');
-        }
-    }
-
-    /**
-     * Retrieve the transaction history for a specific virtual account
-     */
-    async getTransactions(accountNumber: string): Promise<VirtualAccountTransaction[]> {
-        try {
-            const response = await this.axiosInstance.get<{
-                success: boolean;
-                data: VirtualAccountTransaction[];
-            }>(`/virtual-accounts/${accountNumber}/transactions`);
-
-            if (response.data.success) {
-                return response.data.data;
-            }
-
-            throw new Error('Failed to fetch transactions');
-        } catch (error: any) {
-            console.error('❌ VTPay fetch transactions error:', error.response?.data || error.message);
-            throw new Error(error.response?.data?.message || 'Failed to fetch transactions');
         }
     }
 
@@ -155,8 +126,8 @@ export class VTPayService {
      */
     generateReference(userId: string): string {
         const timestamp = Date.now();
-        return `VTP-${userId.substring(0, 8)}-${timestamp}`;
+        return `VTS-${userId.substring(0, 8)}-${timestamp}`;
     }
 }
 
-export const vtPayService = new VTPayService();
+export const vtStackService = new VTStackService();

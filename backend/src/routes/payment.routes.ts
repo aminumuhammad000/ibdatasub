@@ -1,7 +1,7 @@
 // routes/payment.routes.ts
 import { Request, Response, Router } from 'express';
 import { PaymentController } from '../controllers/payment.controller.js';
-import { VTPayController } from '../controllers/vtpay.controller.js';
+import { VTStackController } from '../controllers/vtstack.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import payrantRouter from './payrant.routes.js';
 import virtualAccountRouter from './virtualAccount.routes.js';
@@ -104,40 +104,33 @@ router.post('/webhook/payrant', (req: Request, res: Response) => {
 });
 
 /**
- * @route   POST /api/payment/vtpay/create-virtual-account
- * @desc    Create VTPay virtual account for user
+ * @route   POST /api/payment/vtstack/create-virtual-account
+ * @desc    Create VTStack virtual account for user
  * @access  Private
  */
-router.post('/vtpay/create-virtual-account', authenticate, VTPayController.createAccount);
+router.post('/vtstack/create-virtual-account', authenticate, VTStackController.createAccount);
 
 /**
- * @route   GET /api/payment/vtpay/virtual-account
- * @desc    Get user's VTPay virtual accounts
+ * @route   GET /api/payment/vtstack/virtual-account
+ * @desc    Get user's VTStack virtual accounts
  * @access  Private
  */
-router.get('/vtpay/virtual-account', authenticate, VTPayController.getMyAccounts);
+router.get('/vtstack/virtual-account', authenticate, VTStackController.getMyAccounts);
 
 /**
- * @route   GET /api/payment/vtpay/virtual-account/:accountNumber/balance
- * @desc    Get VTPay virtual account balance
+ * @route   GET /api/payment/vtstack/virtual-account/:accountNumber/balance
+ * @desc    Get VTStack virtual account balance
  * @access  Private
  */
-router.get('/vtpay/virtual-account/:accountNumber/balance', authenticate, VTPayController.getAccountBalance);
+router.get('/vtstack/virtual-account/:accountNumber/balance', authenticate, VTStackController.getAccountBalance);
 
 /**
- * @route   GET /api/payment/vtpay/virtual-account/:accountNumber/transactions
- * @desc    Get VTPay virtual account transactions
- * @access  Private
+ * @route   POST /api/payment/webhook/vtstack
+ * @desc    Handle VTStack webhook for virtual account deposits
+ * @access  Public (Webhook from VTStack)
  */
-router.get('/vtpay/virtual-account/:accountNumber/transactions', authenticate, VTPayController.getAccountTransactions);
-
-/**
- * @route   POST /api/payment/webhook/vtpay
- * @desc    Handle VTPay webhook for virtual account deposits
- * @access  Public (Webhook from VTPay)
- */
-router.post('/webhook/vtpay', (req: Request, res: Response) => {
-  return VTPayController.webhook(req, res);
+router.post('/webhook/vtstack', (req: Request, res: Response) => {
+  return VTStackController.webhook(req, res);
 });
 
 export default router;

@@ -20,13 +20,13 @@ export interface Transaction {
     status: string;
 }
 
-export const vtpayService = {
+export const vtstackService = {
     /**
      * Get all virtual accounts for the user
      */
     getMyAccounts: async (): Promise<{ success: boolean; data: VirtualAccount[] }> => {
         try {
-            const response = await api.get('/payment/vtpay/virtual-account');
+            const response = await api.get('/payment/vtstack/virtual-account');
             return response.data;
         } catch (error: any) {
             throw error.response?.data || error;
@@ -36,21 +36,9 @@ export const vtpayService = {
     /**
      * Create a new virtual account
      */
-    createAccount: async (bankType: 'fcmb' | 'fidelity' | 'moniepoint'): Promise<{ success: boolean; data: VirtualAccount }> => {
+    createAccount: async (bvn: string): Promise<{ success: boolean; data: VirtualAccount }> => {
         try {
-            const response = await api.post('/payment/vtpay/create-virtual-account', { bankType });
-            return response.data;
-        } catch (error: any) {
-            throw error.response?.data || error;
-        }
-    },
-
-    /**
-     * Get transactions for a specific account
-     */
-    getAccountTransactions: async (accountNumber: string): Promise<{ success: boolean; data: Transaction[] }> => {
-        try {
-            const response = await api.get(`/payment/vtpay/virtual-account/${accountNumber}/transactions`);
+            const response = await api.post('/payment/vtstack/create-virtual-account', { bvn });
             return response.data;
         } catch (error: any) {
             throw error.response?.data || error;

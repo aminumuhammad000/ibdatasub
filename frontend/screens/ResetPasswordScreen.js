@@ -2,16 +2,16 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import CustomAlert from "../components/CustomAlert";
 import { useTheme } from "../components/ThemeContext";
@@ -21,7 +21,7 @@ export default function ResetPasswordScreen() {
   const { isDark } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
-  
+
   const email = useMemo(() => (typeof params.email === 'string' ? params.email : ''), [params.email]);
   const otpCode = useMemo(() => (typeof params.otp === 'string' ? params.otp : ''), [params.otp]);
 
@@ -72,12 +72,12 @@ export default function ResetPasswordScreen() {
 
     setSubmitting(true);
     try {
-      const res = await authService.resetPassword({ 
-        email, 
-        otp_code: otpCode, 
-        new_password: password 
+      const res = await authService.resetPassword({
+        email,
+        otp_code: otpCode,
+        new_password: password
       });
-      
+
       if (res?.success) {
         showAlert("Password reset successfully! Please login.", "success");
         setTimeout(() => {
@@ -106,7 +106,7 @@ export default function ResetPasswordScreen() {
       <KeyboardAvoidingView style={styles.keyboardView} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <View style={styles.logoContainer}>
-            <Image source={require("../assets/images/ibdatalogo.png")} style={styles.logo} />
+            <Image source={require("../assets/images/marabuslogo.png")} style={styles.logo} />
             <Text style={[styles.title, { color: textColor }]}>Reset Password</Text>
             <Text style={[styles.subtitle, { color: textBodyColor }]}>Create a new password for your account</Text>
           </View>
