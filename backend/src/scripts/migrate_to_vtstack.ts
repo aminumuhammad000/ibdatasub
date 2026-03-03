@@ -13,8 +13,8 @@ async function migrateToVTStack() {
         console.log('✅ Connected to MongoDB');
 
         // 1. Find all users
-        const users = await User.find({ bvn: { $exists: true, $ne: '' } });
-        console.log(`👤 Found ${users.length} users with BVN`);
+        const users = await User.find({});
+        console.log(`👤 Found ${users.length} total users`);
 
         let migratedCount = 0;
         let skippedCount = 0;
@@ -42,7 +42,7 @@ async function migrateToVTStack() {
                     lastName: user.last_name,
                     email: user.email,
                     phone: user.phone_number || '08000000000',
-                    bvn: user.bvn!,
+                    bvn: user.bvn || '22222222222',
                     identityType: 'INDIVIDUAL',
                     reference: reference
                 });
