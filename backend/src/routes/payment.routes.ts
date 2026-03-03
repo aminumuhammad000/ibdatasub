@@ -15,6 +15,13 @@ router.use('/payrant', payrantRouter);
 router.use('/virtual-account', virtualAccountRouter);
 
 /**
+ * @route   GET /api/payment/gateway-settings
+ * @desc    Get current active payment gateway setting
+ * @access  Private
+ */
+router.get('/gateway-settings', authenticate, PaymentController.getGatewaySettings);
+
+/**
  * @route   POST /api/payment/virtual-account
  * @desc    Create or get user's virtual account
  * @access  Private

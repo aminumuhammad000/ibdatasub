@@ -1,19 +1,23 @@
 import { useAlert } from '@/components/AlertContext';
 import { useTheme } from '@/components/ThemeContext';
+import { walletService } from '@/services/api';
 import { authService } from '@/services/auth.service';
 import { payrantService, VirtualAccountResponse } from '@/services/payrant.service';
+import { vtstackService } from '@/services/vtstack.service';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+    Modal,
     Platform,
     RefreshControl,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -30,10 +34,13 @@ export default function WalletSettingsScreen() {
     const { isDark } = useTheme();
     const { showSuccess, showError, showInfo } = useAlert();
 
-    const [account, setAccount] = useState<VirtualAccountResponse | null>(null);
+    const [account, setAccount] = useState<VirtualAccountResponse | any | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [creatingAccount, setCreatingAccount] = useState(false);
+    const [gateway, setGateway] = useState<'payrant' | 'vtstack'>('vtstack');
+    const [showBvnModal, setShowBvnModal] = useState(false);
+    const [bvn, setBvn] = useState('');
 
     const bgColor = isDark ? '#000000' : '#F8F9FA';
     const cardBg = isDark ? '#1C1C1E' : '#FFFFFF';
@@ -48,9 +55,31 @@ export default function WalletSettingsScreen() {
     const loadData = async () => {
         try {
             setLoading(true);
-            const accountsRes = await payrantService.getVirtualAccount();
-            if (accountsRes && 'account_number' in accountsRes) {
-                setAccount(accountsRes as VirtualAccountResponse);
+            // Fetch active gateway
+            const gatewayRes = await walletService.getGatewaySettings();
+            const activeGateway = gatewayRes.data.data?.gateway as 'payrant' | 'vtstack' || 'vtstack';
+            setGateway(activeGateway);
+
+            if (activeGateway === 'payrant') {
+                const accountsRes = await payrantService.getVirtualAccount();
+                if (accountsRes && 'account_number' in accountsRes) {
+                    setAccount(accountsRes as VirtualAccountResponse);
+                }
+            } else if (activeGateway === 'vtstack') {
+                const vtRes = await vtstackService.getMyAccounts();
+                if (vtRes.success && vtRes.data.length > 0) {
+                    const acc = vtRes.data[0];
+                    setAccount({
+                        account_number: acc.accountNumber,
+                        account_name: acc.accountName,
+                        bank_name: acc.bankName,
+                        account_reference: acc.reference,
+                        provider: 'vtstack',
+                        status: acc.status
+                    });
+                } else {
+                    setAccount(null);
+                }
             }
         } catch (error: any) {
             console.error('Load data error:', error);
@@ -71,24 +100,43 @@ export default function WalletSettingsScreen() {
     };
 
     const handleCreateAccount = async () => {
+        if (gateway === 'vtstack') {
+            setShowBvnModal(true);
+            return;
+        }
+        await processAccountCreation();
+    };
+
+    const processAccountCreation = async (bvnData?: string) => {
         try {
             setCreatingAccount(true);
             const user = await authService.getCurrentUser();
+            if (!user) throw new Error('User not found');
 
-            const accountData = {
-                documentType: 'nin',
-                documentNumber: user?.phone_number || '',
-                virtualAccountName: `${user?.first_name} ${user?.last_name}`,
-                customerName: `${user?.first_name} ${user?.last_name}`,
-                email: user?.email || '',
-                accountReference: `REF-${Date.now()}`
-            };
+            if (gateway === 'payrant') {
+                const accountData = {
+                    documentType: 'nin',
+                    documentNumber: user?.phone_number || '',
+                    virtualAccountName: `${user?.first_name} ${user?.last_name}`,
+                    customerName: `${user?.first_name} ${user?.last_name}`,
+                    email: user?.email || '',
+                    accountReference: `REF-${Date.now()}`
+                };
 
-            const res = await payrantService.createVirtualAccount(accountData);
-            if (res) {
-                setAccount(res);
-                showSuccess('Virtual account created successfully');
-                onRefresh();
+                const res = await payrantService.createVirtualAccount(accountData);
+                if (res) {
+                    setAccount(res);
+                    showSuccess('Virtual account created successfully');
+                    onRefresh();
+                }
+            } else if (gateway === 'vtstack') {
+                if (!bvnData) throw new Error('BVN is required');
+                const res = await vtstackService.createAccount(bvnData);
+                if (res.success) {
+                    setShowBvnModal(false);
+                    showSuccess('Virtual account created successfully');
+                    onRefresh();
+                }
             }
         } catch (error: any) {
             showError(error.message || 'Failed to create account');
@@ -231,6 +279,57 @@ export default function WalletSettingsScreen() {
 
                 <View style={{ height: 100 }} />
             </ScrollView>
+
+            {/* BVN Modal for VTStack */}
+            <Modal
+                visible={showBvnModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowBvnModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: textColor }]}>Generate Virtual Account</Text>
+                            <TouchableOpacity onPress={() => setShowBvnModal(false)}>
+                                <Ionicons name="close" size={24} color={textColor} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={[styles.modalSubtitle, { color: textBodyColor }]}>
+                            A valid BVN is required by VTStack to create your dedicated virtual account.
+                        </Text>
+
+                        <View style={[styles.bvnInputContainer, { borderColor }]}>
+                            <TextInput
+                                style={[styles.bvnInput, { color: textColor }]}
+                                placeholder="Enter 11-digit BVN"
+                                placeholderTextColor={textBodyColor}
+                                value={bvn}
+                                onChangeText={setBvn}
+                                keyboardType="numeric"
+                                maxLength={11}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.modalButton,
+                                { backgroundColor: THEME_COLORS.accent },
+                                (bvn.length !== 11 || creatingAccount) && { opacity: 0.5 }
+                            ]}
+                            onPress={() => processAccountCreation(bvn)}
+                            disabled={bvn.length !== 11 || creatingAccount}
+                        >
+                            {creatingAccount ? (
+                                <ActivityIndicator color="#FFF" />
+                            ) : (
+                                <Text style={styles.modalButtonText}>Generate Account</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -292,5 +391,53 @@ const styles = StyleSheet.create({
     securityIconBox: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
     securityContent: { flex: 1 },
     securityTitle: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
-    securityText: { fontSize: 13, lineHeight: 18 }
+    securityText: { fontSize: 13, lineHeight: 18 },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
+    },
+    modalContent: {
+        width: '100%',
+        borderRadius: 24,
+        padding: 24,
+        gap: 16
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700'
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        lineHeight: 20
+    },
+    bvnInputContainer: {
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        height: 56,
+        justifyContent: 'center'
+    },
+    bvnInput: {
+        fontSize: 16,
+        letterSpacing: 2
+    },
+    modalButton: {
+        height: 56,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    modalButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: '700'
+    }
 });

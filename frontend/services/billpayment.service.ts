@@ -54,6 +54,18 @@ export const billPaymentService = {
   },
 
   /**
+   * Get available electricity providers
+   */
+  getElectricityProviders: async (): Promise<BillPaymentResponse> => {
+    try {
+      const response = await api.get<BillPaymentResponse>('/billpayment/electricity-providers');
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch electricity providers' };
+    }
+  },
+
+  /**
    * Get data plans
    */
   getDataPlans: async (network?: string): Promise<BillPaymentResponse> => {

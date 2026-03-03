@@ -577,7 +577,11 @@ export class BillPaymentController {
           : topupmateService.purchaseElectricity({ provider, meternumber, amount, metertype, phone, ref }));
 
         // Update transaction status
-        if (result.status === 'success' || result.status === true || result.status === 'true') {
+        const statusValue = String(result.status || result.Status || '').toLowerCase();
+        const isSuccess = (statusValue === 'success' || statusValue === 'successful' || statusValue === 'true' || result.status === true);
+        const token = result.token || result.msg; // User provided msg as token example
+
+        if (isSuccess) {
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'completed',
             response: result
@@ -586,17 +590,19 @@ export class BillPaymentController {
           return ApiResponse.success(res, 'Electricity purchase successful', {
             transaction,
             balance: updatedWallet?.balance,
-            token: result.token,
+            token: token,
             provider_response: result,
           });
         } else {
           // Refund user if failed
           await WalletService.credit(userId, parseFloat(amount), 'Electricity purchase refund');
+          const errorMsg = result.msg || result.error || result.message || 'Provider failed the request';
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'failed',
-            response: result
+            response: result,
+            error_message: errorMsg
           });
-          return ApiResponse.error(res, 'Electricity purchase failed', 400);
+          return ApiResponse.error(res, `Electricity purchase failed: ${errorMsg}`, 400);
         }
       } catch (error: any) {
         // Refund user on error

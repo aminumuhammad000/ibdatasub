@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Marabusdata",
-    "slug": "marabusdata",
+    "slug": "vtu-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/marabuslogo.png",

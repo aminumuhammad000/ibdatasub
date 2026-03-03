@@ -107,7 +107,11 @@ export default function PayBillsScreen() {
 
   const handleBillCategoryPress = (category: any) => {
     // Navigate to specific bill payment screen
-    console.log('Selected category:', category.title);
+    if (category.title === 'Electricity') {
+      router.push('/buy-electricity');
+    } else {
+      console.log('Selected category:', category.title);
+    }
   };
 
   return (

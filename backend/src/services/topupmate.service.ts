@@ -220,7 +220,12 @@ class TopupmateService {
     try {
       const api = await this.ensureClient();
       const response = await api.post('/electricity/verify/', data);
-      return response.data;
+      const resData = response.data;
+      // Handle both lowercase status and uppercase Status
+      if (!resData.status && resData.Status) {
+        resData.status = resData.Status.toLowerCase();
+      }
+      return resData;
     } catch (error: any) {
       logger.error('Error verifying electricity meter:', error.message, error.response?.data);
       const msg = error.response?.data?.msg || error.message;
@@ -240,7 +245,12 @@ class TopupmateService {
     try {
       const api = await this.ensureClient();
       const response = await api.post('/electricity/', data);
-      return response.data;
+      const resData = response.data;
+      // Handle both lowercase status and uppercase Status
+      if (!resData.status && resData.Status) {
+        resData.status = resData.Status.toLowerCase();
+      }
+      return resData;
     } catch (error: any) {
       logger.error('Error purchasing electricity:', error.message, error.response?.data);
       const msg = error.response?.data?.msg || error.message;

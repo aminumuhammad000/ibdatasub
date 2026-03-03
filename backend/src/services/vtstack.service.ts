@@ -38,7 +38,7 @@ export class VTStackService {
     constructor() {
         this.config = {
             apiKey: process.env.VTSTACK_API_KEY || 'sk_test_e23b5f55e47ad8e8a7ca30c7ddadbf6539b44fefab6ac6d9',
-            baseUrl: process.env.VTSTACK_BASE_URL || 'https://vtpayapi.vtfree.com.ng/api',
+            baseUrl: process.env.VTSTACK_BASE_URL || 'https://api.vtstack.com.ng/api',
         };
 
         if (!process.env.VTSTACK_API_KEY && !this.config.apiKey) {

@@ -24,6 +24,21 @@ const mockServices = {
 
 export class PaymentController {
   /**
+   * Get current active payment gateway setting
+   */
+  static async getGatewaySettings(req: AuthRequest, res: Response) {
+    try {
+      const setting = await SystemSetting.findOne({ type: 'global_config' });
+      const gateway = setting?.config?.payment_gateway || 'vtstack';
+
+      return ApiResponse.success(res, { gateway }, 'Payment gateway setting retrieved');
+    } catch (error) {
+      console.error('Error fetching gateway settings:', error);
+      return ApiResponse.error(res, 'Failed to fetch gateway settings');
+    }
+  }
+
+  /**
    * Deactivate user's virtual account
    * @param req Express request object
    * @param res Express response object

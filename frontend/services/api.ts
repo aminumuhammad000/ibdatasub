@@ -261,6 +261,8 @@ const walletService = {
     type: 'credit' | 'debit';
     reason: string;
   }) => api.put<ApiResponse>('/wallet/adjust', adjustmentData),
+
+  getGatewaySettings: () => api.get<ApiResponse<{ gateway: string }>>('/payment/gateway-settings'),
 };
 
 // Bill Payment Service
