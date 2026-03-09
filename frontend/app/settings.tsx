@@ -232,6 +232,23 @@ export default function SettingsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#F3F4F6' }}
+              onPress={() => router.push('/admin-gateway')}
+              activeOpacity={0.7}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0A254020' : '#0A254015' }}>
+                  <Ionicons name="settings-outline" size={20} color={theme.primary} />
+                </View>
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Gateway Settings</Text>
+                  <Text style={{ color: textBodyColor, fontSize: 13 }}>Configure virtual account display</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={textBodyColor} />
+            </TouchableOpacity>
           </View>
         )}
 

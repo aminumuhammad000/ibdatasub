@@ -7,13 +7,13 @@ import {
     ActivityIndicator,
     ScrollView,
     Share,
-    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
     useColorScheme,
     View
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { referralService, ReferralSetting, ReferralStats } from '../services/referral.service';
 
 export default function ReferralsScreen() {
@@ -87,7 +87,7 @@ export default function ReferralsScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: bgColor }]}>
-            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
 
             {/* Header */}
             <View style={[styles.header, { backgroundColor: bgColor }]}>

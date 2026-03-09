@@ -111,41 +111,31 @@ export const payrantService = {
         return { exists: false };
       }
       
-      // Handle nested data structure
-      const responseData = response.data.data?.data;
+      // Deeply unwrap data if it's nested
+      let currentData: any = response.data;
       
-      // If we have account data
-      if (responseData && isVirtualAccountResponse(responseData)) {
-        console.log('✅ [Payrant Service] Virtual account found:', {
-          accountNumber: responseData.account_number,
-          accountName: responseData.account_name,
-          bankName: responseData.bank_name,
-          status: responseData.status,
-          reference: responseData.account_reference
-        });
-        return responseData;
+      // Maximum 5 levels of nesting to avoid infinite loops
+      for (let i = 0; i < 5; i++) {
+        if (currentData && typeof currentData === 'object' && 'data' in currentData && currentData.data) {
+          currentData = currentData.data;
+        } else {
+          break;
+        }
+      }
+
+      // Check if we finally have a VirtualAccountResponse
+      if (isVirtualAccountResponse(currentData)) {
+        console.log('✅ [Payrant Service] Virtual account found (unwrapped):', currentData.account_number);
+        return currentData;
       }
       
-      // If account doesn't exist
-      if (responseData && 'exists' in responseData && responseData.exists === false) {
+      // If it explicitly says it doesn't exist
+      if (currentData && typeof currentData === 'object' && 'exists' in currentData && currentData.exists === false) {
         console.log('ℹ️ [Payrant Service] Virtual account does not exist');
         return { exists: false };
       }
       
-      // Handle case where data is in the root
-      if (response.data.data && isVirtualAccountResponse(response.data.data as any)) {
-        const accountData = response.data.data as VirtualAccountResponse;
-        console.log('✅ [Payrant Service] Virtual account found (root level):', {
-          accountNumber: accountData.account_number,
-          accountName: accountData.account_name,
-          bankName: accountData.bank_name,
-          status: accountData.status,
-          reference: accountData.account_reference
-        });
-        return accountData;
-      }
-      
-      console.log('ℹ️ [Payrant Service] No valid virtual account data found in response');
+      console.log('ℹ️ [Payrant Service] No valid virtual account data found after unwrapping');
       return { exists: false };
     } catch (error: any) {
       console.error('❌ Failed to fetch virtual account:', error);

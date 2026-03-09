@@ -165,6 +165,18 @@ export const billPaymentService = {
   },
 
   /**
+   * Purchase exam pin
+   */
+  purchaseExamPin: async (data: { provider: string; quantity: string; pin?: string }): Promise<BillPaymentResponse> => {
+    try {
+      const response = await api.post<BillPaymentResponse>('/billpayment/exampin', data);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to purchase exam pin' };
+    }
+  },
+
+  /**
    * Get transaction status
    */
   getTransactionStatus: async (reference: string): Promise<BillPaymentResponse> => {

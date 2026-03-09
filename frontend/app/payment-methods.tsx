@@ -5,13 +5,13 @@ import React, { useState } from 'react';
 import {
     Alert,
     ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
     useColorScheme,
     View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 const theme = {
   primary: '#0A2540',
@@ -136,7 +136,7 @@ export default function PaymentMethodsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>

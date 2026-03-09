@@ -24,7 +24,7 @@ const VirtualAccountSchema = new Schema({
     provider: {
         type: String,
         default: 'payrant',
-        enum: ['payrant', 'monnify', 'flutterwave', 'vtpay'],
+        enum: ['payrant', 'monnify', 'flutterwave', 'vtpay', 'vtstack'],
         required: true
     },
     reference: {

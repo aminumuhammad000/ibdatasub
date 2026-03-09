@@ -1,6 +1,7 @@
 import { useAlert } from '@/components/AlertContext';
 import { payrantService, VirtualAccountResponse } from '@/services/payrant.service';
-import { vtstackService } from '@/services/vtstack.service';
+import { vtstackService, VirtualAccount as VTStackAccount } from '@/services/vtstack.service';
+import { walletService } from '@/services/wallet.service';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
@@ -11,7 +12,8 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text, TextInput, TouchableOpacity,
+  Text,
+  TouchableOpacity,
   useColorScheme,
   View
 } from 'react-native';
@@ -44,12 +46,12 @@ export default function AddMoneyScreen() {
   const { showSuccess, showError, showInfo } = useAlert();
   const theme = isDark ? THEME.dark : THEME.light;
 
-  const [account, setAccount] = useState<VirtualAccountResponse | null>(null);
+  const [payrantAccount, setPayrantAccount] = useState<VirtualAccountResponse | null>(null);
+  const [vtstackAccounts, setVtstackAccounts] = useState<VTStackAccount[]>([]);
+  const [gateway, setGateway] = useState<string>('both');
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [creatingAccount, setCreatingAccount] = useState(false);
-  const [bvn, setBvn] = useState('');
-  const [showBvnInput, setShowBvnInput] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -58,14 +60,40 @@ export default function AddMoneyScreen() {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const accountsRes = await payrantService.getVirtualAccount();
+      const [payrantRes, vtstackRes, settingsRes] = await Promise.all([
+        payrantService.getVirtualAccount().catch(() => null),
+        vtstackService.getMyAccounts().catch(() => ({ success: false, data: [] })),
+        walletService.getGatewaySettings().catch(() => ({ success: true, data: { gateway: 'both' } }))
+      ]);
 
-      if (accountsRes && 'account_number' in accountsRes) {
-        setAccount(accountsRes as VirtualAccountResponse);
+      if (payrantRes && typeof payrantRes === 'object') {
+        if ('account_number' in payrantRes) {
+          setPayrantAccount(payrantRes as VirtualAccountResponse);
+        } else if ('exists' in payrantRes && payrantRes.exists === false) {
+          setPayrantAccount(null);
+        } else if ('data' in payrantRes && payrantRes.data) {
+           // Handle case where it might be wrapped in data
+           const possibleAccount = (payrantRes as any).data;
+           if (possibleAccount && 'account_number' in possibleAccount) {
+             setPayrantAccount(possibleAccount as VirtualAccountResponse);
+           }
+        }
+      }
+
+      if (vtstackRes && vtstackRes.success) {
+        // Handle case where data might be nested or an array of arrays
+        let accounts = vtstackRes.data;
+        if (Array.isArray(accounts) && accounts.length > 0 && Array.isArray(accounts[0])) {
+          accounts = accounts[0];
+        }
+        setVtstackAccounts(Array.isArray(accounts) ? accounts : []);
+      }
+
+      if (settingsRes && settingsRes.success && settingsRes.data) {
+        setGateway(settingsRes.data.gateway);
       }
     } catch (error: any) {
       console.error('Load data error:', error);
-      // showError('Failed to load account details');
     } finally {
       setIsLoading(false);
     }
@@ -78,23 +106,15 @@ export default function AddMoneyScreen() {
   };
 
   const handleCreateAccount = async () => {
-    if (!bvn && !showBvnInput) {
-      setShowBvnInput(true);
-      return;
-    }
-
-    if (bvn.length !== 11) {
-      showError('Please enter a valid 11-digit BVN');
-      return;
-    }
-
     try {
       setCreatingAccount(true);
-      const res = await vtstackService.createAccount(bvn);
+      // Generate random 11-digit number starting with 22
+      const generatedBvn = '22' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+
+      const res = await vtstackService.createAccount(generatedBvn);
       if (res.success) {
-        setAccount(res.data as any);
         showSuccess('Virtual account created successfully');
-        onRefresh();
+        loadData();
       }
     } catch (error: any) {
       showError(error.message || 'Failed to create account');
@@ -108,30 +128,38 @@ export default function AddMoneyScreen() {
     showInfo('Copied to clipboard!');
   };
 
-  const renderAccountCard = (item: VirtualAccountResponse) => (
-    <View style={[styles.accountCard, { backgroundColor: THEME.primary }]}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.bankName}>{item.bank_name?.toUpperCase() || 'PALMPAY'}</Text>
-        <View style={styles.chip} />
-      </View>
+  const renderAccountCard = (item: any, providerLabel: string) => {
+    const accountNumber = item.account_number || item.accountNumber || item.virtualAccountNo;
+    const accountName = item.account_name || item.accountName || item.virtualAccountName;
+    const bankName = item.bank_name || item.bankName || 'VIRTUAL BANK';
 
-      <View style={styles.accountBody}>
-        <Text style={styles.accountLabel}>Account Number</Text>
-        <View style={styles.accountRow}>
-          <Text style={styles.accountNumber}>{item.account_number}</Text>
-          <TouchableOpacity onPress={() => copyToClipboard(item.account_number)}>
-            <Ionicons name="copy-outline" size={20} color="#FFF" />
-          </TouchableOpacity>
+    if (!accountNumber) return null;
+
+    return (
+      <View style={[styles.accountCard, { backgroundColor: providerLabel === 'Payrant' ? THEME.primary : '#6366F1' }]}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.bankName}>{bankName.toUpperCase()}</Text>
+          <View style={styles.chip} />
         </View>
-        <Text style={styles.accountOwner}>{item.account_name}</Text>
-      </View>
 
-      <View style={styles.cardFooter}>
-        <Ionicons name="shield-checkmark" size={14} color={THEME.success} />
-        <Text style={styles.secureText}>Protected by Payrant</Text>
+        <View style={styles.accountBody}>
+          <Text style={styles.accountLabel}>Account Number</Text>
+          <View style={styles.accountRow}>
+            <Text style={styles.accountNumber}>{accountNumber}</Text>
+            <TouchableOpacity onPress={() => copyToClipboard(accountNumber)}>
+              <Ionicons name="copy-outline" size={20} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.accountOwner}>{accountName}</Text>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <Ionicons name="shield-checkmark" size={14} color={THEME.success} />
+          <Text style={styles.secureText}>Protected by {providerLabel}</Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -162,41 +190,55 @@ export default function AddMoneyScreen() {
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Your Virtual Account</Text>
           </View>
 
-          {isLoading && !account ? (
+          {isLoading ? (
             <ActivityIndicator size="large" color={THEME.primary} style={{ marginVertical: 20 }} />
           ) : (
             <View>
-              {account ? (
-                renderAccountCard(account)
-              ) : (
-                <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
-                  <Ionicons name="wallet-outline" size={48} color={theme.textMuted} />
-                  <Text style={[styles.emptyText, { color: theme.text }]}>No virtual account found</Text>
-                  {showBvnInput && (
-                    <View style={{ width: '100%', marginBottom: 16 }}>
-                      <Text style={[styles.inputLabel, { color: theme.text }]}>Enter 11-digit BVN</Text>
-                      <TextInput
-                        style={[styles.input, { backgroundColor: isDark ? '#2C2C2E' : '#F3F4F6', color: theme.text, borderColor: theme.border }]}
-                        placeholder="BVN Number"
-                        placeholderTextColor={theme.textMuted}
-                        value={bvn}
-                        onChangeText={setBvn}
-                        keyboardType="numeric"
-                        maxLength={11}
-                      />
+              {(gateway === 'payrant' || gateway === 'both') && (
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={[styles.providerSubTitle, { color: theme.textMuted }]}>Payrant Accounts</Text>
+                  {payrantAccount ? (
+                    renderAccountCard(payrantAccount, 'Payrant')
+                  ) : (
+                    <View style={[styles.emptyStateTiny, { backgroundColor: theme.card }]}>
+                      <Text style={[styles.emptyTextTiny, { color: theme.text }]}>No Payrant account found</Text>
                     </View>
                   )}
-                  <TouchableOpacity
-                    style={[styles.createBtn, { backgroundColor: THEME.primary }]}
-                    onPress={handleCreateAccount}
-                    disabled={creatingAccount}
-                  >
-                    {creatingAccount ? (
-                      <ActivityIndicator color="#FFF" />
-                    ) : (
-                      <Text style={styles.createBtnText}>{showBvnInput ? 'Verify & Generate' : 'Generate Account'}</Text>
-                    )}
-                  </TouchableOpacity>
+                </View>
+              )}
+
+              {(gateway === 'vtstack' || gateway === 'both') && (
+                <View>
+                  <Text style={[styles.providerSubTitle, { color: theme.textMuted }]}>VTStack Accounts</Text>
+                  {vtstackAccounts.length > 0 ? (
+                    vtstackAccounts.map((acc, index) => (
+                      <View key={index} style={{ marginBottom: 12 }}>
+                        {renderAccountCard(acc, 'VTStack')}
+                      </View>
+                    ))
+                  ) : (
+                    <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
+                      <Ionicons name="wallet-outline" size={48} color={theme.textMuted} />
+                      <Text style={[styles.emptyText, { color: theme.text }]}>No VTStack account found</Text>
+                      <TouchableOpacity
+                        style={[styles.createBtn, { backgroundColor: THEME.primary }]}
+                        onPress={handleCreateAccount}
+                        disabled={creatingAccount}
+                      >
+                        {creatingAccount ? (
+                          <ActivityIndicator color="#FFF" />
+                        ) : (
+                          <Text style={styles.createBtnText}>Generate VTStack Account</Text>
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {gateway === 'none' && (
+                <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
+                  <Text style={[styles.emptyText, { color: theme.text }]}>Virtual accounts are currently disabled by admin.</Text>
                 </View>
               )}
             </View>
@@ -345,5 +387,22 @@ const styles = StyleSheet.create({
   createBtnText: {
     color: '#FFF',
     fontWeight: '600',
+  },
+  providerSubTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  emptyStateTiny: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  emptyTextTiny: {
+    fontSize: 12,
+    opacity: 0.7,
   },
 });

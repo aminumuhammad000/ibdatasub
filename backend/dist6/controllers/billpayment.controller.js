@@ -199,7 +199,9 @@ export class BillPaymentController {
                         amount: String(amount),
                     }));
                 // Update transaction status
-                if (result.status === 'success' || result.status === true || result.status === 'true') {
+                const isSuccess = (result.status === 'success' || result.status === true || result.status === 'true');
+                const hasErrorMsg = result.msg || result.error || result.message;
+                if (isSuccess && !hasErrorMsg) {
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'successful',
                         updated_at: new Date()
@@ -213,19 +215,21 @@ export class BillPaymentController {
                 }
                 else {
                     // Refund user if failed
-                    await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
+                    const refundAmount = finalAmount;
+                    await WalletService.credit(userId, refundAmount, 'Airtime purchase refund');
+                    const errorMsg = hasErrorMsg || (result.status === 'fail' ? 'Provider failed the request' : 'Unknown provider error');
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'failed',
-                        error_message: result.msg || 'Unknown error',
+                        error_message: errorMsg,
                         updated_at: new Date()
                     });
-                    console.error('❌ Airtime purchase failed - TopUpMate Response:', JSON.stringify(result, null, 2));
-                    return ApiResponse.error(res, `Airtime purchase failed: ${result.msg || 'Unknown error'}`, 400);
+                    console.error('❌ Airtime purchase failed - Provider Response:', JSON.stringify(result, null, 2));
+                    return ApiResponse.error(res, `Airtime purchase failed: ${errorMsg}`, 400);
                 }
             }
             catch (error) {
                 // Refund user on error
-                await WalletService.credit(userId, parseFloat(amount), 'Airtime purchase refund');
+                await WalletService.credit(userId, finalAmount, 'Airtime purchase refund');
                 await Transaction.findByIdAndUpdate(transaction._id, {
                     status: 'failed',
                     error_message: error.message,
@@ -335,7 +339,9 @@ export class BillPaymentController {
                         ported_number,
                     }));
                 // Update transaction status
-                if (result.status === 'success' || result.status === true || result.status === 'true') {
+                const isSuccess = (result.status === 'success' || result.status === true || result.status === 'true');
+                const hasErrorMsg = result.msg || result.error || result.message;
+                if (isSuccess && !hasErrorMsg) {
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'successful',
                         updated_at: new Date()
@@ -349,18 +355,21 @@ export class BillPaymentController {
                 }
                 else {
                     // Refund user if failed
-                    await WalletService.credit(userId, amount, 'Data purchase refund');
+                    const refundAmount = finalAmount;
+                    await WalletService.credit(userId, refundAmount, 'Data purchase refund');
+                    const errorMsg = hasErrorMsg || (result.status === 'fail' ? 'Provider failed the request' : 'Unknown provider error');
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'failed',
-                        error_message: result.msg || 'Unknown error',
+                        error_message: errorMsg,
                         updated_at: new Date()
                     });
-                    return ApiResponse.error(res, 'Data purchase failed', 400);
+                    console.error('❌ Data purchase failed - Provider Response:', JSON.stringify(result, null, 2));
+                    return ApiResponse.error(res, `Data purchase failed: ${errorMsg}`, 400);
                 }
             }
             catch (error) {
                 // Refund user on error
-                await WalletService.credit(userId, amount, 'Data purchase refund');
+                await WalletService.credit(userId, finalAmount, 'Data purchase refund');
                 await Transaction.findByIdAndUpdate(transaction._id, {
                     status: 'failed',
                     error_message: error.message,
@@ -495,8 +504,27 @@ export class BillPaymentController {
     // Purchase electricity
     async purchaseElectricity(req, res, next) {
         try {
-            const { provider, meternumber, amount, metertype, phone } = req.body;
+            const { provider, meternumber, amount, metertype, phone, pin } = req.body;
             const userId = req.user?.id;
+            // Enforce transaction PIN
+            const isApiRequest = !!req.headers['x-api-key'];
+            if (!isApiRequest) {
+                const user = await User.findById(userId);
+                if (!user)
+                    return ApiResponse.error(res, 'User not found', 404);
+                if (!user.transaction_pin) {
+                    // Allow legacy
+                    if (String(pin) !== '1234') {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
+                }
+                else {
+                    const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
+                    if (!pinOk) {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
+                }
+            }
             // Validate user balance
             const wallet = await WalletService.getWalletByUserId(userId);
             if (wallet.balance < parseFloat(amount)) {
@@ -511,8 +539,10 @@ export class BillPaymentController {
                 user_id: userId,
                 type: 'electricity',
                 amount: parseFloat(amount),
-                reference: ref,
+                reference_number: ref, // Consistent naming
                 status: 'pending',
+                destination_account: meternumber,
+                description: `Electricity: ${meternumber} (${metertype})`,
                 metadata: { provider, meternumber, metertype },
             });
             try {
@@ -522,27 +552,32 @@ export class BillPaymentController {
                     ? client.purchaseElectricity({ provider, meternumber, amount, metertype, phone, ref })
                     : topupmateService.purchaseElectricity({ provider, meternumber, amount, metertype, phone, ref }));
                 // Update transaction status
-                if (result.status === 'success' || result.status === true || result.status === 'true') {
+                const statusValue = String(result.status || result.Status || '').toLowerCase();
+                const isSuccess = (statusValue === 'success' || statusValue === 'successful' || statusValue === 'true' || result.status === true);
+                const token = result.token || result.msg;
+                if (isSuccess) {
                     await Transaction.findByIdAndUpdate(transaction._id, {
-                        status: 'completed',
-                        response: result
+                        status: 'successful',
+                        updated_at: new Date()
                     });
                     const updatedWallet = await WalletService.getWalletByUserId(userId);
                     return ApiResponse.success(res, 'Electricity purchase successful', {
                         transaction,
                         balance: updatedWallet?.balance,
-                        token: result.token,
+                        token: token,
                         provider_response: result,
                     });
                 }
                 else {
                     // Refund user if failed
                     await WalletService.credit(userId, parseFloat(amount), 'Electricity purchase refund');
+                    const errorMsg = result.msg || result.error || result.message || 'Provider failed the request';
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'failed',
-                        response: result
+                        error_message: errorMsg,
+                        updated_at: new Date()
                     });
-                    return ApiResponse.error(res, 'Electricity purchase failed', 400);
+                    return ApiResponse.error(res, `Electricity purchase failed: ${errorMsg}`, 400);
                 }
             }
             catch (error) {
@@ -562,32 +597,56 @@ export class BillPaymentController {
     // Purchase exam pin
     async purchaseExamPin(req, res, next) {
         try {
-            const { provider, quantity } = req.body;
+            const { provider, quantity, pin } = req.body;
             const userId = req.user?.id;
-            // Get provider details
-            const providers = await topupmateService.getExamPinProviders();
-            const selectedProvider = providers.response?.find((p) => p.id === provider);
-            if (!selectedProvider) {
-                return ApiResponse.error(res, 'Invalid provider selected', 400);
+            // Enforce transaction PIN
+            const isApiRequest = !!req.headers['x-api-key'];
+            if (!isApiRequest) {
+                const user = await User.findById(userId);
+                if (!user)
+                    return ApiResponse.error(res, 'User not found', 404);
+                if (!user.transaction_pin) {
+                    if (String(pin) !== '1234') {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
+                }
+                else {
+                    const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin));
+                    if (!pinOk) {
+                        return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+                    }
+                }
             }
-            const amount = parseFloat(selectedProvider.price) * parseInt(quantity);
+            // Hardcoded pricing for providers
+            const EXAM_PRICES = {
+                '1': 3360, // WAEC
+                '2': 2180, // NECO
+                '3': 950, // NABTEB
+            };
+            const unitPrice = EXAM_PRICES[String(provider)];
+            if (!unitPrice) {
+                return ApiResponse.error(res, 'Invalid exam provider', 400);
+            }
+            const totalAmount = unitPrice * parseInt(quantity);
             // Validate user balance
             const wallet = await WalletService.getWalletByUserId(userId);
-            if (wallet.balance < amount) {
+            if (wallet.balance < totalAmount) {
                 return ApiResponse.error(res, 'Insufficient wallet balance', 400);
             }
             // Generate reference
             const ref = topupmateService.generateReference('EXAMPIN');
             // Deduct from wallet
-            await WalletService.debit(userId, amount, 'Exam pin purchase');
+            await WalletService.debit(userId, totalAmount, 'Exam pin purchase');
             // Create transaction record
             const transaction = await Transaction.create({
                 user_id: userId,
                 type: 'exampin',
-                amount,
-                reference: ref,
+                amount: totalAmount,
+                reference_number: ref,
                 status: 'pending',
-                metadata: { provider: selectedProvider, quantity },
+                destination_account: `Exam Pin (${quantity})`,
+                description: `Exam Pin: ${provider === '1' ? 'WAEC' : provider === '2' ? 'NECO' : 'NABTEB'} x ${quantity}`,
+                metadata: { provider, quantity },
             });
             try {
                 const selected = await providerRegistry.getPreferredProviderFor('exampin');
@@ -596,32 +655,37 @@ export class BillPaymentController {
                     ? client.purchaseExamPin({ provider, quantity, ref })
                     : topupmateService.purchaseExamPin({ provider, quantity, ref }));
                 // Update transaction status
-                if (result.status === 'success' || result.status === true || result.status === 'true') {
+                const statusValue = String(result.status || result.Status || '').toLowerCase();
+                const isSuccess = (statusValue === 'success' || statusValue === 'successful' || statusValue === 'true' || result.status === true);
+                const pins = result.pins || result.pin || result.token || result.msg;
+                if (isSuccess) {
                     await Transaction.findByIdAndUpdate(transaction._id, {
-                        status: 'completed',
-                        response: result
+                        status: 'successful',
+                        updated_at: new Date()
                     });
                     const updatedWallet = await WalletService.getWalletByUserId(userId);
                     return ApiResponse.success(res, 'Exam pin purchase successful', {
                         transaction,
                         balance: updatedWallet?.balance,
-                        pins: result.pins || result.pin,
+                        pins: pins,
                         provider_response: result,
                     });
                 }
                 else {
                     // Refund user if failed
-                    await WalletService.credit(userId, amount, 'Exam pin purchase refund');
+                    await WalletService.credit(userId, totalAmount, 'Exam pin purchase refund');
+                    const errorMsg = result.msg || result.error || result.message || 'Provider failed the request';
                     await Transaction.findByIdAndUpdate(transaction._id, {
                         status: 'failed',
-                        response: result
+                        error_message: errorMsg,
+                        updated_at: new Date()
                     });
-                    return ApiResponse.error(res, 'Exam pin purchase failed', 400);
+                    return ApiResponse.error(res, `Exam pin purchase failed: ${errorMsg}`, 400);
                 }
             }
             catch (error) {
                 // Refund user on error
-                await WalletService.credit(userId, amount, 'Exam pin purchase refund');
+                await WalletService.credit(userId, totalAmount, 'Exam pin purchase refund');
                 await Transaction.findByIdAndUpdate(transaction._id, {
                     status: 'failed',
                     response: { error: error.message }

@@ -2,10 +2,10 @@ import { useAlert } from '@/components/AlertContext';
 import { userService } from '@/services/user.service';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
     ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
     TextInput,
@@ -79,7 +79,7 @@ export default function ChangePasswordScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: bgColor }]}>
-            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
 
             <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>
                 <TouchableOpacity

@@ -98,7 +98,8 @@ function AuthLayout() {
         <Stack.Screen name="more" />
         <Stack.Screen name="buy-airtime" />
         <Stack.Screen name="buy-data" />
-        <Stack.Screen name="pay-bills" />
+        <Stack.Screen name="buy-electricity" />
+        <Stack.Screen name="buy-exampin" />
         <Stack.Screen name="add-money" />
         <Stack.Screen name="edit-profile" />
         <Stack.Screen name="security" />

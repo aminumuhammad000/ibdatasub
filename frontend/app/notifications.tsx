@@ -7,13 +7,13 @@ import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 export default function NotificationsScreen() {
   const router = useRouter();
@@ -104,7 +104,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor }]}>

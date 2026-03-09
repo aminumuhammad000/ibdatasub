@@ -17,12 +17,23 @@ import {
     View
 } from 'react-native';
 
-const theme = {
+const THEME = {
     primary: '#0A2540',
     accent: '#FF9F43',
     success: '#00D4AA',
     error: '#FF5B5B',
 };
+
+interface ElectricityProvider {
+    id: string;
+    name: string;
+    service_number?: string;
+}
+
+interface ElectricitySuccessData {
+    token?: string;
+    [key: string]: any;
+}
 
 export default function BuyElectricityScreen() {
     const router = useRouter();
@@ -36,8 +47,8 @@ export default function BuyElectricityScreen() {
     const borderColor = isDark ? '#374151' : '#E5E7EB';
 
     const { showError } = useAlert();
-    const [providers, setProviders] = useState<any[]>([]);
-    const [selectedProvider, setSelectedProvider] = useState<any>(null);
+    const [providers, setProviders] = useState<ElectricityProvider[]>([]);
+    const [selectedProvider, setSelectedProvider] = useState<ElectricityProvider | null>(null);
     const [meterNumber, setMeterNumber] = useState('');
     const [amount, setAmount] = useState('');
     const [meterType, setMeterType] = useState<'prepaid' | 'postpaid'>('prepaid');
@@ -46,12 +57,26 @@ export default function BuyElectricityScreen() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [isPinModalVisible, setIsPinModalVisible] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [successData, setSuccessData] = useState<any>(null);
+    const [successData, setSuccessData] = useState<ElectricitySuccessData | null>(null);
     const [customerName, setCustomerName] = useState('');
     const [balance, setBalance] = useState<number | null>(null);
 
+    const ELECTRICITY_PROVIDERS = [
+        { id: '1', name: 'Ikeja Electric' },
+        { id: '2', name: 'Eko Electric' },
+        { id: '3', name: 'Kano Electric' },
+        { id: '4', name: 'Port Harcourt Electric' },
+        { id: '5', name: 'Jos Electric' },
+        { id: '6', name: 'Ibadan Electric' },
+        { id: '7', name: 'Kaduna Electric' },
+        { id: '8', name: 'Abuja Electric' },
+        { id: '9', name: 'Enugu Electric' },
+        { id: '10', name: 'Benin Electric' },
+        { id: '11', name: 'Yola Electric' },
+    ];
+
     useEffect(() => {
-        fetchProviders();
+        setProviders(ELECTRICITY_PROVIDERS);
         fetchBalance();
     }, []);
 
@@ -86,7 +111,7 @@ export default function BuyElectricityScreen() {
         setCustomerName('');
         try {
             const res = await billPaymentService.verifyElectricityMeter(
-                selectedProvider.id || selectedProvider.service_number,
+                (selectedProvider.id || selectedProvider.service_number) as string,
                 meterNumber,
                 meterType
             );
@@ -116,6 +141,7 @@ export default function BuyElectricityScreen() {
 
     const handlePurchase = async (pin: string) => {
         setIsPinModalVisible(false);
+        if (!selectedProvider) return;
         setIsLoading(true);
         try {
             const response = await billPaymentService.purchaseElectricity({
@@ -155,7 +181,7 @@ export default function BuyElectricityScreen() {
                     <View style={styles.sectionHeader}>
                         <Text style={[styles.sectionTitle, { color: textColor }]}>Select Provider</Text>
                         {balance !== null && (
-                            <Text style={[styles.balanceText, { color: theme.accent }]}>
+                            <Text style={[styles.balanceText, { color: THEME.accent }]}>
                                 Balance: ₦{balance.toLocaleString()}
                             </Text>
                         )}
@@ -168,7 +194,7 @@ export default function BuyElectricityScreen() {
                                     styles.providerCard,
                                     {
                                         backgroundColor: cardBgColor,
-                                        borderColor: selectedProvider?.id === p.id ? theme.accent : borderColor,
+                                        borderColor: selectedProvider?.id === p.id ? THEME.accent : borderColor,
                                     },
                                 ]}
                                 onPress={() => setSelectedProvider(p)}
@@ -212,7 +238,7 @@ export default function BuyElectricityScreen() {
                             keyboardType="numeric"
                             onBlur={handleVerifyMeter}
                         />
-                        {isVerifying && <ActivityIndicator size="small" color={theme.accent} />}
+                        {isVerifying && <ActivityIndicator size="small" color={THEME.accent} />}
                     </View>
                     {customerName ? (
                         <Text style={styles.customerName}>Customer: {customerName}</Text>
@@ -268,7 +294,7 @@ export default function BuyElectricityScreen() {
             <Modal visible={showSuccessModal} transparent animationType="slide">
                 <View style={styles.modalContainer}>
                     <View style={[styles.modalContent, { backgroundColor: cardBgColor }]}>
-                        <Ionicons name="checkmark-circle" size={80} color={theme.success} />
+                        <Ionicons name="checkmark-circle" size={80} color={THEME.success} />
                         <Text style={[styles.modalTitle, { color: textColor }]}>Purchase Successful</Text>
                         {successData?.token && (
                             <View style={styles.tokenContainer}>
@@ -327,9 +353,9 @@ const styles = StyleSheet.create({
         borderColor: '#CCC',
         alignItems: 'center',
     },
-    activeType: { borderColor: theme.accent, backgroundColor: theme.accent + '20' },
+    activeType: { borderColor: THEME.accent, backgroundColor: THEME.accent + '20' },
     typeText: { fontSize: 14, color: '#666' },
-    activeTypeText: { color: theme.accent, fontWeight: '600' },
+    activeTypeText: { color: THEME.accent, fontWeight: '600' },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -339,9 +365,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     input: { flex: 1, fontSize: 16 },
-    customerName: { marginTop: 5, color: theme.success, fontWeight: '500' },
+    customerName: { marginTop: 5, color: THEME.success, fontWeight: '500' },
     buyButton: {
-        backgroundColor: theme.accent,
+        backgroundColor: THEME.accent,
         paddingVertical: 18,
         borderRadius: 12,
         alignItems: 'center',

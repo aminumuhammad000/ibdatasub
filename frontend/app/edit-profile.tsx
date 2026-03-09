@@ -13,7 +13,6 @@ import {
     Image,
     Platform,
     ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
     TextInput,
@@ -21,6 +20,7 @@ import {
     useColorScheme,
     View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 const theme = {
   primary: '#0A2540',
@@ -338,7 +338,7 @@ export default function EditProfileScreen() {
   if (isInitialLoading) {
     return (
       <View style={[styles.container, { backgroundColor: bgColor, justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <Ionicons name="refresh" size={32} color={textBodyColor} />
         <Text style={[{ color: textBodyColor, marginTop: 12, fontSize: 16 }]}>Loading...</Text>
       </View>
@@ -347,7 +347,7 @@ export default function EditProfileScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>

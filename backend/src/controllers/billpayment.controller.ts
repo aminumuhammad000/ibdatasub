@@ -544,8 +544,27 @@ export class BillPaymentController {
   // Purchase electricity
   async purchaseElectricity(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { provider, meternumber, amount, metertype, phone } = req.body;
+      const { provider, meternumber, amount, metertype, phone, pin } = req.body;
       const userId = req.user?.id;
+
+      // Enforce transaction PIN
+      const isApiRequest = !!req.headers['x-api-key'];
+      if (!isApiRequest) {
+        const user = await User.findById(userId);
+        if (!user) return ApiResponse.error(res, 'User not found', 404);
+        
+        if (!user.transaction_pin) {
+           // Allow legacy
+           if (String(pin) !== '1234') {
+             return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+           }
+        } else {
+          const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin as string));
+          if (!pinOk) {
+            return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+          }
+        }
+      }
 
       // Validate user balance
       const wallet = await WalletService.getWalletByUserId(userId);
@@ -564,8 +583,10 @@ export class BillPaymentController {
         user_id: userId,
         type: 'electricity',
         amount: parseFloat(amount),
-        reference: ref,
+        reference_number: ref, // Consistent naming
         status: 'pending',
+        destination_account: meternumber,
+        description: `Electricity: ${meternumber} (${metertype})`,
         metadata: { provider, meternumber, metertype },
       });
 
@@ -579,12 +600,12 @@ export class BillPaymentController {
         // Update transaction status
         const statusValue = String(result.status || result.Status || '').toLowerCase();
         const isSuccess = (statusValue === 'success' || statusValue === 'successful' || statusValue === 'true' || result.status === true);
-        const token = result.token || result.msg; // User provided msg as token example
+        const token = result.token || result.msg;
 
         if (isSuccess) {
           await Transaction.findByIdAndUpdate(transaction._id, {
-            status: 'completed',
-            response: result
+            status: 'successful',
+            updated_at: new Date()
           });
           const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Electricity purchase successful', {
@@ -599,8 +620,8 @@ export class BillPaymentController {
           const errorMsg = result.msg || result.error || result.message || 'Provider failed the request';
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'failed',
-            response: result,
-            error_message: errorMsg
+            error_message: errorMsg,
+            updated_at: new Date()
           });
           return ApiResponse.error(res, `Electricity purchase failed: ${errorMsg}`, 400);
         }
@@ -621,22 +642,44 @@ export class BillPaymentController {
   // Purchase exam pin
   async purchaseExamPin(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { provider, quantity } = req.body;
+      const { provider, quantity, pin } = req.body;
       const userId = req.user?.id;
 
-      // Get provider details
-      const providers = await topupmateService.getExamPinProviders();
-      const selectedProvider = providers.response?.find((p: any) => p.id === provider);
-
-      if (!selectedProvider) {
-        return ApiResponse.error(res, 'Invalid provider selected', 400);
+      // Enforce transaction PIN
+      const isApiRequest = !!req.headers['x-api-key'];
+      if (!isApiRequest) {
+        const user = await User.findById(userId);
+        if (!user) return ApiResponse.error(res, 'User not found', 404);
+        
+        if (!user.transaction_pin) {
+           if (String(pin) !== '1234') {
+             return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+           }
+        } else {
+          const pinOk = await import('bcryptjs').then(({ default: bcrypt }) => bcrypt.compare(String(pin), user.transaction_pin as string));
+          if (!pinOk) {
+            return ApiResponse.error(res, 'Incorrect transaction PIN', 400);
+          }
+        }
       }
 
-      const amount = parseFloat(selectedProvider.price) * parseInt(quantity);
+      // Hardcoded pricing for providers
+      const EXAM_PRICES: Record<string, number> = {
+        '1': 3360, // WAEC
+        '2': 2180, // NECO
+        '3': 950,  // NABTEB
+      };
+
+      const unitPrice = EXAM_PRICES[String(provider)];
+      if (!unitPrice) {
+        return ApiResponse.error(res, 'Invalid exam provider', 400);
+      }
+
+      const totalAmount = unitPrice * parseInt(quantity);
 
       // Validate user balance
       const wallet = await WalletService.getWalletByUserId(userId);
-      if (wallet.balance < amount) {
+      if (wallet.balance < totalAmount) {
         return ApiResponse.error(res, 'Insufficient wallet balance', 400);
       }
 
@@ -644,16 +687,18 @@ export class BillPaymentController {
       const ref = topupmateService.generateReference('EXAMPIN');
 
       // Deduct from wallet
-      await WalletService.debit(userId, amount, 'Exam pin purchase');
+      await WalletService.debit(userId, totalAmount, 'Exam pin purchase');
 
       // Create transaction record
       const transaction = await Transaction.create({
         user_id: userId,
         type: 'exampin',
-        amount,
-        reference: ref,
+        amount: totalAmount,
+        reference_number: ref,
         status: 'pending',
-        metadata: { provider: selectedProvider, quantity },
+        destination_account: `Exam Pin (${quantity})`,
+        description: `Exam Pin: ${provider === '1' ? 'WAEC' : provider === '2' ? 'NECO' : 'NABTEB'} x ${quantity}`,
+        metadata: { provider, quantity },
       });
 
       try {
@@ -664,30 +709,36 @@ export class BillPaymentController {
           : topupmateService.purchaseExamPin({ provider, quantity, ref }));
 
         // Update transaction status
-        if (result.status === 'success' || result.status === true || result.status === 'true') {
+        const statusValue = String(result.status || result.Status || '').toLowerCase();
+        const isSuccess = (statusValue === 'success' || statusValue === 'successful' || statusValue === 'true' || result.status === true);
+        const pins = result.pins || result.pin || result.token || result.msg;
+
+        if (isSuccess) {
           await Transaction.findByIdAndUpdate(transaction._id, {
-            status: 'completed',
-            response: result
+            status: 'successful',
+            updated_at: new Date()
           });
           const updatedWallet = await WalletService.getWalletByUserId(userId);
           return ApiResponse.success(res, 'Exam pin purchase successful', {
             transaction,
             balance: updatedWallet?.balance,
-            pins: result.pins || result.pin,
+            pins: pins,
             provider_response: result,
           });
         } else {
           // Refund user if failed
-          await WalletService.credit(userId, amount, 'Exam pin purchase refund');
+          await WalletService.credit(userId, totalAmount, 'Exam pin purchase refund');
+          const errorMsg = result.msg || result.error || result.message || 'Provider failed the request';
           await Transaction.findByIdAndUpdate(transaction._id, {
             status: 'failed',
-            response: result
+            error_message: errorMsg,
+            updated_at: new Date()
           });
-          return ApiResponse.error(res, 'Exam pin purchase failed', 400);
+          return ApiResponse.error(res, `Exam pin purchase failed: ${errorMsg}`, 400);
         }
       } catch (error: any) {
         // Refund user on error
-        await WalletService.credit(userId, amount, 'Exam pin purchase refund');
+        await WalletService.credit(userId, totalAmount, 'Exam pin purchase refund');
         await Transaction.findByIdAndUpdate(transaction._id, {
           status: 'failed',
           response: { error: error.message }

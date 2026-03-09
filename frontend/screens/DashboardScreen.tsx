@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
   Image,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [selectedTab, setSelectedTab] = useState<'airtime' | 'data'>('airtime');
@@ -67,8 +69,8 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor }]}>
         <View style={styles.headerLeft}>
@@ -85,7 +87,7 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -110,36 +112,51 @@ export default function DashboardScreen() {
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <View style={styles.actionItem}>
+          <TouchableOpacity 
+            style={styles.actionItem}
+            onPress={() => router.push('/buy-airtime')}
+          >
             <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
               <Ionicons name="phone-portrait-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
             </View>
             <Text style={[styles.actionText, { color: textBodyColor }]}>Buy Airtime</Text>
-          </View>
-          <View style={styles.actionItem}>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionItem}
+            onPress={() => router.push('/buy-data')}
+          >
             <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
               <Ionicons name="wifi-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
             </View>
             <Text style={[styles.actionText, { color: textBodyColor }]}>Buy Data</Text>
-          </View>
-          <View style={styles.actionItem}>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionItem}
+            onPress={() => router.push('/buy-electricity')}
+          >
             <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
-              <Ionicons name="receipt-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
+              <Ionicons name="flash-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
             </View>
-            <Text style={[styles.actionText, { color: textBodyColor }]}>Pay Bills</Text>
-          </View>
-          <View style={styles.actionItem}>
+            <Text style={[styles.actionText, { color: textBodyColor }]}>Electricity</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionItem}
+            onPress={() => router.push('/more')}
+          >
             <View style={[styles.actionIcon, { backgroundColor: isDark ? 'rgba(10, 37, 64, 0.3)' : 'rgba(10, 37, 64, 0.2)' }]}>
               <Ionicons name="grid-outline" size={24} color={isDark ? '#FFFFFF' : theme.primary} />
             </View>
             <Text style={[styles.actionText, { color: textBodyColor }]}>More</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Quick Top-up Form */}
         <View style={styles.topupSection}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Quick Top-up</Text>
-          
+
           {/* Tabs */}
           <View style={styles.tabs}>
             <TouchableOpacity
@@ -179,7 +196,7 @@ export default function DashboardScreen() {
               {airtimeAmounts.map((amount, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.amountBtn, { 
+                  style={[styles.amountBtn, {
                     borderColor: isDark ? '#374151' : '#E5E7EB',
                     backgroundColor: 'transparent'
                   }]}
@@ -236,7 +253,7 @@ export default function DashboardScreen() {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={[styles.bottomNav, { 
+      <View style={[styles.bottomNav, {
         backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
         borderTopColor: isDark ? '#374151' : '#E5E7EB'
       }]}>

@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +12,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 const theme = {
   primary: '#0A2540',
@@ -72,7 +72,7 @@ export default function SecurityScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: bgColor, borderBottomColor: borderColor }]}>

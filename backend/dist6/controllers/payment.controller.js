@@ -1,6 +1,8 @@
 import { Transaction, User, VirtualAccount, Wallet } from '../models/index.js';
+import { SystemSetting } from '../models/system_setting.model.js';
 import { MonnifyService } from '../services/monnify.service.js';
 import { PaystackService } from '../services/paystack.service.js';
+import { vtStackService } from '../services/vtstack.service.js';
 import { ApiResponse } from '../utils/response.js';
 // Initialize services
 const monnifyService = new MonnifyService();
@@ -15,6 +17,20 @@ const mockServices = {
     }
 };
 export class PaymentController {
+    /**
+     * Get current active payment gateway setting
+     */
+    static async getGatewaySettings(req, res) {
+        try {
+            const setting = await SystemSetting.findOne({ type: 'global_config' });
+            const gateway = setting?.config?.payment_gateway || 'vtstack';
+            return ApiResponse.success(res, { gateway }, 'Payment gateway setting retrieved');
+        }
+        catch (error) {
+            console.error('Error fetching gateway settings:', error);
+            return ApiResponse.error(res, 'Failed to fetch gateway settings');
+        }
+    }
     /**
      * Deactivate user's virtual account
      * @param req Express request object
@@ -276,6 +292,42 @@ export class PaymentController {
                     exists: true
                 }, 'Virtual account already exists');
             }
+            // Get system settings to determine default gateway
+            const systemSetting = await SystemSetting.findOne({ type: 'global_config' });
+            const defaultGateway = systemSetting?.config?.payment_gateway || 'vtstack';
+            if (defaultGateway === 'vtstack') {
+                const { bvn } = req.body;
+                if (!bvn) {
+                    return ApiResponse.error(res, 'BVN is required to create a virtual account with VTStack', 400);
+                }
+                const reference = vtStackService.generateReference(user._id.toString());
+                // Create account on VTStack
+                const vtAccount = await vtStackService.createVirtualAccount({
+                    firstName: user.first_name,
+                    lastName: user.last_name,
+                    email: user.email,
+                    phone: user.phone_number || '08000000000',
+                    bvn: bvn,
+                    identityType: 'INDIVIDUAL',
+                    reference: reference
+                });
+                // Save to local database
+                const newAccount = await VirtualAccount.create({
+                    user: user._id,
+                    accountNumber: vtAccount.accountNumber,
+                    accountName: vtAccount.accountName,
+                    bankName: vtAccount.bankName || 'PalmPay',
+                    provider: 'vtstack',
+                    reference: vtAccount.reference,
+                    status: 'active',
+                    metadata: {
+                        alias: vtAccount.alias,
+                        id: vtAccount.id
+                    }
+                });
+                return ApiResponse.success(res, newAccount, 'Virtual account created successfully', 201);
+            }
+            // Fallback to Payrant (previous logic)
             // Use phone number as NIN (Payrant requires a document number)
             let documentNumber = user.phone_number;
             if (!documentNumber) {

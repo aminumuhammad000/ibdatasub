@@ -19,12 +19,20 @@ import {
   View,
 } from 'react-native';
 
-const theme = {
-  primary: '#0A2540',
-  accent: '#FF9F43',
-  success: '#00D4AA',
-  error: '#FF5B5B',
+const THEME = {
+    primary: '#0A2540',
+    accent: '#FF9F43',
+    success: '#00D4AA',
+    error: '#FF5B5B',
 };
+
+interface DataPlanItem {
+    id: string;
+    data: string;
+    validity: string;
+    price: number;
+    category?: string;
+}
 
 export default function BuyDataScreen() {
   const router = useRouter();
@@ -39,11 +47,11 @@ export default function BuyDataScreen() {
 
   const { showSuccess, showError, showInfo } = useAlert();
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<DataPlanItem | null>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [plans, setPlans] = useState<Array<{ id: string; data: string; validity: string; price: number, category?: string }>>([]);
+  const [plans, setPlans] = useState<DataPlanItem[]>([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState<string | null>(null);
   const [isPinModalVisible, setIsPinModalVisible] = useState(false);
@@ -181,6 +189,7 @@ export default function BuyDataScreen() {
 
   const handleBuyData = async (pin: string) => {
     setIsPinModalVisible(false);
+    if (!selectedNetwork || !selectedPlan) return;
 
     setTimeout(async () => {
       setIsLoading(true);
@@ -280,11 +289,11 @@ export default function BuyDataScreen() {
             onPress={selectContact}
             style={[
               styles.contactBtnFull,
-              { borderColor: theme.accent, backgroundColor: isDark ? 'rgba(255, 159, 67, 0.1)' : '#FFF7ED' }
+              { borderColor: THEME.accent, backgroundColor: isDark ? 'rgba(255, 159, 67, 0.1)' : '#FFF7ED' }
             ]}
           >
-            <Ionicons name="people" size={20} color={theme.accent} />
-            <Text style={{ color: theme.accent, fontWeight: '600', marginLeft: 8 }}>Select from Contacts</Text>
+            <Ionicons name="people" size={20} color={THEME.accent} />
+            <Text style={{ color: THEME.accent, fontWeight: '600', marginLeft: 8 }}>Select from Contacts</Text>
           </TouchableOpacity>
         </View>
 
@@ -301,7 +310,7 @@ export default function BuyDataScreen() {
                     key={filter}
                     style={[
                       styles.filterChip,
-                      { backgroundColor: selectedFilter === filter ? theme.primary : 'transparent', borderWidth: 1, borderColor: selectedFilter === filter ? theme.primary : borderColor }
+                      { backgroundColor: selectedFilter === filter ? THEME.primary : 'transparent', borderWidth: 1, borderColor: selectedFilter === filter ? THEME.primary : borderColor }
                     ]}
                     onPress={() => setSelectedFilter(filter)}
                   >
@@ -312,9 +321,9 @@ export default function BuyDataScreen() {
             </View>
 
             {plansLoading ? (
-              <ActivityIndicator color={theme.primary} style={{ marginTop: 20 }} />
+              <ActivityIndicator color={THEME.primary} style={{ marginTop: 20 }} />
             ) : plansError ? (
-              <Text style={{ color: theme.error }}>{plansError}</Text>
+              <Text style={{ color: THEME.error }}>{plansError}</Text>
             ) : (
               <View style={styles.plansGrid}>
                 {filteredPlans.map((plan, index) => (
@@ -323,8 +332,8 @@ export default function BuyDataScreen() {
                     style={[
                       styles.planCard,
                       {
-                        backgroundColor: selectedPlan?.id === plan.id ? theme.primary : cardBgColor,
-                        borderColor: selectedPlan?.id === plan.id ? theme.accent : borderColor,
+                        backgroundColor: selectedPlan?.id === plan.id ? THEME.primary : cardBgColor,
+                        borderColor: selectedPlan?.id === plan.id ? THEME.accent : borderColor,
                       },
                     ]}
                     onPress={() => setSelectedPlan(plan)}
@@ -335,7 +344,7 @@ export default function BuyDataScreen() {
                     <Text style={[styles.planValidity, { color: selectedPlan?.id === plan.id ? '#D1D5DB' : textBodyColor }]}>
                       {plan.validity}
                     </Text>
-                    <Text style={[styles.planPrice, { color: selectedPlan?.id === plan.id ? theme.accent : theme.primary }]}>
+                    <Text style={[styles.planPrice, { color: selectedPlan?.id === plan.id ? THEME.accent : THEME.primary }]}>
                       ₦{plan.price.toLocaleString()}
                     </Text>
                   </TouchableOpacity>
@@ -352,7 +361,7 @@ export default function BuyDataScreen() {
             {
               backgroundColor: (!phoneNumber || !selectedNetwork || !selectedPlan || isLoading)
                 ? (isDark ? '#374151' : '#D1D5DB')
-                : theme.accent,
+                : THEME.accent,
             },
           ]}
           onPress={initiatePurchase}
@@ -379,7 +388,7 @@ export default function BuyDataScreen() {
       <Modal visible={showSuccessModal} transparent animationType="fade">
         <View style={styles.successModalBackdrop}>
           <View style={[styles.successModalCard, { backgroundColor: cardBgColor }]}>
-            <Ionicons name="checkmark-circle" size={80} color={theme.success} style={{ marginBottom: 20 }} />
+            <Ionicons name="checkmark-circle" size={80} color={THEME.success} style={{ marginBottom: 20 }} />
             <Text style={[styles.successTitle, { color: textColor }]}>Successful!</Text>
             <Text style={[styles.successMessage, { color: textBodyColor, textAlign: 'center', marginBottom: 24 }]}>
               You have successfully purchased {selectedPlan?.data} for {phoneNumber}

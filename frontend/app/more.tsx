@@ -34,43 +34,51 @@ export default function MoreScreen() {
 
   const featuredServices = [
     {
-      id: 'cable',
-      title: 'Cable TV',
-      icon: 'tv',
-      color: '#9333EA',
-      route: '/pay-bills',
+      id: 'airtime',
+      title: 'Airtime',
+      icon: 'phone-portrait',
+      color: '#3B82F6',
+      route: '/buy-airtime',
+    },
+    {
+      id: 'data',
+      title: 'Data Bundle',
+      icon: 'wifi',
+      color: '#10B981',
+      route: '/buy-data',
     },
     {
       id: 'electricity',
       title: 'Electricity',
       icon: 'flash',
       color: '#EAB308',
-      route: '/pay-bills',
+      route: '/buy-electricity',
     },
     {
-      id: 'internet',
-      title: 'Internet',
-      icon: 'globe',
-      color: '#06B6D4',
-      route: '/pay-bills',
-    },
-    {
-      id: 'airtime-cash',
-      title: 'Airtime2Cash',
-      icon: 'cash',
-      color: '#EC4899',
-      route: '/airtime-to-cash',
+      id: 'cable',
+      title: 'Cable TV',
+      icon: 'tv',
+      color: '#9333EA',
+      route: null, // Coming soon
     }
   ];
 
   const allServices = [
     {
       id: 'education',
-      title: 'Education',
-      description: 'WAEC, NECO Pins & Scratch Cards',
+      title: 'Exam PIN',
+      description: 'WAEC, NECO Pins & NABTEB',
       icon: 'school-outline',
-      color: '#10B981',
-      route: null,
+      color: '#F43F5E',
+      route: '/buy-exampin',
+    },
+    {
+      id: 'airtime-cash',
+      title: 'Airtime2Cash',
+      description: 'Convert excess airtime to cash',
+      icon: 'cash-outline',
+      color: '#EC4899',
+      route: '/airtime-to-cash',
     },
     {
       id: 'betting',
@@ -110,6 +118,30 @@ export default function MoreScreen() {
       description: 'Create USD & NGN virtual cards',
       icon: 'card-outline',
       color: '#14B8A6',
+      route: null,
+    },
+    {
+      id: 'water',
+      title: 'Water Bill',
+      description: 'Pay for water supply services',
+      icon: 'water-outline',
+      color: '#0EA5E9',
+      route: null,
+    },
+    {
+      id: 'waste',
+      title: 'Waste Management',
+      description: 'Pay for waste collection services',
+      icon: 'trash-outline',
+      color: '#10B981',
+      route: null,
+    },
+    {
+      id: 'tax',
+      title: 'Government Tax',
+      description: 'Pay state and federal taxes',
+      icon: 'receipt-outline',
+      color: '#6366F1',
       route: null,
     },
   ];

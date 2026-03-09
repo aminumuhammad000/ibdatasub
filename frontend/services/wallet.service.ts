@@ -89,4 +89,28 @@ export const walletService = {
       throw error.response?.data || { success: false, message: 'Balance adjustment failed' };
     }
   },
+
+  /**
+   * Get payment gateway settings
+   */
+  getGatewaySettings: async (): Promise<{ success: boolean; data: { gateway: string } }> => {
+    try {
+      const response = await api.get('/payment/gateway-settings');
+      return response.data;
+    } catch (error: any) {
+      return { success: true, data: { gateway: 'both' } }; // Default to both on error
+    }
+  },
+
+  /**
+   * Update payment gateway settings (admin only)
+   */
+  updateGatewaySettings: async (gateway: 'payrant' | 'vtstack' | 'both' | 'none'): Promise<any> => {
+    try {
+      const response = await api.put('/payment/gateway-settings', { gateway });
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { success: false, message: 'Failed to update gateway settings' };
+    }
+  },
 };
