@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.aminuamee.vtuapp",
-      "versionCode": 1,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -51,8 +51,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "64947245-fd18-4c19-8a09-629893c1c11b"
+        "projectId": "3de35e67-6b7a-403a-b563-2737290040a2"
       }
-    }
+    },
+    "owner": "connecta2026"
   }
 }

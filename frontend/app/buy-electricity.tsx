@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     modalTitle: { fontSize: 20, fontWeight: '700', marginVertical: 15 },
     tokenContainer: { backgroundColor: '#F0F0F0', padding: 20, borderRadius: 10, width: '100%', alignItems: 'center' },
     tokenLabel: { fontSize: 12, color: '#666', marginBottom: 5 },
-    tokenValue: { fontSize: 24, fontWeight: '800', color: theme.primary, letterSpacing: 2 },
-    closeButton: { marginTop: 20, paddingVertical: 12, paddingHorizontal: 30, backgroundColor: theme.primary, borderRadius: 10 },
+    tokenValue: { fontSize: 24, fontWeight: '800', color: THEME.primary, letterSpacing: 2 },
+    closeButton: { marginTop: 20, paddingVertical: 12, paddingHorizontal: 30, backgroundColor: THEME.primary, borderRadius: 10 },
     closeButtonText: { color: '#FFF', fontWeight: '600' },
 });
