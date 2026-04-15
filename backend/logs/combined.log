@@ -507,3 +507,9 @@
 {"level":"info","message":"192.168.43.76 - 690c7de84d4df744806907b2 [09/Feb/2026:13:46:44 +0000] \"GET /api/users/profile HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 28.903 ms","timestamp":"2026-02-09 14:46:44"}
 {"duration":"12ms","ip":"192.168.43.76","level":"info","message":"📤 Response Success","method":"GET","statusCode":200,"timestamp":"2026-02-09 14:46:44","url":"/api/wallet","userId":"690c7de84d4df744806907b2"}
 {"level":"info","message":"192.168.43.76 - 690c7de84d4df744806907b2 [09/Feb/2026:13:46:44 +0000] \"GET /api/wallet HTTP/1.1\" 304 - \"-\" \"okhttp/4.12.0\" 11.204 ms","timestamp":"2026-02-09 14:46:44"}
+{"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 12:48:03"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 12:48:09"}
+{"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 12:52:52"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 12:52:52"}
+{"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 13:02:23"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 13:02:23"}

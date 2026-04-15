@@ -118,11 +118,41 @@ export class VTStackController {
      */
     static async webhook(req: Request, res: Response) {
         try {
-            const payload = req.body;
+            // req.body may be a raw Buffer if the server uses raw body parsing for webhooks
+            // Parse it to JSON if needed
+            let payload: any;
+            if (Buffer.isBuffer(req.body)) {
+                try {
+                    payload = JSON.parse(req.body.toString('utf8'));
+                } catch (parseErr) {
+                    console.error('❌ VTStack Webhook: Failed to parse Buffer body');
+                    return res.status(400).json({ success: false, message: 'Invalid payload' });
+                }
+            } else {
+                payload = req.body;
+            }
+
             console.log('🔔 VTStack Webhook received:', JSON.stringify(payload, null, 2));
 
-            if (payload.event === 'payment.success' && payload.data) {
-                const { accountNumber, amount, reference } = payload.data;
+            // VTStack sends event as 'transaction.deposit' (not 'payment.success')
+            const isDeposit = payload.event === 'transaction.deposit' || payload.event === 'payment.success';
+
+            if (isDeposit && payload.data) {
+                const data = payload.data;
+
+                // VTStack sends 'virtualAccount' field (not 'accountNumber' at top level)
+                const accountNumber = data.virtualAccount || data.accountNumber || data.customer?.accountNumber;
+                const amount        = data.amount;
+                const reference     = data.reference;
+                const currency      = data.currency || 'NGN';
+                const senderName    = data.customer?.name || data.customer || 'Customer';
+
+                console.log(`📥 Deposit: account=${accountNumber}, amount=${amount}, ref=${reference}`);
+
+                if (!accountNumber) {
+                    console.warn('⚠️ Webhook received but no account number found in payload');
+                    return res.status(200).json({ status: 'ignored', message: 'No account number in payload' });
+                }
 
                 // Find the virtual account locally
                 const virtualAccount = await VirtualAccount.findOne({ accountNumber, provider: 'vtstack' });
@@ -146,24 +176,29 @@ export class VTStackController {
                     return res.status(200).json({ status: 'error', message: 'Wallet not found' });
                 }
 
-                // Fund Wallet using WalletService
-                await WalletService.creditWallet(virtualAccount.user as unknown as Types.ObjectId, parseFloat(amount));
+                // VTStack sends amount directly in Naira (e.g. 9900 = ₦9,900)
+                const amountInNaira = parseFloat(amount);
+
+                await WalletService.creditWallet(virtualAccount.user as unknown as Types.ObjectId, amountInNaira);
 
                 // Record Transaction
                 await Transaction.create({
                     user_id: virtualAccount.user,
                     wallet_id: wallet._id,
                     type: 'wallet_funding',
-                    amount: parseFloat(amount),
+                    amount: amountInNaira,
                     fee: 0,
                     total_charged: 0,
                     status: 'successful',
                     reference_number: reference,
                     payment_method: 'vtstack_transfer',
-                    description: `Bank transfer from ${payload.data.customer || 'Customer'}`
+                    description: `Bank transfer from ${senderName}`,
+                    metadata: { currency, raw_payload: data }
                 });
 
-                console.log(`✅ Wallet funded for user ${virtualAccount.user}: ${amount}`);
+                console.log(`✅ Wallet funded: user=${virtualAccount.user}, amount=₦${amountInNaira}, ref=${reference}`);
+            } else {
+                console.log(`ℹ️ Unhandled VTStack event type: ${payload.event}`);
             }
 
             return res.status(200).json({ success: true });
