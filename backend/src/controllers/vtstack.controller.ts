@@ -176,8 +176,8 @@ export class VTStackController {
                     return res.status(200).json({ status: 'error', message: 'Wallet not found' });
                 }
 
-                // VTStack sends amount directly in Naira (e.g. 9900 = ₦9,900)
-                const amountInNaira = parseFloat(amount);
+                // VTStack sends amount in kobo (e.g. 9900 kobo = ₦99)
+                const amountInNaira = parseFloat(amount) / 100;
 
                 await WalletService.creditWallet(virtualAccount.user as unknown as Types.ObjectId, amountInNaira);
 
@@ -185,7 +185,7 @@ export class VTStackController {
                 await Transaction.create({
                     user_id: virtualAccount.user,
                     wallet_id: wallet._id,
-                    type: 'wallet_funding',
+                    type: 'wallet_topup',
                     amount: amountInNaira,
                     fee: 0,
                     total_charged: 0,
