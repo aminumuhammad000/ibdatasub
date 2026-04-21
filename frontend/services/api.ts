@@ -108,11 +108,13 @@ api.interceptors.response.use(
     if (status === 401) {
       // Clear auth data on 401
       try {
-        // Get current route before clearing storage
-        const currentRoute = window.location.pathname;
+        // Safe check for window.location to prevent crashes in React Native
+        const currentRoute = typeof window !== 'undefined' && window.location ? window.location.pathname || '' : '';
         const isAuthPage = ['/login', '/register', '/forgot-password', '/auth/'].some(path =>
           currentRoute.includes(path)
         );
+        
+        const isAuthRequest = error.config?.url?.includes('/auth/');
 
         // Clear auth data
         await AsyncStorage.multiRemove(['authToken', 'user', 'walletData', 'transactions', 'profileData']);
@@ -122,8 +124,8 @@ api.interceptors.response.use(
           delete api.defaults.headers.common['Authorization'];
         }
 
-        // Update error message for user
-        if (!isAuthPage) {
+        // Update error message for user, but NOT for auth requests/pages
+        if (!isAuthPage && !isAuthRequest) {
           errorMessage = 'Your session has expired. Please log in again.';
         }
 
@@ -153,7 +155,7 @@ api.interceptors.response.use(
     }
 
     // Show user-friendly alert for non-401 errors and non-auth pages
-    const isAuthRequest = error.config?.url?.startsWith('/auth/');
+    const isAuthRequest = error.config?.url?.includes('/auth/');
     if (status !== 401 && !isAuthRequest) {
       Alert.alert('Error', errorMessage);
     }
@@ -165,7 +167,9 @@ api.interceptors.response.use(
       data,
       isApiError: true,
       originalError: error,
-      details: error.response?.data || error.message
+      details: error.response?.data || error.message,
+      // Add response so error.response?.data works in catching components
+      response: error.response
     });
   }
 );

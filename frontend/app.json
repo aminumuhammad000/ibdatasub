@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Marabusdata",
+    "name": "Murabusdata",
     "slug": "vtu-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.aminuamee.vtuapp",
-      "versionCode": 3,
+      "versionCode": 32,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -51,9 +51,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3de35e67-6b7a-403a-b563-2737290040a2"
+        "projectId": "398ca600-948f-4c4e-b795-48287307b259"
       }
-    },
-    "owner": "connecta2026"
+    }
   }
 }

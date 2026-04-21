@@ -199,20 +199,22 @@ const Settings = () => {
                                         </div>
                                     </label>
 
-                                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${systemSettings.payment_gateway === 'payrant' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                    <div className="flex items-center p-4 border border-slate-200 rounded-xl bg-slate-50 opacity-50 cursor-not-allowed select-none">
                                         <input
                                             type="radio"
                                             name="payment_gateway"
                                             value="payrant"
-                                            checked={systemSettings.payment_gateway === 'payrant'}
-                                            onChange={handleSystemChange}
-                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                            disabled
+                                            checked={false}
+                                            onChange={() => {}}
+                                            className="w-4 h-4 text-slate-400 cursor-not-allowed"
                                         />
-                                        <div className="ml-3">
-                                            <span className="block text-sm font-medium text-slate-900">Payrant</span>
-                                            <span className="block text-xs text-slate-500">Alternative payment provider.</span>
+                                        <div className="ml-3 flex-1">
+                                            <span className="block text-sm font-medium text-slate-400">Payrant</span>
+                                            <span className="block text-xs text-slate-400">Alternative payment provider.</span>
                                         </div>
-                                    </label>
+                                        <span className="ml-auto text-xs font-semibold bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full">Unavailable</span>
+                                    </div>
                                 </div>
                             </div>
 

@@ -515,3 +515,7 @@
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 13:11:22"}
 {"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 13:12:48"}
 {"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 13:12:48"}
+{"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 13:15:47"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 13:15:47"}
+{"environment":"development","level":"info","message":"🚀 Marabusdata Backend Starting...","nodeVersion":"v22.18.0","timestamp":"2026-04-15 13:27:30"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2026-04-15 13:27:30"}

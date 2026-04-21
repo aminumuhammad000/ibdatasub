@@ -1,0 +1,29 @@
+commit 7dfd89fa9f5c1642d5499f16d108aa0cdcb5cdc3
+Author: aminumuhammad000 <aminumuhammad00015@gmail.com>
+Date:   Mon Mar 9 15:41:27 2026 +0100
+
+    Refactor service navigation, integrate Exam PIN, and fix TS errors
+
+commit 90c08ffe24651afb3aab2ef16107dc0a332f6014
+Author: aminumuhammad000 <aminumuhammad00015@gmail.com>
+Date:   Mon Mar 9 15:31:44 2026 +0100
+
+    fixed version updates
+
+commit 4f0811a3f10595452c89a34b7705cfc266862ec8
+Author: aminumuhammad000 <aminumuhammad00015@gmail.com>
+Date:   Tue Mar 3 17:54:06 2026 +0100
+
+    Update migration script to use default BVN for users without one
+
+commit e9681ece74b3fa1379ac51f1dbfc72dcd89bfe2f
+Author: aminumuhammad000 <aminumuhammad00015@gmail.com>
+Date:   Tue Mar 3 17:30:54 2026 +0100
+
+    feat: implement electricity payment, gateway-specific virtual accounts and VTStack migration script
+
+commit 1371fd26f82a02b8f53a0b44e2640dbbb36ef99b
+Author: aminumuhammad000 <aminumuhammad00015@gmail.com>
+Date:   Sat Feb 28 17:26:42 2026 +0100
+
+    feat: Integrate VTStack payment gateway and replace application logos
