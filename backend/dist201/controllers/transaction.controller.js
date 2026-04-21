@@ -118,7 +118,7 @@ export class TransactionController {
     static async updateTransactionStatus(req, res) {
         try {
             const { status, remarks } = req.body;
-            const allowedStatuses = ['pending', 'completed', 'failed', 'cancelled'];
+            const allowedStatuses = ['pending', 'successful', 'failed', 'refunded'];
             if (!allowedStatuses.includes(status)) {
                 return ApiResponse.error(res, 'Invalid status', 400);
             }

@@ -6,9 +6,7 @@ const router = Router();
 
 // Wallet routes (protected)
 router.get('/', authMiddleware, WalletController.getWallet);
-router.post('/fund', authMiddleware, WalletController.fundWallet);
 router.get('/transactions', authMiddleware, WalletController.getWalletTransactions);
-router.put('/adjust', authMiddleware, WalletController.adjustBalance);
 router.post('/transfer', authMiddleware, WalletController.transferFunds);
 
 export default router;

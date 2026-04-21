@@ -444,7 +444,7 @@ export class BillPaymentController {
                 // Update transaction status
                 if (result.status === 'success' || result.status === true || result.status === 'true') {
                     await Transaction.findByIdAndUpdate(transaction._id, {
-                        status: 'completed',
+                        status: 'successful',
                         response: result
                     });
                     const updatedWallet = await WalletService.getWalletByUserId(userId);

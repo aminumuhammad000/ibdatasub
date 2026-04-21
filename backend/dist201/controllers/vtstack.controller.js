@@ -151,22 +151,32 @@ export class VTStackController {
                 }
                 // VTStack sends amount in kobo (e.g. 9900 kobo = ₦99)
                 const amountInNaira = parseFloat(amount) / 100;
-                await WalletService.creditWallet(virtualAccount.user, amountInNaira);
-                // Record Transaction
-                await Transaction.create({
-                    user_id: virtualAccount.user,
-                    wallet_id: wallet._id,
-                    type: 'wallet_topup',
-                    amount: amountInNaira,
-                    fee: 0,
-                    total_charged: 0,
-                    status: 'successful',
-                    reference_number: reference,
-                    payment_method: 'vtstack_transfer',
-                    description: `Bank transfer from ${senderName}`,
-                    metadata: { currency, raw_payload: data }
-                });
-                console.log(`✅ Wallet funded: user=${virtualAccount.user}, amount=₦${amountInNaira}, ref=${reference}`);
+                try {
+                    // Record Transaction FIRST to ensure idempotency via unique reference_number index
+                    const transaction = await Transaction.create({
+                        user_id: virtualAccount.user,
+                        wallet_id: wallet._id,
+                        type: 'wallet_topup',
+                        amount: amountInNaira,
+                        fee: 0,
+                        total_charged: 0,
+                        status: 'successful',
+                        reference_number: reference,
+                        payment_method: 'vtstack_transfer',
+                        description: `Bank transfer from ${senderName}`,
+                        metadata: { currency, raw_payload: data }
+                    });
+                    // Credit wallet ONLY AFTER transaction record is successfully created
+                    await WalletService.creditWallet(virtualAccount.user, amountInNaira);
+                    console.log(`✅ Wallet funded: user=${virtualAccount.user}, amount=₦${amountInNaira}, ref=${reference}`);
+                }
+                catch (error) {
+                    if (error.code === 11000) {
+                        console.log('🔁 Transaction already processed (race condition caught):', reference);
+                        return res.status(200).json({ status: 'success', message: 'Already processed' });
+                    }
+                    throw error;
+                }
             }
             else {
                 console.log(`ℹ️ Unhandled VTStack event type: ${payload.event}`);

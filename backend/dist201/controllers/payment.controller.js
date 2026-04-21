@@ -3,6 +3,7 @@ import { SystemSetting } from '../models/system_setting.model.js';
 import { MonnifyService } from '../services/monnify.service.js';
 import { PaystackService } from '../services/paystack.service.js';
 import { vtStackService } from '../services/vtstack.service.js';
+import { WalletService } from '../services/wallet.service.js';
 import { ApiResponse } from '../utils/response.js';
 // Initialize services
 const monnifyService = new MonnifyService();
@@ -71,21 +72,39 @@ export class PaymentController {
             // Handle different event types
             if (event.eventType === 'SUCCESSFUL_TRANSACTION') {
                 const { paymentReference, amount, customer } = event.eventData;
-                // Update wallet balance
-                const wallet = await Wallet.findOne({ userId: customer.email });
+                // Find user by email first
+                const user = await User.findOne({ email: customer.email });
+                if (!user) {
+                    console.error(`Monnify Webhook: User not found for email ${customer.email}`);
+                    return res.status(200).json({ status: false, message: 'User not found' });
+                }
+                // Update wallet balance atomically
+                const wallet = await Wallet.findOne({ user_id: user._id });
                 if (wallet) {
-                    wallet.balance += amount;
-                    await wallet.save();
-                    // Record transaction
-                    await Transaction.create({
-                        userId: wallet.userId,
-                        amount,
-                        type: 'credit',
-                        status: 'completed',
-                        reference: paymentReference,
-                        description: 'Wallet funding via Monnify',
-                        metadata: { gateway: 'monnify' }
-                    });
+                    try {
+                        // Record transaction FIRST for idempotency
+                        await Transaction.create({
+                            user_id: user._id,
+                            wallet_id: wallet._id,
+                            amount,
+                            type: 'wallet_topup',
+                            total_charged: 0,
+                            payment_method: 'monnify_transfer',
+                            status: 'successful',
+                            reference_number: paymentReference,
+                            description: 'Wallet funding via Monnify',
+                            metadata: { gateway: 'monnify' }
+                        });
+                        // Credit wallet ONLY AFTER transaction record is successfully created
+                        await WalletService.creditWallet(user._id, amount);
+                    }
+                    catch (error) {
+                        if (error.code === 11000) {
+                            console.log('🔁 Monnify: Transaction already processed:', paymentReference);
+                            return res.status(200).json({ status: true, message: 'Already processed' });
+                        }
+                        throw error;
+                    }
                 }
             }
             return res.status(200).json({ status: true });
@@ -248,11 +267,7 @@ export class PaymentController {
                 transaction.status = verificationResult.status;
                 // If payment is successful, update the wallet balance
                 if (verificationResult.status === true && transaction.type === 'credit') {
-                    const wallet = await Wallet.findById(transaction.wallet_id);
-                    if (wallet) {
-                        wallet.balance = (wallet.balance || 0) + transaction.amount;
-                        await wallet.save();
-                    }
+                    await WalletService.creditWallet(transaction.user_id, transaction.amount);
                 }
                 await transaction.save();
             }
@@ -508,35 +523,44 @@ export class PaymentController {
                 console.log('⚠️ Transaction already processed:', reference);
                 return res.status(200).json({ status: true, message: 'Already processed' });
             }
-            // Credit wallet
-            const oldBalance = wallet.balance;
-            wallet.balance += amount;
-            await wallet.save();
-            console.log(`💰 Wallet updated: ₦${oldBalance} -> ₦${wallet.balance}`);
-            // Create transaction record
-            await Transaction.create({
-                user_id: user._id,
-                amount: amount,
-                type: 'deposit',
-                status: 'completed',
-                reference_number: reference,
-                description: `Virtual account deposit from ${payerDetails?.account_name || 'Unknown'}`,
-                gateway: 'payrant',
-                metadata: {
-                    payer_account: payerDetails?.account_number,
-                    payer_name: payerDetails?.account_name,
-                    payer_bank: payerDetails?.bank_name,
-                    fee: transaction.fee || 0,
-                    gross_amount: transaction.amount,
-                    net_amount: transaction.net_amount,
-                    account_number: accountDetails?.account_number,
-                    account_name: accountDetails?.account_name,
-                    session_id: transaction.metadata?.session_id,
-                    timestamp: transaction.timestamp,
-                    webhook_event: eventType,
-                },
-            });
-            console.log(`✅ Wallet credited: User ${user.email}, Amount: ₦${amount}, New Balance: ₦${wallet.balance}`);
+            try {
+                // Create transaction record FIRST to ensure idempotency via unique reference_number index
+                await Transaction.create({
+                    user_id: user._id,
+                    wallet_id: wallet._id, // Add wallet_id which is required by schema
+                    amount: amount,
+                    type: 'wallet_topup', // Use wallet_topup to match existing types
+                    total_charged: 0,
+                    payment_method: 'payrant_virtual_account',
+                    status: 'successful',
+                    reference_number: reference,
+                    description: `Virtual account deposit from ${payerDetails?.account_name || 'Unknown'}`,
+                    gateway: 'payrant',
+                    metadata: {
+                        payer_account: payerDetails?.account_number,
+                        payer_name: payerDetails?.account_name,
+                        payer_bank: payerDetails?.bank_name,
+                        fee: transaction.fee || 0,
+                        gross_amount: transaction.amount,
+                        net_amount: transaction.net_amount,
+                        account_number: accountDetails?.account_number,
+                        account_name: accountDetails?.account_name,
+                        session_id: transaction.metadata?.session_id,
+                        timestamp: transaction.timestamp,
+                        webhook_event: eventType,
+                    },
+                });
+                // Credit wallet ONLY AFTER transaction record is successfully created
+                await WalletService.creditWallet(user._id, amount);
+                console.log(`✅ Wallet credited: User ${user.email}, Amount: ₦${amount}, New Balance: ₦${(wallet.balance || 0) + amount}`);
+            }
+            catch (error) {
+                if (error.code === 11000) {
+                    console.log('🔁 Transaction already processed (race condition caught):', reference);
+                    return res.status(200).json({ status: true, message: 'Already processed' });
+                }
+                throw error;
+            }
             return res.status(200).json({ status: true, message: 'Webhook processed successfully' });
         }
         catch (error) {

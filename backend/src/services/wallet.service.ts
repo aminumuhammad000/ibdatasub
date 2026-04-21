@@ -16,24 +16,39 @@ export class WalletService {
     return wallet?.balance || 0;
   }
 
-  static async creditWallet(user_id: Types.ObjectId, amount: number): Promise<boolean> {
-    const wallet = await Wallet.findOne({ user_id });
-    if (!wallet) throw new Error('Wallet not found');
-
-    wallet.balance += amount;
-    wallet.last_transaction_at = new Date();
-    await wallet.save();
+  static async creditWallet(user_id: Types.ObjectId | string, amount: number): Promise<boolean> {
+    const result = await Wallet.findOneAndUpdate(
+      { user_id },
+      { 
+        $inc: { balance: amount },
+        $set: { last_transaction_at: new Date(), updated_at: new Date() }
+      },
+      { new: true, upsert: false }
+    );
+    
+    if (!result) throw new Error('Wallet not found');
     return true;
   }
 
-  static async debitWallet(user_id: Types.ObjectId, amount: number): Promise<boolean> {
-    const wallet = await Wallet.findOne({ user_id });
-    if (!wallet) throw new Error('Wallet not found');
-    if (wallet.balance < amount) throw new Error('Insufficient balance');
+  static async debitWallet(user_id: Types.ObjectId | string, amount: number): Promise<boolean> {
+    // We use a filter on balance to ensure we don't go below 0 (atomic check)
+    const result = await Wallet.findOneAndUpdate(
+      { 
+        user_id,
+        balance: { $gte: amount }
+      },
+      { 
+        $inc: { balance: -amount },
+        $set: { last_transaction_at: new Date(), updated_at: new Date() }
+      },
+      { new: true }
+    );
 
-    wallet.balance -= amount;
-    wallet.last_transaction_at = new Date();
-    await wallet.save();
+    if (!result) {
+      const wallet = await Wallet.findOne({ user_id });
+      if (!wallet) throw new Error('Wallet not found');
+      throw new Error('Insufficient balance');
+    }
     return true;
   }
 
@@ -43,10 +58,10 @@ export class WalletService {
   }
 
   static async debit(user_id: Types.ObjectId | string, amount: number, description?: string) {
-    return await this.debitWallet(user_id as Types.ObjectId, amount);
+    return await this.debitWallet(user_id, amount);
   }
 
   static async credit(user_id: Types.ObjectId | string, amount: number, description?: string) {
-    return await this.creditWallet(user_id as Types.ObjectId, amount);
+    return await this.creditWallet(user_id, amount);
   }
 }
