@@ -29,15 +29,28 @@ class SMEPlugService {
             throw new Error(`Unsupported network: ${network}`);
         return id;
     }
+    maskKey(key) {
+        if (!key)
+            return 'empty';
+        if (key.length <= 10)
+            return '***';
+        return `${key.substring(0, 5)}...${key.substring(key.length - 5)}`;
+    }
     async ensureClient() {
         if (this.api)
             return this.api;
         const cfg = await ProviderConfig.findOne({ code: 'smeplug' });
         const baseURL = cfg?.base_url || 'https://smeplug.ng/api';
-        const apiKey = cfg?.api_key || cfg?.metadata?.env?.SMEPLUG_API_KEY || '';
+        // Priority: process.env > database api_key > database metadata
+        const apiKey = process.env.SMEPLUG_API_KEY ||
+            cfg?.api_key ||
+            cfg?.metadata?.env?.SMEPLUG_API_KEY ||
+            '';
         if (!apiKey) {
+            logger.error('SMEPlug API key not configured in .env or database');
             throw new Error('SMEPlug API key not configured');
         }
+        logger.info(`Initializing SMEPlug client with key: ${this.maskKey(apiKey)} and baseURL: ${baseURL}`);
         this.api = axios.create({
             baseURL,
             headers: {
@@ -53,14 +66,19 @@ class SMEPlugService {
      * GET /v1/account/balance
      */
     async getWalletBalance() {
+        let api;
         try {
-            const api = await this.ensureClient();
+            api = await this.ensureClient();
             const res = await api.get('/v1/account/balance');
             logger.info('SMEPlug wallet balance retrieved', { balance: res.data });
             return res.data;
         }
         catch (error) {
-            logger.error('SMEPlug getWalletBalance error:', error.response?.data || error.message);
+            logger.error('SMEPlug getWalletBalance error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
             throw error;
         }
     }
@@ -69,14 +87,19 @@ class SMEPlugService {
      * GET /v1/networks
      */
     async getNetworks() {
+        let api;
         try {
-            const api = await this.ensureClient();
+            api = await this.ensureClient();
             const res = await api.get('/v1/networks');
             logger.info('SMEPlug networks retrieved', { count: res.data?.data?.length || 0 });
             return res.data;
         }
         catch (error) {
-            logger.error('SMEPlug getNetworks error:', error.response?.data || error.message);
+            logger.error('SMEPlug getNetworks error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
             throw error;
         }
     }
@@ -119,7 +142,11 @@ class SMEPlugService {
             return res.data;
         }
         catch (error) {
-            logger.error('SMEPlug purchaseAirtime error:', error.response?.data || error.message);
+            logger.error('SMEPlug purchaseAirtime error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
             throw error;
         }
     }
@@ -147,7 +174,11 @@ class SMEPlugService {
             return res.data;
         }
         catch (error) {
-            logger.error('SMEPlug purchaseData error:', error.response?.data || error.message);
+            logger.error('SMEPlug purchaseData error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
             throw error;
         }
     }
