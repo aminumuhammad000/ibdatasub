@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-    "start": "npm run build && npm run init:admin && npm run seed:admin && npm run seed:providers && npm run seed:data-plans && node dist/server.js",
-    "start:with-seed": "npm run build && npm run seed:pricing && npm run seed:providers && node dist/server.js",
+    "start": "npm run build && npm run init:admin && npm run seed:admin && npm run seed:providers && npm run seed:data-plans && PORT=5001 node dist/server.js",
+    "start:with-seed": "npm run build && npm run seed:pricing && npm run seed:providers && PORT=5001 node dist/server.js",
     "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
     "test:coverage": "NODE_ENV=test jest --coverage",
