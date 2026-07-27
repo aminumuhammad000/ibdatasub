@@ -12,7 +12,7 @@ export const Logo = ({ size = 48 }) => (
 const styles = StyleSheet.create({
   container: {
     borderRadius: 24,
-    backgroundColor: '#0a335c',
+    backgroundColor: '#1e5faf',
     alignItems: 'center',
     justifyContent: 'center',
   },

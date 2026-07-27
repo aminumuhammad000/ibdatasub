@@ -157,7 +157,7 @@ const LoginScreen = () => {
   };
 
   const theme = {
-    primary: "#0A2540",
+    primary: "#1e5faf",
     accent: "#FF9F43",
     backgroundLight: "#F8F9FA",
     backgroundDark: "#111921",

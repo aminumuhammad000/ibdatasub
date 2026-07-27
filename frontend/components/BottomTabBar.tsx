@@ -17,7 +17,7 @@ const BottomTabBar = () => {
   const isDark = colorScheme === 'dark';
 
   const theme = {
-    primary: '#0A2540',
+    primary: '#1e5faf',
     accent: '#FF9F43',
   };
 

@@ -1,7 +1,7 @@
 import { useTheme } from '@/components/ThemeContext';
 import { authService } from '@/services/auth.service';
 import { billPaymentService } from '@/services/billpayment.service';
-import * as Contacts from 'expo-contacts';
+
 
 import { userService } from '@/services/user.service';
 import { WalletData, walletService } from '@/services/wallet.service';
@@ -146,7 +146,7 @@ export default function HomeScreen() {
   };
 
   const theme = {
-    primary: '#0A2540',
+    primary: '#1e5faf',
     accent: '#FF9F43',
     backgroundLight: '#F8F9FA',
     backgroundDark: '#111921',
@@ -192,47 +192,7 @@ export default function HomeScreen() {
     }
   };
 
-  const selectContact = async () => {
-    const { status } = await Contacts.requestPermissionsAsync();
-    if (status === 'granted') {
-      const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers],
-      });
-      if (data.length > 0) {
-        try {
-          const contact = await Contacts.presentContactPickerAsync();
-          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
-            let number = contact.phoneNumbers[0].number;
-            if (number) {
-              number = number.replace(/\D/g, '');
-              if (number.startsWith('234')) number = '0' + number.slice(3);
-              if (number.length === 13 && number.startsWith('234')) number = '0' + number.slice(3);
-              setPhoneNumber(number);
-            }
-          }
-        } catch (err) {
-          console.log(err);
-          // Silent fail or simple log
-        }
-      } else {
-        Alert.alert('Info', 'No contacts found');
-      }
-    } else {
-      const { status: currentStatus, canAskAgain } = await Contacts.getPermissionsAsync();
-      if (!canAskAgain && currentStatus !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'You have denied contact access. Please enable it in your phone settings to use this feature.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
-          ]
-        );
-      } else {
-        Alert.alert('Permission Denied', 'Permission to access contacts was denied. We need this to help you select phone numbers easily.');
-      }
-    }
-  };
+
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -422,9 +382,7 @@ export default function HomeScreen() {
                   onChangeText={setPhoneNumber}
                   keyboardType="phone-pad"
                 />
-                <TouchableOpacity onPress={selectContact}>
-                  <Ionicons name="people" size={20} color={theme.accent} style={styles.inputIcon} />
-                </TouchableOpacity>
+
               </View>
 
               {/* Amount Buttons */}
@@ -649,7 +607,7 @@ const styles = StyleSheet.create({
   balanceCard: {
     borderRadius: 20,
     padding: 24,
-    shadowColor: '#0A2540',
+    shadowColor: '#1e5faf',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -733,9 +691,7 @@ const styles = StyleSheet.create({
   formContainer: {
     gap: 12,
   },
-  inputIcon: {
-    marginLeft: 8,
-  },
+
   amountGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

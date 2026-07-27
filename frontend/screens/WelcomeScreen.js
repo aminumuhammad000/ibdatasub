@@ -71,7 +71,7 @@ const WelcomeScreen = () => {
           <View key={slide.id} style={styles.slide}>
             <View style={styles.iconContainer}>
               <View style={styles.iconBackground}>
-                <MaterialIcons name={slide.icon} size={80} color="#34d399" />
+                <MaterialIcons name={slide.icon} size={80} color="#1e5faf" />
               </View>
             </View>
             <Text style={styles.title}>{slide.title}</Text>
@@ -118,7 +118,7 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#111418',
   },
   header: {
     alignItems: 'center',
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoText: {
-    color: '#111418',
+    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 10,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 100,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(30, 95, 175, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   paginationDotActive: {
     width: 32,
-    backgroundColor: '#34d399',
+    backgroundColor: '#1e5faf',
   },
   footer: {
     padding: 24,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
   },
   primaryButton: {
-    backgroundColor: '#34d399',
+    backgroundColor: '#1e5faf',
     borderRadius: 8,
     height: 56,
     justifyContent: 'center',
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryButtonText: {
-    color: '#0a335c',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',

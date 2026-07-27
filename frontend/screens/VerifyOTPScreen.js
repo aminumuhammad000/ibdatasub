@@ -37,7 +37,7 @@ export default function VerifyOTPScreen() {
   }, []);
 
   const theme = {
-    primary: "#0A2540",
+    primary: "#1e5faf",
     accent: "#FF9F43",
     backgroundLight: "#F8F9FA",
     backgroundDark: "#111921",
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, height: 50, fontFamily: "Poppins-Regular" },
   buttonContainer: { marginTop: 8 },
   button: { height: 50, borderRadius: 10, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  primaryButton: { backgroundColor: "#0A2540" },
+  primaryButton: { backgroundColor: "#1e5faf" },
   primaryButtonText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Poppins-SemiBold" },
   buttonDisabled: { opacity: 0.6 },
   secondaryButton: { backgroundColor: "transparent", borderWidth: 1, borderColor: "#334155" },

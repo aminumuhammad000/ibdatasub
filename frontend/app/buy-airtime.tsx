@@ -2,13 +2,12 @@ import { useAlert } from '@/components/AlertContext';
 import TransactionPinModal from '@/components/TransactionPinModal';
 import { billPaymentService } from '@/services/billpayment.service';
 import { Ionicons } from '@expo/vector-icons';
-import * as Contacts from 'expo-contacts';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  Linking,
+
   Modal,
   ScrollView,
   StyleSheet,
@@ -20,7 +19,7 @@ import {
 } from 'react-native';
 
 const theme = {
-  primary: '#0A2540',
+  primary: '#1e5faf',
   accent: '#FF9F43',
   success: '#00D4AA',
   error: '#FF5B5B',
@@ -87,7 +86,7 @@ export default function BuyAirtimeScreen() {
             const id = baseId || `net-${i}`;
 
             // Map network colors to match Buy Data screen
-            let color = '#0A2540'; // default
+            let color = '#1e5faf'; // default
             const networkName = (n.name || n.network || n.network_code || '').toLowerCase();
             if (networkName.includes('mtn')) color = '#FFCC00';
             else if (networkName.includes('glo')) color = '#00A95C';
@@ -112,54 +111,7 @@ export default function BuyAirtimeScreen() {
     loadNetworks();
   }, []);
 
-  const selectContact = async () => {
-    const { status } = await Contacts.requestPermissionsAsync();
-    if (status === 'granted') {
-      const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers],
-      });
-      if (data.length > 0) {
-        try {
-          const contact = await Contacts.presentContactPickerAsync();
-          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
-            let number = contact.phoneNumbers[0].number;
-            // Clean number
-            if (number) {
-              number = number.replace(/\D/g, '');
-              // Handle +234
-              if (number.startsWith('234')) {
-                number = '0' + number.slice(3);
-              }
-              // Handle 234 without +
-              if (number.length === 13 && number.startsWith('234')) {
-                number = '0' + number.slice(3);
-              }
-              setPhoneNumber(number);
-            }
-          }
-        } catch (err) {
-          console.log(err);
-          showInfo('Could not open contacts');
-        }
-      } else {
-        showInfo('No contacts found');
-      }
-    } else {
-      const { status: currentStatus, canAskAgain } = await Contacts.getPermissionsAsync();
-      if (!canAskAgain && currentStatus !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'You have denied contact access. Please enable it in your phone settings to use this feature.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
-          ]
-        );
-      } else {
-        showError('Permission to access contacts was denied. We need this to help you select phone numbers easily.');
-      }
-    }
-  };
+
 
   const initiatePurchase = () => {
     if (!phoneNumber || !selectedNetwork || (!selectedAmount && !customAmount)) {
@@ -241,9 +193,7 @@ export default function BuyAirtimeScreen() {
           <Ionicons name="arrow-back" size={24} color={textColor} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: textColor }]}>Buy Airtime</Text>
-        <TouchableOpacity onPress={selectContact}>
-          <Ionicons name="people" size={24} color={theme.accent} />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView
@@ -310,9 +260,7 @@ export default function BuyAirtimeScreen() {
               keyboardType="phone-pad"
               maxLength={11}
             />
-            <TouchableOpacity onPress={selectContact} style={styles.contactBtn}>
-              <Ionicons name="book-outline" size={22} color={theme.accent} />
-            </TouchableOpacity>
+
           </View>
         </View>
 
@@ -604,9 +552,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
   },
-  contactBtn: {
-    padding: 8,
-  },
+
   currencySymbol: {
     fontSize: 16,
     fontWeight: '600',

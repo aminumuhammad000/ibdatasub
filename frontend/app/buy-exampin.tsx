@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 
 const THEME = {
-    primary: '#0A2540',
+    primary: '#1e5faf',
     accent: '#FF9F43',
     success: '#00D4AA',
     error: '#FF5B5B',

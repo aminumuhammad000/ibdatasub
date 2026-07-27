@@ -2,13 +2,12 @@ import { useAlert } from '@/components/AlertContext';
 import TransactionPinModal from '@/components/TransactionPinModal';
 import { billPaymentService } from '@/services/billpayment.service';
 import { Ionicons } from '@expo/vector-icons';
-import * as Contacts from 'expo-contacts';
+
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  Linking,
+
   Modal,
   ScrollView,
   StyleSheet,
@@ -20,7 +19,7 @@ import {
 } from 'react-native';
 
 const THEME = {
-    primary: '#0A2540',
+    primary: '#1e5faf',
     accent: '#FF9F43',
     success: '#00D4AA',
     error: '#FF5B5B',
@@ -108,7 +107,7 @@ export default function BuyDataScreen() {
             return {
               id: String(p.planid || p.plan_id || p.id || p.plan || `plan-${i}`),
               data: name,
-              validity: p.validity || p.duration || '30 Days',
+              validity: p.validity || p.duration || '',
               price: Number(p.price || p.amount || 0),
               category
             };
@@ -132,47 +131,7 @@ export default function BuyDataScreen() {
     return plans.filter(p => p.category === selectedFilter);
   }, [plans, selectedFilter]);
 
-  const selectContact = async () => {
-    const { status } = await Contacts.requestPermissionsAsync();
-    if (status === 'granted') {
-      const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers],
-      });
-      if (data.length > 0) {
-        try {
-          const contact = await Contacts.presentContactPickerAsync();
-          if (contact && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
-            let number = contact.phoneNumbers[0].number;
-            if (number) {
-              number = number.replace(/\D/g, '');
-              if (number.startsWith('234')) number = '0' + number.slice(3);
-              if (number.length === 13 && number.startsWith('234')) number = '0' + number.slice(3);
-              setPhoneNumber(number);
-            }
-          }
-        } catch (err) {
-          console.log(err);
-          showInfo('Could not open contacts');
-        }
-      } else {
-        showInfo('No contacts found');
-      }
-    } else {
-      const { status: currentStatus, canAskAgain } = await Contacts.getPermissionsAsync();
-      if (!canAskAgain && currentStatus !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'You have denied contact access. Please enable it in your phone settings to use this feature.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
-          ]
-        );
-      } else {
-        showError('Permission to access contacts was denied. We need this to help you select phone numbers easily.');
-      }
-    }
-  };
+
 
   const initiatePurchase = () => {
     if (!phoneNumber || !selectedNetwork || !selectedPlan) {
@@ -284,17 +243,7 @@ export default function BuyDataScreen() {
               maxLength={11}
             />
           </View>
-          {/* Contact Button Outside */}
-          <TouchableOpacity
-            onPress={selectContact}
-            style={[
-              styles.contactBtnFull,
-              { borderColor: THEME.accent, backgroundColor: isDark ? 'rgba(255, 159, 67, 0.1)' : '#FFF7ED' }
-            ]}
-          >
-            <Ionicons name="people" size={20} color={THEME.accent} />
-            <Text style={{ color: THEME.accent, fontWeight: '600', marginLeft: 8 }}>Select from Contacts</Text>
-          </TouchableOpacity>
+
         </View>
 
         {/* Data Plans with Improved Filter Layout */}
@@ -341,9 +290,11 @@ export default function BuyDataScreen() {
                     <Text style={[styles.planData, { color: selectedPlan?.id === plan.id ? '#FFF' : textColor }]}>
                       {plan.data}
                     </Text>
-                    <Text style={[styles.planValidity, { color: selectedPlan?.id === plan.id ? '#D1D5DB' : textBodyColor }]}>
-                      {plan.validity}
-                    </Text>
+                    {plan.validity ? (
+                      <Text style={[styles.planValidity, { color: selectedPlan?.id === plan.id ? '#D1D5DB' : textBodyColor }]}>
+                        {plan.validity}
+                      </Text>
+                    ) : null}
                     <Text style={[styles.planPrice, { color: selectedPlan?.id === plan.id ? THEME.accent : THEME.primary }]}>
                       ₦{plan.price.toLocaleString()}
                     </Text>
@@ -445,10 +396,7 @@ const styles = StyleSheet.create({
   },
   inputIcon: { marginRight: 12 },
   input: { flex: 1, fontSize: 16 },
-  contactBtnFull: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    marginTop: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed'
-  },
+
   plansHeaderContainer: { marginBottom: 12 },
   filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
   plansGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },

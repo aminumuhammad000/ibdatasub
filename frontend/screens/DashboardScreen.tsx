@@ -21,7 +21,7 @@ export default function DashboardScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const theme = {
-    primary: '#0A2540',
+    primary: '#1e5faf',
     accent: '#FF9F43',
     backgroundLight: '#F8F9FA',
     backgroundDark: '#111921',
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#0A2540',
+    borderBottomColor: '#1e5faf',
   },
   tabText: {
     fontSize: 14,

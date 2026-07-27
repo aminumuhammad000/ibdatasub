@@ -58,7 +58,7 @@ const OnboardingScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.slide}>
       <View style={styles.iconContainer}>
-        <MaterialIcons name={item.icon} size={96} color="#34d399" />
+        <MaterialIcons name={item.icon} size={96} color="#1e5faf" />
       </View>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     width: 192,
     height: 192,
     borderRadius: 100,
-    backgroundColor: 'rgba(10, 51, 92, 0.3)',
+    backgroundColor: 'rgba(30, 95, 175, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 32,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   paginationDotActive: {
     width: 32,
-    backgroundColor: '#34d399',
+    backgroundColor: '#1e5faf',
   },
   footer: {
     padding: 24,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   primaryButton: {
-    backgroundColor: '#34d399',
+    backgroundColor: '#1e5faf',
     borderRadius: 8,
     height: 56,
     justifyContent: 'center',
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryButtonText: {
-    color: '#0a335c',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Inter-Bold',

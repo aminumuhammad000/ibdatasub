@@ -20,7 +20,7 @@ import {
 
 // Constants
 const THEME = {
-  primary: '#0A2540',
+  primary: '#1e5faf',
   success: '#00D4AA',
   error: '#FF5B5B',
   dark: {

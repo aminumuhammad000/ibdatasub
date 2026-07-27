@@ -40,7 +40,7 @@ export default function ResetPasswordScreen() {
   }, []);
 
   const theme = {
-    primary: "#0A2540",
+    primary: "#1e5faf",
     accent: "#FF9F43",
     backgroundLight: "#F8F9FA",
     backgroundDark: "#111921",
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   eyeIcon: { padding: 4 },
   buttonContainer: { marginTop: 8 },
   button: { height: 50, borderRadius: 10, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  primaryButton: { backgroundColor: "#0A2540" },
+  primaryButton: { backgroundColor: "#1e5faf" },
   primaryButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
   buttonDisabled: { opacity: 0.6 },
 });

@@ -35,7 +35,7 @@ const SignupScreen = () => {
   const { isDark } = useTheme();
 
   const theme = {
-    primary: "#0A2540",
+    primary: "#1e5faf",
     accent: "#FF9F43",
     backgroundLight: "#F8F9FA",
     backgroundDark: "#111921",
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2E8F0',
   },
   progressDotActive: {
-    backgroundColor: '#0A2540',
+    backgroundColor: '#1e5faf',
 
   },
   progressLine: {
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   progressLineActive: {
-    backgroundColor: '#0A2540',
+    backgroundColor: '#1e5faf',
   },
   formContainer: {
     width: "100%",
