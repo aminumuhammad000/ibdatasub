@@ -1,53 +1,57 @@
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import { config } from '../config/bootstrap.js';
-import ProviderConfig from '../models/provider.model.js';
-import logger from '../utils/logger.js';
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import { config } from "../config/bootstrap.js";
+import ProviderConfig from "../models/provider.model.js";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
 const PROVIDERS = [
   {
-    name: 'Topupmate',
-    code: 'topupmate',
-    base_url: 'https://connect.topupmate.com/api',
-    api_key: process.env.TOPUPMATE_API_KEY || '',
-    secret_key: '',
-    username: '',
-    password: '',
-    active: false,
-    priority: 2,
-    supported_services: ['airtime', 'data', 'cable', 'electricity', 'exampin'],
-    metadata: {
-      env: {
-        TOPUPMATE_API_KEY: process.env.TOPUPMATE_API_KEY || ''
-      }
-    }
-  },
-  {
-    name: 'SME Plug',
-    code: 'smeplug',
-    base_url: 'https://smeplug.ng/api',
-    api_key: process.env.SMEPLUG_API_KEY || 'acc5a5e0c43bcd66498b0bf68aa38f2bf3290019e09f7305f6d158106f09475f',
-    secret_key: '',
-    username: '',
-    password: '',
+    name: "SME Plug",
+    code: "smeplug",
+    base_url: "https://smeplug.ng/api",
+    api_key:
+      process.env.SMEPLUG_API_KEY ||
+      "acc5a5e0c43bcd66498b0bf68aa38f2bf3290019e09f7305f6d158106f09475f",
+    secret_key: "",
+    username: "",
+    password: "",
     active: true,
     priority: 1,
-    supported_services: ['airtime', 'data'],
+    supported_services: ["airtime", "data"],
     metadata: {
       env: {
-        SMEPLUG_API_KEY: process.env.SMEPLUG_API_KEY || 'acc5a5e0c43bcd66498b0bf68aa38f2bf3290019e09f7305f6d158106f09475f'
-      }
-    }
-  }
+        SMEPLUG_API_KEY:
+          process.env.SMEPLUG_API_KEY ||
+          "acc5a5e0c43bcd66498b0bf68aa38f2bf3290019e09f7305f6d158106f09475f",
+      },
+    },
+  },
+  {
+    name: "Topupmate",
+    code: "topupmate",
+    base_url: "https://connect.topupmate.com/api",
+    api_key: process.env.TOPUPMATE_API_KEY || "",
+    secret_key: "",
+    username: "",
+    password: "",
+    active: true,
+    priority: 2,
+    supported_services: ["airtime", "data", "cable", "electricity", "exampin"],
+    metadata: {
+      env: {
+        TOPUPMATE_API_KEY: process.env.TOPUPMATE_API_KEY || "",
+      },
+    },
+  },
 ];
 
 async function run() {
   try {
     const mongoUrl = config.mongoUri;
     await mongoose.connect(mongoUrl);
-    logger.info('Connected to MongoDB');
+    logger.info("Connected to MongoDB");
 
     for (const p of PROVIDERS) {
       const exists = await ProviderConfig.findOne({ code: p.code });
@@ -62,12 +66,12 @@ async function run() {
 
     console.log(`✅ Providers seeded/updated: ${PROVIDERS.length}`);
   } catch (err) {
-    logger.error('Error seeding providers:', err);
-    console.error('❌ Error seeding providers:', err);
+    logger.error("Error seeding providers:", err);
+    console.error("❌ Error seeding providers:", err);
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    logger.info('Disconnected from MongoDB');
+    logger.info("Disconnected from MongoDB");
   }
 }
 

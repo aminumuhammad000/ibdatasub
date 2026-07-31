@@ -51,7 +51,7 @@
       "node"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/test/setup.ts"
+      "<rootDir>/test/setup.cjs"
     ]
   },
   "keywords": [],
