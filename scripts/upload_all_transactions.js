@@ -3,12 +3,12 @@ const path = require('path');
 const BSON = require('/tmp/bson-tool/node_modules/bson');
 const { createClient } = require(path.resolve(__dirname, '../admin-next/node_modules/@supabase/supabase-js'));
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ktjqbsoyuukmpvehcdkp.supabase.co';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.SUPABASE_SECRET_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  'sb_publishable_ceITR7XipG_dBI7KnBAnZA_RrVBYtjp';
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
