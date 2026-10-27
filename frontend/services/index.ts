@@ -11,6 +11,15 @@ export { transactionService } from './transaction.service';
 export { userService } from './user.service';
 export { vtstackService } from './vtstack.service';
 export { walletService } from './wallet.service';
+export { supabase } from './supabase';
+export {
+  supabaseAuthService,
+  supabaseWalletService,
+  supabaseTransactionService,
+  supabasePlansService,
+  supabaseNotificationsService,
+  supabaseAirtimeToCashService,
+} from './supabaseService';
 
 // Re-export types
 export type {

@@ -43,5 +43,9 @@ app-example
 /android
 backend/logs/
 
+# Next.js
+.next/
+out/
+
 # Backup credentials
 backup/.env
