@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Parse environment variables manually from admin-next/.env.local
-const envPath = path.resolve(__dirname, '../admin-next/.env.local');
+// Parse environment variables manually from .env.local
+const envPath = path.resolve(__dirname, '../.env.local');
 if (fs.existsSync(envPath)) {
   const content = fs.readFileSync(envPath, 'utf8');
   for (const line of content.split('\n')) {
@@ -17,7 +17,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-const { createClient } = require(path.resolve(__dirname, '../admin-next/node_modules/@supabase/supabase-js'));
+const { createClient } = require(path.resolve(__dirname, '../node_modules/@supabase/supabase-js'));
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey =

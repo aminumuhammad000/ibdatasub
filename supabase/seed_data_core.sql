@@ -6,7 +6,7 @@
 
 -- 1. Insert Admin Users
 INSERT INTO admin_users (id, email, password_hash, first_name, last_name, role, status, last_login_at, created_at, updated_at)
-VALUES ('00000000-6913-80a2-e3ba-eb2c24cb7bbf', 'murabusdatas@gmail.com', '$2b$10$v0tb/.0eNYoHcRyeTbf4uuyMupijHXDdhyKR5eBmWGw9JNx99xi6i', 'IBRAHIM', 'MURABUS', 'super_admin', 'active', '2026-07-13T11:12:57.383Z', '2025-11-11T18:29:54.442Z', '2026-05-01T13:06:04.038Z')
+VALUES ('00000000-6913-80a2-e3ba-eb2c24cb7bbf', 'murabusdatas@gmail.com', '$2b$10$3F5FLQUL02r.shr2fWzZreaCm8MaePzwHimQYvvKMm8h489rTMx5e', 'IBRAHIM', 'MURABUS', 'super_admin', 'active', '2026-07-13T11:12:57.383Z', '2025-11-11T18:29:54.442Z', '2026-05-01T13:06:04.038Z')
 ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name;
 INSERT INTO admin_users (id, email, password_hash, first_name, last_name, role, status, last_login_at, created_at, updated_at)
 VALUES ('00000000-6953-01eb-2328-8670bbff4d5a', 'admin@vtuapp.com', '$2b$10$5lTxJyv88W5GA5VqlfsSxupXRKmnl4diyW3VzUhF34ZPalS9CSvcO', 'Admin', 'User', 'super_admin', 'active', '2026-06-18T09:31:51.029Z', '2025-12-29T22:34:19.711Z', '2025-12-29T22:34:19.712Z')

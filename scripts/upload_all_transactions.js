@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const BSON = require('/tmp/bson-tool/node_modules/bson');
-const { createClient } = require(path.resolve(__dirname, '../admin-next/node_modules/@supabase/supabase-js'));
+const { createClient } = require(path.resolve(__dirname, '../node_modules/@supabase/supabase-js'));
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey =

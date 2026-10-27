@@ -60,7 +60,7 @@ const Login: React.FC = () => {
 
   const handleAutoFill = () => {
     setValue('email', 'murabusdatas@gmail.com');
-    setValue('password', 'Admin@123456');
+    setValue('password', 'Murabus2026');
     setApiError(null);
   };
 
@@ -115,7 +115,7 @@ const Login: React.FC = () => {
             </div>
             <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-blue-100">
               <span className="text-slate-500 font-sans">Password:</span>
-              <span className="font-semibold text-blue-900 select-all">Admin@123456</span>
+              <span className="font-semibold text-blue-900 select-all">Murabus2026</span>
             </div>
           </div>
         </div>

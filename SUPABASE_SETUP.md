@@ -45,21 +45,22 @@ From `mongodb-backup-2026-07-13.tar.gz`, the production data has been converted 
 
 ## 3. Admin Login Credentials
 
-From your migrated MongoDB backup, you can log in to the Next.js Admin Dashboard with:
+You can log in to the Next.js Admin Dashboard with:
 
 * **Email:** `murabusdatas@gmail.com`
-* **Or:** `admin@connectavtu.com`
-* *(Your existing password hash from MongoDB is preserved)*
+* **Password:** `Murabus2026`
+* **Secondary Admin:** `admin@connectavtu.com` / `Admin@123456`
 
 ---
 
 ## 4. Run the Apps
 
-### Admin Dashboard (Next.js)
+### Admin & Landing (Next.js)
 ```bash
-cd admin-next
 npm run dev
-# Dashboard runs on http://localhost:3000
+# App runs on http://localhost:3000
+# Landing page: http://localhost:3000/
+# Admin portal: http://localhost:3000/admin
 ```
 
 ### Mobile App (Expo / React Native)
