@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { login as loginApi } from '@/lib/supabaseApi';
 import { useAuthContext } from '@/hooks/AuthContext';
 import { useToast } from '@/hooks/ToastContext';
@@ -43,7 +44,10 @@ const Login: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('Login error:', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Login failed. Please check your credentials.';
+      let errorMessage = error?.response?.data?.message || error?.message || 'Login failed. Please check your credentials.';
+      if (error?.code === 'email_not_confirmed' || errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Admin account created, but email is not confirmed in Supabase. Please confirm the user in Supabase Authentication > Users or run SQL: UPDATE auth.users SET email_confirmed_at = NOW() WHERE email = \'murabusdatas@gmail.com\';';
+      }
       setApiError(errorMessage);
       toast.showError(errorMessage);
     },
@@ -54,11 +58,30 @@ const Login: React.FC = () => {
     mutation.mutate(data);
   };
 
+  const handleAutoFill = () => {
+    setValue('email', 'murabusdatas@gmail.com');
+    setValue('password', 'Admin@123456');
+    setApiError(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-12">
       <div className="w-full max-w-md px-6">
+        {/* Navigation back to landing */}
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-900 transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Landing Page
+          </Link>
+        </div>
+
         {/* Logo/Brand Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-2xl mb-4 shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -66,6 +89,35 @@ const Login: React.FC = () => {
           </div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h1>
           <p className="text-slate-500">Sign in to your admin account</p>
+        </div>
+
+        {/* Admin Login Details Hint Card */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs uppercase tracking-wider">
+              <svg className="w-4 h-4 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Admin Login Details
+            </div>
+            <button
+              type="button"
+              onClick={handleAutoFill}
+              className="text-xs bg-blue-700 hover:bg-blue-800 text-white font-medium px-2.5 py-1 rounded-md shadow-sm transition-all"
+            >
+              Auto-Fill
+            </button>
+          </div>
+          <div className="text-xs text-slate-700 space-y-1.5 font-mono">
+            <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-blue-100">
+              <span className="text-slate-500 font-sans">Email:</span>
+              <span className="font-semibold text-blue-900 select-all">murabusdatas@gmail.com</span>
+            </div>
+            <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-blue-100">
+              <span className="text-slate-500 font-sans">Password:</span>
+              <span className="font-semibold text-blue-900 select-all">Admin@123456</span>
+            </div>
+          </div>
         </div>
 
         {/* Login Form Card */}
@@ -77,7 +129,7 @@ const Login: React.FC = () => {
           {apiError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
                 <div>
@@ -110,7 +162,7 @@ const Login: React.FC = () => {
             {errors.email && (
               <p className="text-red-500 text-sm mt-2 flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 {errors.email.message}
               </p>
@@ -157,7 +209,7 @@ const Login: React.FC = () => {
             {errors.password && (
               <p className="text-red-500 text-sm mt-2 flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 {errors.password.message}
               </p>
@@ -198,7 +250,7 @@ const Login: React.FC = () => {
 
         {/* Footer */}
         <p className="text-center text-sm text-slate-500 mt-6">
-          Protected by enterprise-grade security
+          Protected by enterprise-grade security &bull; Marabus Data Admin
         </p>
       </div>
     </div>
