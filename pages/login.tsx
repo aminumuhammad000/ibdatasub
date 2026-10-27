@@ -58,12 +58,6 @@ const Login: React.FC = () => {
     mutation.mutate(data);
   };
 
-  const handleAutoFill = () => {
-    setValue('email', 'murabusdatas@gmail.com');
-    setValue('password', 'Murabus2026');
-    setApiError(null);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-12">
       <div className="w-full max-w-md px-6">
@@ -76,48 +70,19 @@ const Login: React.FC = () => {
             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Landing Page
+            Back to Home
           </Link>
         </div>
 
         {/* Logo/Brand Section */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-2xl mb-4 shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h1>
-          <p className="text-slate-500">Sign in to your admin account</p>
-        </div>
-
-        {/* Admin Login Details Hint Card */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs uppercase tracking-wider">
-              <svg className="w-4 h-4 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              Admin Login Details
-            </div>
-            <button
-              type="button"
-              onClick={handleAutoFill}
-              className="text-xs bg-blue-700 hover:bg-blue-800 text-white font-medium px-2.5 py-1 rounded-md shadow-sm transition-all"
-            >
-              Auto-Fill
-            </button>
-          </div>
-          <div className="text-xs text-slate-700 space-y-1.5 font-mono">
-            <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-blue-100">
-              <span className="text-slate-500 font-sans">Email:</span>
-              <span className="font-semibold text-blue-900 select-all">murabusdatas@gmail.com</span>
-            </div>
-            <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-blue-100">
-              <span className="text-slate-500 font-sans">Password:</span>
-              <span className="font-semibold text-blue-900 select-all">Murabus2026</span>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Admin Portal</h1>
+          <p className="text-slate-500">Sign in to your administration account</p>
         </div>
 
         {/* Login Form Card */}
