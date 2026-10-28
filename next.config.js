@@ -2,18 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/',
-          destination: '/landing.html',
-        },
-        {
-          source: '/admin',
-          destination: '/login',
-        },
-      ],
-    };
+    return [
+      {
+        source: '/admin',
+        destination: '/login',
+      },
+    ];
   },
 };
 
