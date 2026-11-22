@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '../../supabaseAdmin';
 import { AuthenticatedUser } from '../authMiddleware';
+import { localStore } from '../services/localStore';
 
 export const usersController = {
   async getProfile(req: NextApiRequest, res: NextApiResponse, user: AuthenticatedUser) {
@@ -27,6 +28,13 @@ export const usersController = {
         // network fallback
       }
 
+      if (!userData) {
+        userData = localStore.findUser({ id: user.id });
+      }
+      if (!wallet) {
+        wallet = localStore.getWallet(user.id);
+      }
+
       const activeUser = userData || user;
       const formatted = {
         ...activeUser,
@@ -38,7 +46,7 @@ export const usersController = {
               balance: Number(wallet.balance || 0),
               currency: wallet.currency || 'NGN',
             }
-          : { _id: 'wal_1', id: 'wal_1', balance: 5000, currency: 'NGN' },
+          : { _id: `wal_${activeUser.id}`, id: `wal_${activeUser.id}`, balance: 0, currency: 'NGN' },
       };
 
       return res.status(200).json({
@@ -74,6 +82,11 @@ export const usersController = {
         // fallback
       }
 
+      const localUpdated = localStore.updateUser(user.id, updates);
+      if (localUpdated) {
+        updatedData = { ...updatedData, ...localUpdated };
+      }
+
       return res.status(200).json({
         success: true,
         message: 'Profile updated successfully',
@@ -91,21 +104,32 @@ export const usersController = {
         return res.status(400).json({ success: false, message: 'New password is required' });
       }
 
+      let storedHash = '';
       try {
         const { data: dbUser } = await supabaseAdmin
           .from('users')
           .select('password_hash')
           .eq('id', user.id)
           .single();
+        if (dbUser?.password_hash) storedHash = dbUser.password_hash;
+      } catch (e) {
+        // fallback
+      }
 
-        if (dbUser?.password_hash && current_password) {
-          const isMatch = await bcrypt.compare(current_password, dbUser.password_hash);
-          if (!isMatch && current_password !== 'Murabus2026' && current_password !== 'Admin@123456') {
-            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
-          }
+      if (!storedHash) {
+        const localUser = localStore.findUser({ id: user.id });
+        if (localUser?.password_hash) storedHash = localUser.password_hash;
+      }
+
+      if (storedHash && current_password) {
+        const isMatch = await bcrypt.compare(current_password, storedHash);
+        if (!isMatch && current_password !== 'Murabus2026' && current_password !== 'Admin@123456') {
+          return res.status(400).json({ success: false, message: 'Current password is incorrect' });
         }
+      }
 
-        const password_hash = await bcrypt.hash(new_password, 10);
+      const password_hash = await bcrypt.hash(new_password, 10);
+      try {
         await supabaseAdmin
           .from('users')
           .update({ password_hash })
@@ -113,6 +137,8 @@ export const usersController = {
       } catch (e) {
         // fallback
       }
+
+      localStore.updateUser(user.id, { password_hash });
 
       return res.status(200).json({ success: true, message: 'Password updated successfully' });
     } catch (err: any) {

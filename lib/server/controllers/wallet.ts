@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseAdmin } from '../../supabaseAdmin';
 import { AuthenticatedUser } from '../authMiddleware';
+import { localStore } from '../services/localStore';
 
 export const walletController = {
   async getWallet(req: NextApiRequest, res: NextApiResponse, user: AuthenticatedUser) {
@@ -19,14 +20,7 @@ export const walletController = {
       }
 
       if (!wallet) {
-        wallet = {
-          id: `wal_${user.id}`,
-          user_id: user.id,
-          balance: 50000.0,
-          currency: 'NGN',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        wallet = localStore.getWallet(user.id);
       }
 
       return res.status(200).json({
@@ -57,7 +51,8 @@ export const walletController = {
         return res.status(400).json({ success: false, message: 'Valid amount is required' });
       }
 
-      let newBalance = 50000 + numAmount;
+      const currentWallet = localStore.getWallet(user.id);
+      let newBalance = Number(currentWallet.balance || 0) + numAmount;
       try {
         const { data: wallet } = await supabaseAdmin
           .from('wallets')
@@ -84,6 +79,8 @@ export const walletController = {
       } catch (e) {
         // fallback
       }
+
+      localStore.updateWallet(user.id, newBalance);
 
       return res.status(200).json({
         success: true,

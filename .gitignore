@@ -46,6 +46,7 @@ backend/logs/
 # Next.js
 .next/
 out/
+/data/
 
 # Backup credentials
 backup/.env
