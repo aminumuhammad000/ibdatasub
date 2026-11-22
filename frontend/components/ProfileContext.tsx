@@ -1,4 +1,5 @@
 import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '@/services/auth.service';
 import { userService } from '@/services/user.service';
 
@@ -45,10 +46,30 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
     profileImage: 'https://i.pravatar.cc/150?img=12',
   });
 
-  // Load user data from server on mount
+  // Load user data on mount
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
+        // Only fetch profile from server if the user is authenticated
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) {
+          // If unauthenticated, use cached user if available
+          const cachedUser = await authService.getCurrentUser();
+          if (cachedUser) {
+            setProfileData({
+              firstName: cachedUser.first_name || '',
+              lastName: cachedUser.last_name || '',
+              email: cachedUser.email || '',
+              phoneNumber: cachedUser.phone_number || '',
+              address: cachedUser.address || '',
+              city: cachedUser.city || '',
+              state: cachedUser.state || '',
+              profileImage: cachedUser.avatar || 'https://i.pravatar.cc/150?img=12',
+            });
+          }
+          return;
+        }
+
         // Try to get from server first
         const response = await userService.getProfile();
         if (response.success && response.data) {

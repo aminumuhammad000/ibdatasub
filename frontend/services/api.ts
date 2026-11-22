@@ -17,9 +17,9 @@ import {
   Wallet
 } from './types';
 
-// Local development - use computer's IP for physical devices
-// export const API_BASE_URL = 'http://192.168.43.204:5000/api';
-export const API_BASE_URL = 'https://api.ibdata.com.ng/api'; // Production
+// Connect to Next.js API server
+const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+export const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl : `${rawBaseUrl}/api`;
 
 
 // Log the API URL being used
@@ -58,12 +58,12 @@ api.interceptors.request.use(
 
       return config;
     } catch (error) {
-      console.error('Error in request interceptor:', error);
+      console.warn('Error in request interceptor:', error);
       return Promise.reject(error);
     }
   },
   (error) => {
-    console.error('❌ API Request Error:', error);
+    console.warn('❌ API Request Error:', error);
     return Promise.reject(error);
   }
 );
@@ -90,7 +90,7 @@ api.interceptors.response.use(
         config: error.config,
       };
 
-      console.error('❌ Request Error:', errorDetails);
+      console.warn('❌ Request Error:', errorDetails);
 
       return Promise.reject({
         success: false,
@@ -132,7 +132,7 @@ api.interceptors.response.use(
         // Note: Navigation should be handled by the app's auth state management
         // The app will automatically redirect to login when it detects no token
       } catch (storageError) {
-        console.error('Error during logout:', storageError);
+        console.warn('Error during logout:', storageError);
       }
     } else if (status === 400 && data?.errors) {
       // Handle validation errors
@@ -144,9 +144,9 @@ api.interceptors.response.use(
       errorMessage = 'Server error. Please try again later.';
     }
 
-    // Log error details in development
+    // Log error details in development using console.warn to prevent Expo RedBox error popups
     if (__DEV__) {
-      console.error(`❌ API Error [${status}]:`, {
+      console.warn(`⚠️ API Error [${status}]:`, {
         url: error.config?.url,
         method: error.config?.method,
         message: errorMessage,
@@ -154,9 +154,9 @@ api.interceptors.response.use(
       });
     }
 
-    // Show user-friendly alert for non-401 errors and non-auth pages
-    const isAuthRequest = error.config?.url?.includes('/auth/');
-    if (status !== 401 && !isAuthRequest) {
+    // Only show global alert if explicitly configured on the request.
+    // Individual screens handle their own errors and display alerts in catch blocks.
+    if ((error.config as any)?.showAlert) {
       Alert.alert('Error', errorMessage);
     }
 

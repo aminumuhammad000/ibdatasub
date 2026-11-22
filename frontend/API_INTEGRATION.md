@@ -1,10 +1,10 @@
 # API Integration Documentation
 
 ## Overview
-This document outlines the API integration between the frontend (React Native/Expo) and backend (Node.js/Express).
+This document outlines the API integration between the mobile app (React Native/Expo) and the Next.js API backend server.
 
 ## Base Configuration
-- **Backend URL**: `http://localhost:5000/api`
+- **Backend URL**: `http://localhost:3000/api` (Next.js backend server)
 - **Authentication**: JWT Bearer Token
 - **Storage**: AsyncStorage for token and user data persistence
 
@@ -159,7 +159,7 @@ Backend fields match frontend implementation:
 ### Frontend
 Update the API base URL in `services/api.ts`:
 ```typescript
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 ```
 
 For production, use:

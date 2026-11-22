@@ -1,8 +1,8 @@
 export const USE_LOCAL_API = false;
 
 export const API_URLS = {
-  LOCAL: 'http://127.0.0.1:5001/api',
-  PRODUCTION: 'https://api.ibdata.com.ng/api'
+  LOCAL: 'http://localhost:3000/api',
+  PRODUCTION: process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/api` : '/api',
 };
 
 export const getApiUrl = () => {

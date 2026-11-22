@@ -49,3 +49,6 @@ out/
 
 # Backup credentials
 backup/.env
+
+error.jpeg
+
