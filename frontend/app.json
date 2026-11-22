@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.aminuamee.vtuapp",
-      "versionCode": 34,
+      "versionCode": 37,
       "adaptiveIcon": {
         "backgroundColor": "#1e5faf",
         "foregroundImage": "./assets/images/marabuslogo.png",
