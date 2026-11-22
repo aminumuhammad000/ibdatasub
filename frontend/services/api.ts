@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Alert } from 'react-native';
+import { router } from 'expo-router';
 // import * as Network from "expo-network";
 import {
   AdminService,
@@ -34,14 +35,90 @@ const api = axios.create({
   },
 });
 
+/**
+ * Check if a JWT token has expired
+ */
+export const isTokenExpired = (token: string): boolean => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) base64 += '=';
+    const json = atob(base64);
+    const decoded = JSON.parse(json);
+    if (decoded && typeof decoded.exp === 'number') {
+      return Date.now() >= decoded.exp * 1000;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+};
+
+type SessionExpiredHandler = () => void;
+let sessionExpiredHandler: SessionExpiredHandler | null = null;
+let isSessionExpiredAlertShowing = false;
+
+export const setSessionExpiredHandler = (handler: SessionExpiredHandler | null) => {
+  sessionExpiredHandler = handler;
+};
+
+/**
+ * Global handler for expired session:
+ * Clears cached tokens, updates auth state, redirects to /login, and alerts the user
+ */
+export const handleSessionExpiry = async () => {
+  try {
+    // Clear auth data
+    await AsyncStorage.multiRemove(['authToken', 'user', 'walletData', 'transactions', 'profileData']);
+
+    // Clear API auth header
+    if (api.defaults.headers.common['Authorization']) {
+      delete api.defaults.headers.common['Authorization'];
+    }
+
+    // Notify AuthContext so React state updates immediately
+    if (sessionExpiredHandler) {
+      sessionExpiredHandler();
+    }
+
+    // Navigate to login screen
+    try {
+      router.replace('/login');
+    } catch (e) {
+      console.warn('Router redirect failed:', e);
+    }
+
+    // Show friendly session expired alert once
+    if (!isSessionExpiredAlertShowing) {
+      isSessionExpiredAlertShowing = true;
+      Alert.alert(
+        'Session Expired',
+        'Your session has expired. Please log in again to continue.',
+        [{ text: 'OK' }]
+      );
+      setTimeout(() => {
+        isSessionExpiredAlertShowing = false;
+      }, 3000);
+    }
+  } catch (err) {
+    console.warn('Error handling session expiry:', err);
+  }
+};
+
 // Request interceptor for API calls
 api.interceptors.request.use(
   async (config) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
 
-      // Add auth header if token exists
+      // Check if token exists and if it is expired
       if (token) {
+        if (isTokenExpired(token)) {
+          // Token expired before request was sent
+          await handleSessionExpiry();
+          return Promise.reject(new Error('Session expired'));
+        }
         config.headers.Authorization = `Bearer ${token}`;
       }
 
@@ -106,33 +183,10 @@ api.interceptors.response.use(
 
     // Handle specific status codes
     if (status === 401) {
-      // Clear auth data on 401
-      try {
-        // Safe check for window.location to prevent crashes in React Native
-        const currentRoute = typeof window !== 'undefined' && window.location ? window.location.pathname || '' : '';
-        const isAuthPage = ['/login', '/register', '/forgot-password', '/auth/'].some(path =>
-          currentRoute.includes(path)
-        );
-        
-        const isAuthRequest = error.config?.url?.includes('/auth/');
-
-        // Clear auth data
-        await AsyncStorage.multiRemove(['authToken', 'user', 'walletData', 'transactions', 'profileData']);
-
-        // Clear API auth header
-        if (api.defaults.headers.common['Authorization']) {
-          delete api.defaults.headers.common['Authorization'];
-        }
-
-        // Update error message for user, but NOT for auth requests/pages
-        if (!isAuthPage && !isAuthRequest) {
-          errorMessage = 'Your session has expired. Please log in again.';
-        }
-
-        // Note: Navigation should be handled by the app's auth state management
-        // The app will automatically redirect to login when it detects no token
-      } catch (storageError) {
-        console.warn('Error during logout:', storageError);
+      const isAuthRequest = error.config?.url?.includes('/auth/');
+      if (!isAuthRequest) {
+        errorMessage = 'Your session has expired. Please log in again.';
+        await handleSessionExpiry();
       }
     } else if (status === 400 && data?.errors) {
       // Handle validation errors

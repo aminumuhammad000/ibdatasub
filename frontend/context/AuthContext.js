@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authService } from '../services/auth.service';
+import { setSessionExpiredHandler, isTokenExpired } from '../services/api';
 
 export const AuthContext = createContext();
 
@@ -10,6 +11,18 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
 
+  // Listen for session expiry notifications from API interceptor
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      setUser(null);
+      setIsAuthenticated(false);
+    });
+
+    return () => {
+      setSessionExpiredHandler(null);
+    };
+  }, []);
+
   // Check if user is logged in on app start
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,6 +30,10 @@ export const AuthProvider = ({ children }) => {
         const token = await AsyncStorage.getItem('authToken');
         if (!token) {
           throw new Error('No authentication token found');
+        }
+
+        if (isTokenExpired(token)) {
+          throw new Error('Authentication token has expired');
         }
 
         const userData = await authService.getCurrentUser();
