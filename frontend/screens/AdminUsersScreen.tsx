@@ -160,12 +160,12 @@ export default function AdminUsersScreen() {
               <Ionicons name="people-outline" size={36} color={textBodyColor} />
               <Text style={{ color: textBodyColor, marginTop: 8 }}>No users found</Text>
             </View>
-          ) : null}
+          ) : undefined}
           ListFooterComponent={users.length > 0 && users.length < total ? (
             <View style={{ paddingVertical: 12, alignItems: 'center' }}>
               <ActivityIndicator color={theme.accent} />
             </View>
-          ) : null}
+          ) : undefined}
         />
       )}
 

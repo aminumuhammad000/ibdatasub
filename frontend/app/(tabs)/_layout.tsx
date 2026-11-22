@@ -43,7 +43,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={24} color={typeof color === 'string' ? color : undefined} />,
         }}
       />
 
@@ -51,7 +51,7 @@ export default function TabLayout() {
         name="transactions"
         options={{
           title: 'History',
-          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={24} color={typeof color === 'string' ? color : undefined} />,
         }}
       />
 
@@ -59,7 +59,7 @@ export default function TabLayout() {
         name="referrals"
         options={{
           title: 'Referrals',
-          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={24} color={typeof color === 'string' ? color : undefined} />,
         }}
       />
 
@@ -67,7 +67,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={24} color={typeof color === 'string' ? color : undefined} />,
         }}
       />
 
