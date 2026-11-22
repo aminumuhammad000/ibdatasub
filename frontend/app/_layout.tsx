@@ -1,7 +1,8 @@
 import { AlertProvider } from '@/components/AlertContext';
 import AppLock from '@/components/AppLock';
 import { ProfileProvider } from '@/components/ProfileContext';
-import { ThemeProvider } from '@/components/ThemeContext';
+import { ThemeProvider, useTheme } from '@/components/ThemeContext';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useFonts } from 'expo-font';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -42,12 +43,12 @@ function AuthLayout() {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       const inAuthGroup = ['login', 'signup', 'forgot-password', 'verify-otp'].includes(segments[0] as string);
 
-      if (appState.current.match(/active/) && nextAppState === 'background') {
+      if (appState.current?.match(/active/) && nextAppState === 'background') {
         // App went to background
         backgroundTime.current = Date.now();
       }
 
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+      if (appState.current?.match(/inactive|background/) && nextAppState === 'active') {
         // App came to foreground
         if (backgroundTime.current && isAuthenticated && !inAuthGroup) {
           const elapsedSeconds = (Date.now() - backgroundTime.current) / 1000;
@@ -118,6 +119,15 @@ function AuthLayout() {
   );
 }
 
+function NavigationThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { isDark } = useTheme();
+  return (
+    <NavigationThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      {children}
+    </NavigationThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
@@ -140,14 +150,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <AlertProvider>
-        <ProfileProvider>
-          <AuthProvider>
-            <StatusBar style="light" />
-            <AuthLayout />
-          </AuthProvider>
-        </ProfileProvider>
-      </AlertProvider>
+      <NavigationThemeWrapper>
+        <AlertProvider>
+          <ProfileProvider>
+            <AuthProvider>
+              <StatusBar style="light" />
+              <AuthLayout />
+            </AuthProvider>
+          </ProfileProvider>
+        </AlertProvider>
+      </NavigationThemeWrapper>
     </ThemeProvider>
   );
 }
