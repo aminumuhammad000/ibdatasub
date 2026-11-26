@@ -29,15 +29,28 @@ function normalizeList<T extends Record<string, any>>(list: T[]): (T & { _id: an
 }
 
 // ===================== AUTH =====================
+function storeAdminSession(user: any, token: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('current_admin_user', JSON.stringify(user));
+    localStorage.setItem('admin_token', token);
+  }
+}
+
 export const login = async (data: { email: string; password: string }) => {
+  const email = data.email.trim();
+  const password = data.password;
+
   try {
     const { data: authData, error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
+      email,
+      password,
     });
     if (!error && authData?.user) {
+      const token = authData.session?.access_token || '';
+      storeAdminSession(authData.user, token);
       return formatResponse({
-        token: authData.session?.access_token,
+        token,
+        session: authData.session || null,
         user: authData.user,
         admin: authData.user,
       });
@@ -47,34 +60,72 @@ export const login = async (data: { email: string; password: string }) => {
   }
 
   // Fallback to admin_users table in Supabase
-  const { data: adminList, error: dbErr } = await supabase
-    .from('admin_users')
-    .select('*')
-    .eq('email', data.email)
-    .eq('status', 'active');
+  try {
+    const { data: adminList, error: dbErr } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', email)
+      .eq('status', 'active');
 
-  if (!dbErr && adminList && adminList.length > 0) {
-    const adminRec = adminList[0];
-    if (data.password === 'Murabus2026' || data.password === 'Admin@123456') {
-      const syntheticUser = {
-        id: adminRec.id,
-        email: adminRec.email,
-        user_metadata: {
-          first_name: adminRec.first_name,
-          last_name: adminRec.last_name,
-          role: adminRec.role,
-        },
-        role: 'authenticated',
-      };
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('current_admin_user', JSON.stringify(syntheticUser));
-        localStorage.setItem('admin_token', 'admin_session_' + adminRec.id);
+    if (!dbErr && adminList && adminList.length > 0) {
+      const adminRec = adminList[0];
+      if (password === 'Murabus2026' || password === 'Admin@123456') {
+        const syntheticUser = {
+          id: adminRec.id,
+          email: adminRec.email,
+          user_metadata: {
+            first_name: adminRec.first_name,
+            last_name: adminRec.last_name,
+            role: adminRec.role,
+          },
+          role: 'authenticated',
+        };
+        const token = 'admin_session_' + adminRec.id;
+        storeAdminSession(syntheticUser, token);
+        return formatResponse({
+          token,
+          session: null,
+          user: syntheticUser,
+          admin: syntheticUser,
+        });
       }
-      return formatResponse({
-        token: 'admin_session_' + adminRec.id,
-        user: syntheticUser,
-        admin: syntheticUser,
+    }
+  } catch (e) {
+    console.warn('Supabase admin_users lookup failed, falling back to /api/admin/login');
+  }
+
+  // Fallback to Next.js API route (/api/admin/login)
+  if (typeof window !== 'undefined') {
+    try {
+      const resp = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
+      const json = await resp.json();
+      if (resp.ok && json?.success && json?.data?.admin) {
+        const adminRec = json.data.admin;
+        const syntheticUser = {
+          id: adminRec.id,
+          email: adminRec.email,
+          user_metadata: {
+            first_name: adminRec.first_name,
+            last_name: adminRec.last_name,
+            role: adminRec.role,
+          },
+          role: 'authenticated',
+        };
+        const token = json.data.token || 'admin_session_' + adminRec.id;
+        storeAdminSession(syntheticUser, token);
+        return formatResponse({
+          token,
+          session: null,
+          user: syntheticUser,
+          admin: syntheticUser,
+        });
+      }
+    } catch (e) {
+      console.warn('Local /api/admin/login fallback failed', e);
     }
   }
 

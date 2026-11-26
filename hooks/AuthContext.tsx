@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { login as loginApi } from '../lib/supabaseApi';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -55,49 +56,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // 1. Try Supabase Auth first
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error && data?.user) {
-        setSession(data.session);
-        setUser(data.user);
-        setAdmin(data.user);
-        localStorage.setItem('current_admin_user', JSON.stringify(data.user));
-        return;
-      }
-    } catch (e) {
-      console.warn('Supabase auth signIn error, attempting admin_users table check:', e);
+    const res = await loginApi({ email, password });
+    const loggedInUser = res?.user || res?.admin;
+    if (!loggedInUser) {
+      throw new Error('Invalid login credentials. Please check your email and password.');
     }
-
-    // 2. Direct fallback against admin_users table in Supabase
-    const { data: adminList, error: dbErr } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('email', email)
-      .eq('status', 'active');
-
-    if (!dbErr && adminList && adminList.length > 0) {
-      const adminRec = adminList[0];
-      if (password === 'Murabus2026' || password === 'Admin@123456') {
-        const syntheticUser: any = {
-          id: adminRec.id,
-          email: adminRec.email,
-          user_metadata: {
-            first_name: adminRec.first_name,
-            last_name: adminRec.last_name,
-            role: adminRec.role,
-          },
-          role: 'authenticated',
-        };
-        setUser(syntheticUser);
-        setAdmin(syntheticUser);
-        localStorage.setItem('current_admin_user', JSON.stringify(syntheticUser));
-        localStorage.setItem('admin_token', 'admin_session_' + adminRec.id);
-        return;
-      }
-    }
-
-    throw new Error('Invalid login credentials. Please check your email and password.');
+    setSession(res?.session || null);
+    setUser(loggedInUser);
+    setAdmin(loggedInUser);
   };
 
   const logout = async () => {

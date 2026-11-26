@@ -3,6 +3,27 @@ import jwt from 'jsonwebtoken';
 import { supabaseAdmin } from '../../supabaseAdmin';
 import { JWT_SECRET } from '../authMiddleware';
 
+const ADMIN_ACCOUNTS: Record<string, { id: string; first_name: string; last_name: string; role: string }> = {
+  'murabusdatas@gmail.com': {
+    id: '00000000-6913-80a2-e3ba-eb2c24cb7bbf',
+    first_name: 'IBRAHIM',
+    last_name: 'MURABUS',
+    role: 'super_admin',
+  },
+  'admin@vtuapp.com': {
+    id: '00000000-6953-01eb-2328-8670bbff4d5a',
+    first_name: 'Admin',
+    last_name: 'User',
+    role: 'super_admin',
+  },
+  'admin@connectavtu.com': {
+    id: '00000000-6913-7b01-45f8-5a28e21733c6',
+    first_name: 'Super',
+    last_name: 'Admin',
+    role: 'super_admin',
+  },
+};
+
 export const adminController = {
   async login(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -11,19 +32,21 @@ export const adminController = {
         return res.status(400).json({ success: false, message: 'Email and password required' });
       }
 
-      const isValid = (password === 'Murabus2026' || password === 'Admin@123456');
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const account = ADMIN_ACCOUNTS[normalizedEmail];
+      const isValid = Boolean(account) && (password === 'Murabus2026' || password === 'Admin@123456');
 
       if (!isValid) {
         return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
       }
 
       const adminUser = {
-        _id: '00000000-6923-93b7-e195-e70de4cc3c01',
-        id: '00000000-6923-93b7-e195-e70de4cc3c01',
-        email,
-        first_name: 'Super',
-        last_name: 'Admin',
-        role: 'super_admin',
+        _id: account.id,
+        id: account.id,
+        email: normalizedEmail,
+        first_name: account.first_name,
+        last_name: account.last_name,
+        role: account.role,
       };
 
       const token = jwt.sign({ id: adminUser.id, role: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
@@ -33,7 +56,7 @@ export const adminController = {
         message: 'Admin login successful',
         data: {
           admin: adminUser,
-          token: `admin_session_${adminUser.id}`,
+          token,
         },
       });
     } catch (err: any) {

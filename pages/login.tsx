@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { login as loginApi } from '@/lib/supabaseApi';
 import { useAuthContext } from '@/hooks/AuthContext';
 import { useToast } from '@/hooks/ToastContext';
 
@@ -30,7 +29,7 @@ const Login: React.FC = () => {
   }, [setValue]);
 
   const mutation = useMutation({
-    mutationFn: (data: LoginForm) => loginApi(data),
+    mutationFn: (data: LoginForm) => auth.login(data.email, data.password),
     onSuccess: (res: any, variables: LoginForm) => {
       setApiError(null);
       if (variables.rememberMe) {
@@ -59,21 +58,21 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-12">
-      <div className="w-full max-w-md px-6">
-        {/* Navigation back to landing */}
-        <div className="mb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-900 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Home
-          </Link>
-        </div>
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-16 px-4">
+      {/* Navigation back to landing */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+        <Link
+          href="/"
+          className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-blue-900 hover:bg-white/80 transition-colors"
+        >
+          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Link>
+      </div>
 
+      <div className="w-full max-w-md px-2 sm:px-6">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-2xl mb-4 shadow-lg">
